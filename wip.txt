@@ -1,3 +1,79 @@
+🛠️ Ход работы — ft_transcendence, инфраструктура + Auth
+1. Архитектура и стек
+
+Тема: соцсеть "Церковь Истинного Релинка" — профили, ранги/роли, чат, донаты, позже LLM-бот и карточная игра
+Стек: NestJS (backend) + React/TS/Vite (frontend) + PostgreSQL/Prisma (БД) + Socket.IO (realtime) + Docker Compose/Nginx (инфра)
+Модульный план под бонусы: ~28+ очков без игры (Web, User Management, AI, Data&Analytics, DevOps), игра — отдельным этапом позже
+
+2. Docker Compose — базовая инфраструктура
+
+docker-compose.yml: сервисы postgres, backend, frontend, nginx, общая сеть ft_network
+.env / .env.example — секреты не коммитятся, шаблон коммитится
+Ключевые фиксы по ходу:
+
+target: development обязателен в build: для backend и frontend (иначе Docker берёт последний stage без нужного CMD)
+Healthcheck postgres: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} (изначально ловили ошибку database "ft_user" does not exist — дефолтная БД у pg_isready совпадает с именем юзера, не с реальной БД)
+Порты nginx: 8080:80 / 8443:443 вместо 80:80/443:443 — на кампусе нет sudo, привилегированные порты (<1024) недоступны в rootless Docker
+
+
+
+3. Backend — Dockerfile
+
+Multi-stage: development (hot-reload через npm run start:dev --watch) / production (билд для будущего деплоя)
+apk add openssl — обязателен для Prisma query engine на alpine (без него prisma generate падает)
+app.listen(port, '0.0.0.0') — обязательно, иначе backend не виден из сети контейнеров
+Prisma зафиксирована на 6-й версии (--save-exact) — Prisma 7 (вышла ноябрь 2025) сломала синтаксис url = env("DATABASE_URL") в schema.prisma, требует prisma.config.ts + driver adapters
+Entrypoint-скрипт (entrypoint.sh) — гоняет prisma migrate deploy перед стартом приложения (exec "$@" для корректной передачи сигналов)
+
+4. Frontend — Dockerfile
+
+Multi-stage: development (Vite dev-сервер) / build (статика для будущего prod)
+--host 0.0.0.0 обязателен для Vite — иначе слушает только localhost внутри контейнера, недоступен для nginx
+CHOKIDAR_USEPOLLING / WATCHPACK_POLLING — на случай проблем с hot-reload через volume (актуально особенно на сетевых ФС кампуса)
+
+5. Nginx
+
+Свой Dockerfile (не голый image: nginx:alpine) — нужен для entrypoint-скрипта
+entrypoint.sh — генерирует self-signed HTTPS-сертификат при первом запуске, если его ещё нет (переиспользуется дальше)
+conf.d/default.conf:
+
+/api/ → backend:3000
+/socket.io/ → backend:3000 с Upgrade/Connection заголовками (обязательно для WebSocket) + увеличенные таймауты (60с дефолт слишком мало для чата)
+/ → frontend:5173, тоже с Upgrade-заголовками (нужно для Vite HMR)
+
+
+Засада: файл конфига нужно физически положить в nginx/conf.d/ на диске — volume монтирует то что реально есть в папке, а не то что обсуждали в чате
+
+6. Организационное
+
+Кампус (без sudo) vs личный ноут — решили вести разработку на личном ноуте, кампус — вторично, синхронизация строго через git
+Комментарии в коде — испанский (Испания), т.к. команда испаноязычная; нейминг переменных/функций — английский; общение в чате — русский
+Makefile: up/clean/fclean/re — уже реализовано у тебя самостоятельно
+
+7. Auth-модуль — только что собрали
+
+Схема Prisma: User + RefreshToken (связь один-ко-многим, ревокация токенов)
+PrismaModule/PrismaService — DI-обёртка над Prisma Client, @Global() чтобы не импортировать в каждом модуле
+AuthModule: register / login / refresh / logout
+
+Access token (JWT, 15 мин) + refresh token (случайная строка, 7 дней, хранится в БД, с ревокацией и ротацией)
+bcrypt, SALT_ROUNDS = 12
+JwtStrategy + JwtAuthGuard — пока написаны, но ещё не навешаны ни на один защищённый роут
+
+
+
+Что нужно сделать руками (ещё не подтверждено что сделано)
+
+ npm install недостающих пакетов (@nestjs/jwt, passport-jwt, bcrypt, class-validator и т.д.)
+ ValidationPipe в main.ts
+ Первая миграция (prisma migrate dev --name init / add_auth)
+ Проверка /auth/register через curl
+
+Следующий шаг (ещё не сделан)
+
+UsersModule с защищённым GET /users/me — обкатать Guard в реальном сценарии, замкнуть цепочку регистрация → логин → авторизованный запрос 
+
+==================================================================================================
 Про сертификаты.
 Конфиг ссылается на /etc/nginx/certs/nginx.crt и nginx.key, но самих файлов пока нет.
 Для локальной разработки нужен self-signed сертификат — по аналогии с тем, что ты уже делал в inception для WordPress.
