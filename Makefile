@@ -36,13 +36,13 @@ db-studio:
 
 # Detener contenedores y borrarlos
 clean:
-	@echo "$(GREEN)Limpiando contenedores...$(RESET)"
+	@echo "$(GREEN)Limpiando contenedores y volúmenes del proyecto.....$(RESET)"
 	$(COMPOSE) down --volumes --remove-orphans
 
 # Limpieza profunda: borra contenedores, volúmenes (¡OJO: borra la BD!) e imágenes huérfanas
 fclean: clean
-	@echo "$(GREEN)Realizando una limpieza total del caché de Docker...$(RESET)"
-	docker system prune -a -f
+	@echo "$(GREEN)Eliminando imágenes específicas del proyecto...$(RESET)"
+	$(COMPOSE) down --rmi all --volumes --remove-orphans	
 
 # Reconstruir todo el proyecto desde cero
 re: fclean all

@@ -12,7 +12,7 @@ services:
     networks:
       - ft_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -32,6 +32,9 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
       NODE_ENV: ${NODE_ENV}
+      # dos ajustes para el hot-reload en entornos virtuales (Vim/Docker)
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -44,8 +47,13 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: development
     container_name: ft_frontend
     restart: unless-stopped
+    environment:
+      # hot-reload fix: fuerza a Vite a revisar cambios de archivos mediante 'polling'
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -55,15 +63,17 @@ services:
       - "5173"
 
   nginx:
-    image: nginx:alpine
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
     container_name: ft_nginx
     restart: unless-stopped
     depends_on:
       - backend
       - frontend
     ports:
-      - "443:443"
-      - "80:80"
+      - "8080:80"
+      - "8443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/certs:/etc/nginx/certs
