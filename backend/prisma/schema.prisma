@@ -16,4 +16,18 @@ model User {
   avatarUrl    String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  refreshTokens RefreshToken[]
+}
+
+// Guardamos los refresh tokens en la base de datos para poder revocarlos
+// individualmente (logout de una sola sesión, no de todas)
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
