@@ -2,7 +2,7 @@
 
 ## 1. Arquitectura y Stack
 
-**Tema**: red social "Iglesia del Verdadero Relink" — perfiles, rangos/roles, chat, donaciones, más adelante bot LLM y juego de cartas.
+**Tema**: red social "Iglesia del Verdadero Relink" — perfiles, rangos/roles, chat, donaciones, más adelante bot LLM (preferible) y juego de cartas (como opcion).
 
 **Stack**:
 - **Backend**: NestJS
