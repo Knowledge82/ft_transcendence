@@ -170,6 +170,7 @@ Otra vez:
 3) Los permisos del `entrypoint.sh` mediante `RUN chmod +x` — la misma lógica que con la propiedad de archivos por UID de la que hablamos antes: el script debe ser ejecutable dentro de la imagen. Esta es una acción independiente de simplemente copiar el archivo.
 
 ## ============ AUTH MODULE =============
+
 ### -------- ACCESS TOKEN + REFRESH TOKEN
 
 Añadimos en `schema.prisma` la parte del refresh token. Implementamos el modelo: **access token + refresh token**.
@@ -393,4 +394,132 @@ Es privado (`private`) porque solo se necesita dentro de este servicio. Encapsul
 - Firma el Access Token con la clave secreta del `.env` (`JWT_SECRET`).
 - Genera un Refresh Token aleatorio, calcula su fecha de caducidad (+7 días) y guarda este registro en PostgreSQL a través de nuestro querido `PrismaService`.
 
+## Estrategia JWT (JWT Strategy) e implementación de Guards
 
+En el ecosistema de NestJS, la autenticación y el control de acceso se basan en una simbiosis perfecta entre dos herramientas potentes: Passport.js (que se encarga del trabajo sucio de parsear y verificar los tokens) y los Guards de NestJS (que actúan como aduanas o filtros de seguridad antes de ejecutar la lógica de los endpoints).
+
+### 1. Arquitectura y lógica de JwtStrategy
+
+#### src/auth/strategies/jwt.strategy.ts
+
+Esta clase es el "cerebro" detrás de la validación del token. No la llamamos directamente en el código; NestJS la registra como un proveedor (provider) que Passport.js ejecutará automáticamente en cada petición entrante dirigida a una ruta protegida.
+
+**Desglose de la configuración dentro de super():**
+- *Integración con Passport.js*: Al extender PassportStrategy(Strategy, 'jwt'), el segundo argumento 'jwt' registra esta estrategia con un nombre único en el contenedor de Passport. Así es como NestJS sabe exactamente a qué estrategia recurrir cuando un Guard solicita una validación de tipo 'jwt'.
+
+- *Mecanismo de extracción (jwtFromRequest)*: La opción ExtractJwt.fromAuthHeaderAsBearerToken() le indica al backend que escanee minuciosamente las cabeceras (headers) de cada petición HTTP entrante. Busca específicamente la cabecera Authorization y espera el formato estricto Bearer <token>. Si la cabecera no existe o el formato es incorrecto, Passport corta la petición de inmediato sin siquiera intentar descifrar el token.
+
+- *Control de expiración (ignoreExpiration)*: Configurar ignoreExpiration: false es un pilar crítico de seguridad. Dentro de cada JWT viaja un campo llamado exp (timestamp de caducidad). Al dejarlo en false, Passport.js compara la hora actual del servidor con ese exp. Si el token ha caducado por un solo milisegundo, lanza un 401 Unauthorized. Nos ahorramos tener que picar la lógica de fechas a mano.
+
+**Robustez contra errores críticos (Enfoque Fail-Fast):**
+En TypeScript, las variables de entorno leídas a través de process.env tienen por defecto el tipo string | undefined, pero la librería passport-jwt exige estrictamente un tipo string.
+
+En lugar de usar el operador ruidoso secretOrKey: process.env.JWT_SECRET!, que simplemente "engaña" al compilador pero no soluciona el peligro real, implementamos una validación explícita antes de invocar al constructor padre:
+
+```ts
+const secret = process.env.JWT_SECRET;
+if (!secret) {
+    throw new Error('JWT_SECRET no está definido en las variables de entorno');
+  }
+```
+- Por qué esto es calidad de producción: Sigue el patrón arquitectónico Fail-Fast (Fallo inmediato). Si al levantar los contenedores de Docker (ya sea en la máquina de otro desarrollador del equipo o en producción) alguien olvida meter la variable JWT_SECRET en el .env, la aplicación de NestJS petará instantáneamente en el arranque, dejando un log claro y conciso. Si hubiéramos usado el !, la app habría arrancado bien, pero escupiría un TypeError críptico e infumable en tiempo de ejecución cada vez que un usuario intentara loguearse.
+
+**El rol del método validate(payload):**
+
+Este es el paso final y más importante de la estrategia. Este método se ejecuta automáticamente única y exclusivamente si Passport.js ha verificado con éxito tres cosas: el token existe, la firma criptográfica coincide con nuestro JWT_SECRET y el token no ha expirado.
+
+```ts
+async validate(payload: JwtPayload) {
+  return { userId: payload.sub, email: payload.email };
+}
+```
+
+Qué pasa con el retorno: El objeto que devolvemos aquí (en nuestro caso { userId, email }) es interceptado por Passport, que lo inyecta directamente en el objeto de la petición HTTP bajo la propiedad user (request.user).
+
+El beneficio real: En cualquier controlador protegido por el Guard, ya no necesitamos parsear el token a mano ni decodificarlo. Nos basta con usar el decorador @Req() req para tener acceso seguro e inmediato a req.user.userId.
+
+### 2. Principio de funcionamiento de JwtAuthGuard
+
+#### src/auth/guards/jwt-auth.guard.ts
+
+Si JwtStrategy es el perito experto que sabe validar si un pasaporte es auténtico o falso, el JwtAuthGuard es el portero de la discoteca que utiliza a ese perito para dejar pasar o no a la gente.
+
+- El nexo de unión: La clase extiende AuthGuard('jwt'). Esa cadena 'jwt' es la que conecta este Guard de manera síncrona con la estrategia JwtStrategy que hemos definido antes.
+
+- Ciclo de vida de la petición: Los Guards en NestJS se ejecutan en la fase intermedia: justo después de parsear el cuerpo de la petición (body), pero antes de que impacte en la lógica del método del controlador.
+
+- Protección declarativa: Al colocar la anotación @UseGuards(JwtAuthGuard) sobre una clase controladora entera (или sobre un método específico @Get() / @Post()), blindamos ese endpoint por completo. Si la petición es legítima, el Guard devuelve true y el código sigue su curso. Si la estrategia falla, el Guard bloquea la petición y devuelve un 401 Unauthorized de libro, protegiendo los recursos del servidor de usuarios no autenticados.
+
+=====================================
+1. Instalación de dependencias — qué paquetes y para qué sirven.
+```bash
+docker compose exec backend npm install @nestjs/jwt @nestjs/passport passport passport-jwt bcrypt class-validator class-transformer
+```
+
+* **`@nestjs/jwt`** — Envoltorio de NestJS sobre la librería `jsonwebtoken`. Proporciona el `JwtService` con los métodos `.sign()` (crear token) y `.verify()` (verificar token). Ya lo usamos en `AuthService` con `this.jwtService.sign(payload, ...)`.
+
+* **`@nestjs/passport`** — Integración de NestJS con Passport.js (librería independiente de NestJS, muy antigua y estándar en el ecosistema Node). NestJS no inventa su propio sistema de autenticación desde cero, sino que envuelve Passport en decoradores cómodos (`@UseGuards`, `PassportStrategy`).
+
+* **`passport`** — La propia librería Passport, de la que depende `@nestjs/passport`.
+
+* **`passport-jwt`** — Estrategia concreta de Passport para trabajar específicamente con JWT (Passport soporta decenas de estrategias: Google OAuth, GitHub OAuth, login local, etc. — ahora necesitamos precisamente la estrategia JWT, que usamos en `jwt.strategy.ts`).
+
+* **`bcrypt`** — Librería para hashear contraseñas. Importante: es un módulo nativo con bindings en C++ (se compila para la plataforma concreta), por eso a veces da problemas en Docker al cambiar de arquitectura (Mac ARM vs Linux x86). Pero como lo instalamos dentro del contenedor (`docker compose exec`), se compila directamente para la plataforma del contenedor y no debería haber problemas.
+
+* **`class-validator`** — La librería que proporciona los decoradores `@IsEmail()`, `@MinLength()`, etc. en nuestros DTO.
+
+* **`class-transformer`** — Trabaja en conjunto con `class-validator` y se encarga de transformar el JSON crudo de la petición en una instancia real de la clase DTO (sin ella los decoradores de validación no verían los datos en la forma correcta).
+
+---
+
+**Tipos separados para TypeScript** (las propias librerías pueden estar escritas en JS puro sin tipos incluidos).
+```bash
+docker compose exec backend npm install --save-dev @types/bcrypt @types/passport-jwt
+```
+
+**¿Por qué usar `docker compose exec` en lugar de simplemente `npm install` en el host?**
+
+El contenedor debe estar ya en ejecución (`up` en segundo plano o en otra terminal). El comando `exec` entra dentro del contenedor en ejecución y ejecuta el comando allí. Esto garantiza que `node_modules` se actualice exactamente en el volumen que ven tanto el host (para tu editor/IDE) como el contenedor (para ejecutar la aplicación).
+
+Si el contenedor no está corriendo, el comando fallará con un error del tipo *"no such service is running"* o similar. En ese caso, primero ejecuta `docker compose up -d`.
+
+---
+======================================
+**ValidationPipe, Persistencia con Prisma y Pruebas End-to-End**
+
+1. *El motor de validación*: ValidationPipe en main.ts
+
+Archivo: src/main.ts
+
+La inclusión de la línea app.useGlobalPipes(new ValidationPipe()); no es un simple paso de configuración; es el interruptor que activa la seguridad de la capa de entrada de datos en toda la API.
+
+- Activación del tipado en runtime: TypeScript es un lenguaje de tipado estático que desaparece por completo una vez compilado a JavaScript. Esto significa que los DTOs (RegisterDto, LoginDto) por sí solos no protegen al servidor de recibir datos corruptos. Los decoradores como @IsEmail() o @MinLength() son solo metadatos decorativos.
+ - El rol del Pipe global: Al registrar el ValidationPipe de forma global, NestJS intercepta cada petición entrante, busca el DTO correspondiente al endpoint y ejecuta una validación en tiempo de ejecución (runtime) utilizando las librerías class-validator y class-transformer.
+ - Filtrado preventivo: Si un cliente envía un campo con un formato erróneo (por ejemplo, un email inválido), el ValidationPipe detiene la petición inmediatamente en la puerta de entrada y devuelve un error 400 Bad Request detallado. Esto garantiza que ningún dato corrupto o malformado llegue jamás a la lógica de negocio del AuthService, protegiendo la estabilidad del backend.
+
+2. *Sincronización del estado*: Primera migración con Prisma
+
+```bash
+docker compose exec backend npx prisma migrate dev --name add_auth
+```
+Este comando consolidó la arquitectura de persistencia del proyecto, conectando las definiciones de TypeScript con la realidad de la base de datos PostgreSQL.
+
+```bash
+docker compose exec backend npx prisma migrate dev --name add_auth
+```
+
+- Detección de diferencias (Diffing): Prisma comparó el archivo schema.prisma actualizado (que ya incluía las relaciones y restricciones de los modelos User y RefreshToken) con el estado actual de la base de datos dentro del contenedor. Al detectar que la base de datos carecía de estas tablas, calculó los cambios necesarios.
+ - Generación del artefacto SQL: Se creó un archivo físico de migración en la ruta `prisma/migrations/<timestamp>_add_auth/migration.sql`. Este archivo contiene las instrucciones SQL puras (CREATE TABLE, ALTER TABLE, etc.) y debe ser comiteado obligatoriamente en Git. No es un archivo temporal; es el historial que asegura que el resto del equipo (y el entorno de producción) tengan exactamente la misma estructura de base de datos.
+ - Resolución de errores de compilación: Tras aplicar el SQL en la base de datos, el comando ejecutó automáticamente prisma generate. Esto actualizó el mapa de tipos de PrismaClient en los node_modules. Al regenerarse, TypeScript reconoció instantáneamente la existencia de la propiedad refreshToken, lo que eliminó de inmediato el error de compilación que bloqueaba el arranque del servidor.
+
+3. *Verificación End-to-End (E2E) mediante cURL*
+
+Para certificar que toda la infraestructura (Validación $\rightarrow$ Controladores $\rightarrow$ Servicios $\rightarrow$ Prisma $\rightarrow$ Base de Datos) funciona al unísono sin fisuras, se ejecutó una batería de tres pruebas secuenciales contra el endpoint `https://localhost:8443/api/auth/`:
+
+Flujo de Prueba	| Endpoint / Método | Resultado HTTP | Acción Interna del Servidor
+|------|----------|--------|--------|
+1. Registro Inicial | `POST /auth/register` | 211 Created | El AuthService recibe los datos limpios. Encripta la contraseña usando bcrypt.hash(), crea el registro en la base de datos y devuelve una estructura JSON con `{ accessToken, refreshToken }`.
+2. Autenticación | `POST /auth/login` | 200 OK | Se envían las mismas credenciales. El servidor busca al usuario, extrae el hash de la base de datos y lo compara con la contraseña en texto plano usando bcrypt.compare(). Al coincidir, genera y retorna un par de tokens completamente nuevos.
+3. Control de Duplicados | `POST /auth/register` | 409 Conflict | Se intenta registrar exactamente el mismo email. El servicio detecta la colisión antes de realizar la inserción y lanza un ConflictException. El cliente recibe un error controlado con el mensaje *"Ya existe una cuenta con este email"*.
+
+Conclusión del hito: El éxito de esta secuencia (201 $\rightarrow$ 200 $\rightarrow$ 409) valida de extremo a extremo el flujo base de autenticación. El sistema es criptográficamente seguro, inmune a la duplicidad de cuentas en la capa de persistencia y capaz de autorizar sesiones de manera consistente.

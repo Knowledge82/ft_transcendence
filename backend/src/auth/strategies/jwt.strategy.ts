@@ -10,11 +10,19 @@ interface JwtPayload {
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor() {
+    const secret = process.env.JWT_SECRET;
+
+    // Fallamos rápido y con un mensaje claro si falta la variable de entorno,
+    // en lugar de dejar que Passport falle más adelante con un error críptico
+    if (!secret) {
+      throw new Error('JWT_SECRET no está definido en las variables de entorno');
+    }
+
     super({
       // Busca el token en la cabecera: Authorization: Bearer <token>
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false, // los tokens expirados se rechazan automáticamente
-      secretOrKey: process.env.JWT_SECRET,
+      secretOrKey: secret,
     });
   }
 
