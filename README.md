@@ -27,7 +27,7 @@
 - **`target: development`** es obligatorio en el apartado `build:` para backend y frontend; de lo contrario, Docker toma la última etapa (stage) sin el `CMD` adecuado.
 
 - **Healthcheck de Postgres**:
-  ```yaml
+```yaml
   test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
 ```
 (Inicialmente se producía el error database "ft_user" does not exist porque pg_isready usaba por defecto la base de datos con el nombre del usuario, no la base de datos real.)
@@ -518,8 +518,8 @@ Para certificar que toda la infraestructura (Validación $\rightarrow$ Controlad
 
 Flujo de Prueba	| Endpoint / Método | Resultado HTTP | Acción Interna del Servidor
 |------|----------|--------|--------|
-1. Registro Inicial | `POST /auth/register` | 211 Created | El AuthService recibe los datos limpios. Encripta la contraseña usando bcrypt.hash(), crea el registro en la base de datos y devuelve una estructura JSON con `{ accessToken, refreshToken }`.
-2. Autenticación | `POST /auth/login` | 200 OK | Se envían las mismas credenciales. El servidor busca al usuario, extrae el hash de la base de datos y lo compara con la contraseña en texto plano usando bcrypt.compare(). Al coincidir, genera y retorna un par de tokens completamente nuevos.
-3. Control de Duplicados | `POST /auth/register` | 409 Conflict | Se intenta registrar exactamente el mismo email. El servicio detecta la colisión antes de realizar la inserción y lanza un ConflictException. El cliente recibe un error controlado con el mensaje *"Ya existe una cuenta con este email"*.
+| 1. Registro Inicial | `POST /auth/register` | 211 Created | El AuthService recibe los datos limpios. Encripta la contraseña usando bcrypt.hash(), crea el registro en la base de datos y devuelve una estructura JSON con `{ accessToken, refreshToken }`|
+| 2. Autenticación | `POST /auth/login` | 200 OK | Se envían las mismas credenciales. El servidor busca al usuario, extrae el hash de la base de datos y lo compara con la contraseña en texto plano usando bcrypt.compare(). Al coincidir, genera y retorna un par de tokens completamente nuevos|
+| 3. Control de Duplicados | `POST /auth/register` | 409 Conflict | Se intenta registrar exactamente el mismo email. El servicio detecta la colisión antes de realizar la inserción y lanza un ConflictException. El cliente recibe un error controlado con el mensaje *"Ya existe una cuenta con este email"*|
 
 Conclusión del hito: El éxito de esta secuencia (201 $\rightarrow$ 200 $\rightarrow$ 409) valida de extremo a extremo el flujo base de autenticación. El sistema es criptográficamente seguro, inmune a la duplicidad de cuentas en la capa de persistencia y capaz de autorizar sesiones de manera consistente.
