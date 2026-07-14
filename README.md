@@ -97,8 +97,8 @@ El **Backend** es el motor central de nuestra plataforma. Mientras que el Fronte
 
 En nuestro ecosistema, el backend cumple las siguientes funciones críticas:
 *   **Gestión de Datos (API REST & Prisma ORM):** Controla el acceso a la base de datos PostgreSQL, garantizando que la información de los usuarios, partidas y chats se guarde y consulte de forma segura.
-*   **Autenticación y Seguridad (JWT):** Valida la identidad de los usuarios, gestiona el inicio de sesión (incluyendo el flujo de OAuth2 con la API de 42) y protege las rutas del sistema para que nadie pueda suplantar a otro jugador.
-*   **Comunicación en Tiempo Real (WebSockets):** Soporta el tráfico de baja latencia necesario para el juego del Pong en vivo, el emparejamiento (matchmaking) y el chat en tiempo real.
+*   **Autenticación y Seguridad (JWT):** Valida la identidad de los usuarios, gestiona el inicio de sesión y protege las rutas del sistema.
+*   **Comunicación en Tiempo Real (WebSockets):** --- TO DO --- 
 
 ---
 
@@ -160,7 +160,7 @@ src/
 
 
 ---
-##  Módulo de autenticación (Auth) — recién implementado
+##  Módulo de autenticación (Auth)
 
 **Esquema Prisma**:
 - Modelos `User` y `RefreshToken` (relación uno-a-muchos, con revocación de tokens).
@@ -180,8 +180,6 @@ src/
 - `bcrypt` con `SALT_ROUNDS = 12`.
 
 ## Sobre los certificados
-
-La configuración hace referencia a `/etc/nginx/certs/nginx.crt` y `nginx.key`, pero los archivos todavía no existen.
 
 Para el desarrollo local se necesita un certificado **self-signed** (autofirmado), similar al que ya creaste en el proyecto *inception* para WordPress.
 
