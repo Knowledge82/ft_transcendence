@@ -1,6 +1,6 @@
-# 🛠️ Progreso del trabajo — ft_transcendence, infraestructura + Auth
+# 🛠️ Notas del trabajo
 
-## 🚀 Comenzar a Trabajar (Quick Start)
+## 🚀 Como comenzar a trabajar (Quick Start)
 
 Sigue estos sencillos pasos para clonar el repositorio, configurar tu entorno y levantar el proyecto en local:
 
@@ -24,7 +24,7 @@ Cuando copies el archivo `.env.example` a `.env`, verás las siguientes variable
 | Variable | Valor por defecto | ¿Qué debes hacer? |
 | :--- | :--- | :--- |
 | `POSTGRES_USER` | `ft_user` | Puedes dejarlo por defecto para desarrollo local. |
-| `POSTGRES_PASSWORD` | `change_me` | **¡CÁMBIALO!** Pon una contraseña segura para tu base de datos local (ej. `mi_super_clave_123`). |
+| `POSTGRES_PASSWORD` | `change_me` | **¡CÁMBIALO!** Pon una contraseña segura para tu base de datos local, sin caracteres especiales como `@ : / # ?` (ej. `mi_super_clave_123`). |
 | `POSTGRES_DB` | `ft_transcendence`| Puedes dejarlo por defecto. Es el nombre de la base de datos que se creará automáticamente en PostgreSQL. |
 | `JWT_SECRET` | `change_me_access_secret` | **¡CÁMBIALO!** Genera una cadena de texto larga y aleatoria. Se usa para firmar los Access Tokens (15 min). |
 | `JWT_REFRESH_SECRET` | `change_me_refresh_secret` | **¡CÁMBIALO!** Genera otra cadena de texto aleatoria distinta a la anterior. Se usa para firmar los Refresh Tokens (7 días). |
@@ -32,9 +32,11 @@ Cuando copies el archivo `.env.example` a `.env`, verás las siguientes variable
 | `VITE_API_URL` | `https://localhost/api` | Déjalo así. Es la URL que usará el Frontend (Vite) para comunicarse con el Backend a través del puerto seguro de Nginx. |
 
 > 🔑 **Pro Tip para generar secretos seguros:**  
-> Puedes generar claves aleatorias fuertes rápidamente desde tu terminal ejecutando:
-> `openssl rand -base64 32`
-> Copia el resultado y pégalo en tu `JWT_SECRET` y `JWT_REFRESH_SECRET`.
+Puedes generar claves aleatorias fuertes rápidamente desde tu terminal ejecutando:
+```bash
+openssl rand -base64 32
+```
+Copia el resultado y pégalo en tu `JWT_SECRET` y `JWT_REFRESH_SECRET`.
 
 ### C. Levantar la infraestructura con Docker
 Gracias a Docker y a nuestro Makefile, no necesitas instalar Node.js, NestJS ni PostgreSQL en tu sistema local. Solo asegúrate de tener Docker instalado y ejecutándose, luego lanza el comando:
@@ -53,7 +55,7 @@ docker compose exec backend npx prisma migrate dev
 
 ---
 
-## 1. Arquitectura y Stack
+#  Arquitectura y Stack
 
 **Tema**: red social "Iglesia del Verdadero Relink" — perfiles, rangos/roles, chat, donaciones, más adelante bot LLM (preferible) y juego de cartas (como opcion).
 
@@ -68,7 +70,7 @@ docker compose exec backend npx prisma migrate dev
 
 ---
 
-## 2. Docker Compose — Infraestructura base
+#  Docker Compose — Infraestructura base
 
 **docker-compose.yml**: servicios `postgres`, `backend`, `frontend`, `nginx`; red común `ft_network`.
 
@@ -87,7 +89,40 @@ docker compose exec backend npx prisma migrate dev
 
 Puertos de Nginx: se usan 8080:80 y 8443:443 en lugar de 80:80 y 443:443, porque en el campus no se dispone de sudo y los puertos privilegiados (<1024) no son accesibles en Docker sin permisos de root.
 
-## 3. Backend — Dockerfile
+# 🖥️ Backend (NestJS + Prisma)
+
+## 1. ¿Qué es el Backend y cuál es su función?
+
+El **Backend** es el motor central de nuestra plataforma. Mientras que el Frontend se encarga de pintar la interfaz y capturar los clics del usuario, el Backend es el cerebro que gestiona las reglas de negocio, protege los datos y mantiene el estado del sistema en tiempo real.
+
+En nuestro ecosistema, el backend cumple las siguientes funciones críticas:
+*   **Gestión de Datos (API REST & Prisma ORM):** Controla el acceso a la base de datos PostgreSQL, garantizando que la información de los usuarios, partidas y chats se guarde y consulte de forma segura.
+*   **Autenticación y Seguridad (JWT):** Valida la identidad de los usuarios, gestiona el inicio de sesión (incluyendo el flujo de OAuth2 con la API de 42) y protege las rutas del sistema para que nadie pueda suplantar a otro jugador.
+*   **Comunicación en Tiempo Real (WebSockets):** Soporta el tráfico de baja latencia necesario para el juego del Pong en vivo, el emparejamiento (matchmaking) y el chat en tiempo real.
+
+---
+
+## 2. Estructura de Archivos del Proyecto (Raíz del Backend)
+
+Para mantener el proyecto limpio y escalable, la raíz de nuestro directorio `backend/` está organizada de la siguiente manera:
+
+```text
+backend/
+├── dist/                  # Código TypeScript compilado a JavaScript (generado automáticamente)
+├── node_modules/          # Dependencias de Node.js instaladas por npm
+├── prisma/                # Configuración de la base de datos (schema.prisma y migraciones)
+├── src/                   # El código fuente de nuestra aplicación (lógica del backend)
+├── test/                  # Pruebas integradas y de extremo a extremo (E2E)
+├── Dockerfile             # Receta para construir la imagen de Docker del backend
+├── entrypoint.sh          # Script de arranque del contenedor (aplica migraciones y levanta NestJS)
+├── eslint.config.mjs      # Reglas de linter para mantener la calidad y estilo del código
+├── nest-cli.json          # Configuración de la interfaz de comandos (CLI) de NestJS
+├── package.json           # Dependencias del proyecto y scripts de ejecución (start, build, etc.)
+├── package-lock.json      # Registro exacto de las versiones de las dependencias instaladas
+├── tsconfig.json          # Configuración principal del compilador de TypeScript
+└── tsconfig.build.json    # Configuración de TypeScript específica para el build de producción 
+```
+### Dockerfile:
 
 **Multi-stage**:
 - `development`: hot-reload mediante `npm run start:dev --watch`
@@ -101,34 +136,30 @@ Puertos de Nginx: se usan 8080:80 y 8443:443 en lugar de 80:80 y 443:443, porque
 
 - **Prisma fijado a la versión 6** (`--save-exact`): Prisma 7 (lanzada en noviembre de 2025) rompió la sintaxis `url = env("DATABASE_URL")` en `schema.prisma`, exigiendo `prisma.config.ts` y adaptadores de driver.
 
-- **Script de entrada (entrypoint.sh)**: ejecuta `prisma migrate deploy` antes de iniciar la aplicación. Se usa `exec "$@"` para garantizar que las señales se transmitan correctamente al proceso principal.
+### Entrypoint.sh
 
-## 4. Frontend — Dockerfile
+**Script de entrada (entrypoint.sh)**: ejecuta `prisma migrate deploy` antes de iniciar la aplicación. Se usa `exec "$@"` para garantizar que las señales se transmitan correctamente al proceso principal.
 
-**Multi-stage**:
-- `development`: servidor de desarrollo de Vite
-- `build`: archivos estáticos para futuros despliegues en producción
 
-**Detalles importantes**:
 
-- `--host 0.0.0.0` es obligatorio para Vite; de lo contrario, solo escucha en `localhost` dentro del contenedor y no es accesible para Nginx.
+## 3. Anatomía de src/ (El corazón de la aplicación)
 
-- `CHOKIDAR_USEPOLLING` / `WATCHPACK_POLLING` — para prevenir problemas con el hot-reload a través de volúmenes (especialmente relevante en sistemas de archivos de red del campus).
+Dentro de la carpeta src/ es donde ocurre toda la magia de NestJS. Está modularizada para que cada recurso (usuarios, autenticación, etc.) tenga su propio espacio aislado:
 
-## 5. Nginx
+```text
+src/
+├── auth/                  # Módulo de Autenticación (Login, JWT, Registro, 42 OAuth)
+├── users/                 # Módulo de Usuarios (Perfiles, base de datos, relaciones)
+├── prisma/                # Servicio y módulo global para conectar NestJS con Prisma Client
+├── app.controller.ts      # Controlador raíz (gestiona peticiones HTTP genéricas de prueba)
+├── app.controller.spec.ts # Pruebas unitarias para el controlador raíz
+├── app.module.ts          # El módulo principal que orquesta e importa todo el sistema
+├── app.service.ts         # Lógica de negocio básica para el módulo raíz
+└── main.ts                # El punto de entrada oficial que levanta el servidor NestJS
+```
 
-- **Dockerfile personalizado** (no se usa la imagen `nginx:alpine` directamente) — necesario para incluir el script de entrada (*entrypoint*).
-
-- **entrypoint.sh**: genera un certificado HTTPS autofirmado en el primer arranque si aún no existe (se reutiliza en posteriores reinicios).
-
-- **Configuración en `conf.d/default.conf`**:
-
-  - `/api/` → redirige al backend en el puerto `3000`
-  - `/socket.io/` → redirige al backend en el puerto `3000` con cabeceras `Upgrade` y `Connection` (imprescindible para WebSockets) y tiempos de espera (*timeouts*) aumentados (el valor por defecto de 60 segundos es insuficiente para un chat).
-  - `/` → redirige al frontend en el puerto `5173`, también con cabeceras `Upgrade` (necesarias para el HMR de Vite).
 
 ---
-
 ##  Módulo de autenticación (Auth) — recién implementado
 
 **Esquema Prisma**:
@@ -579,3 +610,223 @@ Flujo de Prueba	| Endpoint / Método | Resultado HTTP | Acción Interna del Serv
 | 3. Control de Duplicados | `POST /auth/register` | 409 Conflict | Se intenta registrar exactamente el mismo email. El servicio detecta la colisión antes de realizar la inserción y lanza un ConflictException. El cliente recibe un error controlado con el mensaje *"Ya existe una cuenta con este email"*|
 
 Conclusión del hito: El éxito de esta secuencia (201 $\rightarrow$ 200 $\rightarrow$ 409) valida de extremo a extremo el flujo base de autenticación. El sistema es criptográficamente seguro, inmune a la duplicidad de cuentas en la capa de persistencia y capaz de autorizar sesiones de manera consistente.
+
+---
+
+## 👥 El Módulo de Usuarios (`src/users/`)
+
+En pocas palabras este módulo se encarga de gestionar la información de los jugadores una vez que ya han iniciado sesión. Sigue la arquitectura estándar de NestJS dividida en tres capas: el módulo como declarador, el servicio para la lógica de negocio y base de datos, y el controlador para exponer los endpoints HTTP.
+
+Para entender por qué hemos creado este módulo, primero debemos entender cómo funciona la arquitectura de una aplicación web moderna (como nuestro *Transcendence*).
+
+---
+
+#### 1. ¿Por qué necesitamos un módulo de Usuarios separado?
+El módulo de Autenticación (`AuthModule`) solo se encarga de las **puertas de acceso**: registrar usuarios, verificar contraseñas y expedir "pases" (los tokens JWT). 
+
+Una vez que el usuario ya ha cruzado esa puerta y está dentro de la aplicación, el `AuthModule` ya no tiene más trabajo. Es aquí donde entra el **`UsersModule`**. Su propósito es:
+*   Servir como la fuente de verdad del perfil del jugador (su nombre, su avatar, sus estadísticas).
+*   Permitir que otros módulos (como el de emparejamiento para el juego, la lista de amigos o el chat) puedan consultar información del usuario de forma rápida y segura a través de su `ID`.
+
+---
+
+#### 2. ¿Qué es y cómo funciona la "zona protegida" `/users/me`?
+En una API REST clásica, cuando un usuario inicia sesión y entra a su perfil, el frontend necesita saber **quién es el usuario actual** para poder pintar su interfaz (su avatar, sus puntos, etc.). El endpoint para resolver esto es `GET /api/users/me` (que se traduce literalmente como *"tráeme mis propios datos"*).
+
+Pero hay un problema de seguridad: **¿Cómo sabe el servidor quién está haciendo la petición?**
+*   **La forma insegura:** Que el frontend envíe el ID del usuario en la URL (ej. `GET /api/users/15`). Si hiciéramos esto, cualquier usuario malicioso podría cambiar el `15` por un `16` o un `17` y cotillear los perfiles de los demás o, peor aún, modificarlos.
+*   **La forma segura (Zona Protegida con JWT):** El frontend no envía ningún ID. Simplemente hace una petición a `/users/me` y adjunta en la cabecera el "pase VIP" que le dimos al iniciar sesión (el `AccessToken` dentro de la cabecera `Authorization: Bearer <token>`).
+
+---
+
+#### 3. El flujo de seguridad paso a paso en la "zona protegida"
+
+Cuando ejecutas el comando `curl -H "Authorization: Bearer <token>" https://localhost:8443/api/users/me`, el backend realiza el siguiente baile de seguridad detrás de escena:
+
+1.  **Interceptación del Guardia (`JwtAuthGuard`):** El guardia detiene la petición en la entrada. Revisa si hay un token. Si no lo hay, responde inmediatamente con un `401 Unauthorized` (que es lo que viste en tu primera prueba).
+2.  **Validación del pasaporte (`JwtStrategy`):** El guardia le pasa el token a la estrategia. Esta verifica criptográficamente que el token fue firmado por nuestro servidor (usando el `JWT_SECRET` del `.env`) y que no ha expirado.
+3.  **Extracción de identidad:** Al descifrar el token, la estrategia encuentra el Payload (que contiene el `userId`). Passport.js inyecta este payload dentro del objeto de la petición HTTP (`req.user`).
+4.  **Consulta segura en la Base de Datos (`UsersService`):** El controlador recibe la petición (sabiendo ya con total certeza que el usuario es el `userId` extraído del token) y le pide al servicio que busque ese perfil en PostgreSQL, **excluyendo siempre la contraseña** mediante la selección selectiva (`select`).
+5.  **Respuesta:** El servidor devuelve un JSON limpio con los datos del perfil del jugador actual.
+
+> 💡 **En resumen:** La zona protegida de `/users/me` es la garantía de que un usuario solo puede ver y gestionar su propia información, de manera 100% segura, sin posibilidad de suplantación de identidad.
+
+-----------------------------
+
+---
+
+### 1. `users.module.ts` (El Pegamento del Módulo)
+
+Es la pieza que declara y conecta todos los componentes de este recurso dentro del ecosistema de NestJS.
+
+```ts
+import { Module } from '@nestjs/common';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
+
+@Module({
+  controllers: [UsersController], // Expone las rutas HTTP al exterior
+  providers: [UsersService],     // Contiene la lógica de negocio accesible mediante Inyección de Dependencias
+})
+export class UsersModule {}
+```
+¿Por qué es necesario? NestJS es modular. Sin este archivo, el framework no sabría que existen el controlador de usuarios ni su servicio. Al encapsularlos aquí, creamos un bloque reutilizable que luego simplemente se importa en el módulo raíz (app.module.ts).
+
+### 2. users.service.ts (El Cerebro y la Seguridad de Datos)
+Este servicio es el único encargado de hablar directamente con la base de datos a través de Prisma. Aquí se aplica una regla de oro de la seguridad en el desarrollo backend.
+```ts
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+
+@Injectable() // Registra la clase en el contenedor de Inyección de Dependencias de NestJS
+export class UsersService {
+  // Inyectamos el servicio global de Prisma para acceder a las tablas de la base de datos
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findById(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId }, // Ejecuta un SELECT optimizado usando el índice único de la clave primaria
+      
+      // REGLA DE ORO DE SEGURIDAD: Selección selectiva (Safe Selection)
+      // Por defecto, Prisma extrae todas las columnas de la tabla, incluyendo "passwordHash".
+      // Si un desarrollador devuelve el objeto de la base de datos directamente al cliente por error,
+      // el hash de la contraseña se filtraría al frontend, creando una brecha de seguridad crítica.
+      // Usando "select", forzamos a la base de datos a no extraer jamás "passwordHash" de la memoria física.
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        avatarUrl: true,
+        createdAt: true,
+      },
+    });
+
+    // Control de errores (Fail-Fast):
+    // Si el usuario no existe (por ejemplo, si el token es antiguo y la cuenta fue borrada de la BD),
+    // Prisma devolverá null. Lanzamos un NotFoundException que NestJS convertirá automáticamente
+    // en una respuesta HTTP estándar 404 Not Found con un JSON formateado para el cliente.
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Retorna el objeto de usuario limpio y seguro para el cliente
+    return user;
+  }
+}
+```
+
+### 3. users.controller.ts (La Frontera HTTP)
+Es el punto de entrada que recibe las peticiones HTTP del exterior, valida las credenciales y delega la obtención de datos en el servicio.
+```ts
+import { Controller, Get, Request, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UsersService } from './users.service';
+
+@Controller('users') // Define la ruta base para este controlador: /api/users
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @UseGuards(JwtAuthGuard) // ACTIVA EL GUARD: Nadie puede acceder a este endpoint sin un token JWT válido
+  @Get('me')               // Endpoint: GET /api/users/me
+  async getMe(@Request() req) {
+    // FLUJO INTERNO:
+    // 1. Antes de entrar aquí, JwtAuthGuard ejecuta JwtStrategy.validate()
+    // 2. Si el token es válido, los datos del Payload descifrado ({ userId, email })
+    //    se inyectan automáticamente dentro del objeto HTTP request como "req.user"
+    // 3. Extraemos el "userId" de forma segura y le pedimos al servicio que busque la información completa en la BD
+    return this.usersService.findById(req.user.userId);
+  }
+}
+```
+
+🔄 Resumen del flujo de datos en /users/me:
+```text
+[ Cliente HTTP ]
+       │  (GET /api/users/me con Bearer Token)
+       ▼
+ ┌───────────────┐
+ │ JwtAuthGuard  │ ──(¿Token inválido/expirado?)──► [ 401 Unauthorized ]
+ └───────────────┘
+       │  (Token válido -> Inyecta req.user = { userId, email })
+       ▼
+ ┌─────────────────────────────────┐
+ │ UsersController.getMe(req)      │
+ └─────────────────────────────────┘
+       │  (Pide buscar por id: req.user.userId)
+       ▼
+ ┌─────────────────────────────────┐
+ │ UsersService.findById(userId)   │
+ └─────────────────────────────────┘
+       │  (Consulta SELECT segura excluyendo passwordHash)
+       ▼
+ ┌──────────────────┐
+ │ PostgreSQL (BD)  │ ──(¿No existe el usuario?)──► [ 404 Not Found ]
+ └──────────────────┘
+       │  (Devuelve datos seguros)
+       ▼
+[ JSON seguro con datos del perfil ]
+```
+
+El punto clave es cómo se completa aquí toda la cadena que construimos a partir de JWT Strategy:
+
+1.  Una solicitud GET /users/me llega con el encabezado Authorization: Bearer <accessToken>.
+
+2. @UseGuards(JwtAuthGuard) intercepta la solicitud antes de que llegue al cuerpo del método getMe.
+
+3. JwtAuthGuard ejecuta JwtStrategy, que extrae el token del encabezado (ExtractJwt.fromAuthHeaderAsBearerToken()) y verifica la firma y la fecha de vencimiento usando secretOrKey.
+
+4. Si es válido, se llama a validate(payload), que devuelve { userId, email }.
+
+5. NestJS coloca esto en req.user, por lo que leemos req.user.userId en el controlador. 
+
+6. Si el token no es válido, ha caducado o falta, Guard finaliza la solicitud prematuramente, el cuerpo del método getMe no se ejecuta y el cliente recibe automáticamente una respuesta 401 No autorizado.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======================================================================================================
+# Frontend
+
+### Dockerfile
+
+**Multi-stage**:
+- `development`: servidor de desarrollo de Vite
+- `build`: archivos estáticos para futuros despliegues en producción
+
+**Detalles importantes**:
+
+- `--host 0.0.0.0` es obligatorio para Vite; de lo contrario, solo escucha en `localhost` dentro del contenedor y no es accesible para Nginx.
+
+- `CHOKIDAR_USEPOLLING` / `WATCHPACK_POLLING` — para prevenir problemas con el hot-reload a través de volúmenes (especialmente relevante en sistemas de archivos de red del campus).
+
+## 5. Nginx
+
+- **Dockerfile personalizado** (no se usa la imagen `nginx:alpine` directamente) — necesario para incluir el script de entrada (*entrypoint*).
+
+- **entrypoint.sh**: genera un certificado HTTPS autofirmado en el primer arranque si aún no existe (se reutiliza en posteriores reinicios).
+
+- **Configuración en `conf.d/default.conf`**:
+
+  - `/api/` → redirige al backend en el puerto `3000`
+  - `/socket.io/` → redirige al backend en el puerto `3000` con cabeceras `Upgrade` y `Connection` (imprescindible para WebSockets) y tiempos de espera (*timeouts*) aumentados (el valor por defecto de 60 segundos es insuficiente para un chat).
+  - `/` → redirige al frontend en el puerto `5173`, también con cabeceras `Upgrade` (necesarias para el HMR de Vite).
+
+---
+
+
