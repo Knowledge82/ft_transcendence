@@ -89,6 +89,9 @@ let AuthService = class AuthService {
         return this.issueTokens(user.id, user.email);
     }
     async refresh(rawToken) {
+        if (!rawToken) {
+            throw new common_1.UnauthorizedException('No refresh token provided');
+        }
         const storedToken = await this.prisma.refreshToken.findUnique({
             where: { token: rawToken },
             include: { user: true },
@@ -103,6 +106,9 @@ let AuthService = class AuthService {
         return this.issueTokens(storedToken.user.id, storedToken.user.email);
     }
     async logout(rawToken) {
+        if (!rawToken) {
+            return;
+        }
         await this.prisma.refreshToken.updateMany({
             where: { token: rawToken },
             data: { revoked: true },

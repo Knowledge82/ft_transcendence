@@ -1,20 +1,19 @@
+import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 export declare class AuthController {
     private readonly authService;
     constructor(authService: AuthService);
-    register(dto: RegisterDto): Promise<{
+    register(dto: RegisterDto, res: Response): Promise<{
         accessToken: string;
-        refreshToken: string;
     }>;
-    login(dto: LoginDto): Promise<{
+    login(dto: LoginDto, res: Response): Promise<{
         accessToken: string;
-        refreshToken: string;
     }>;
-    refresh(refreshToken: string): Promise<{
+    refresh(req: Request, res: Response): Promise<{
         accessToken: string;
-        refreshToken: string;
     }>;
-    logout(refreshToken: string): Promise<void>;
+    logout(req: Request, res: Response): Promise<void>;
+    private setRefreshCookie;
 }

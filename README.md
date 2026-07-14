@@ -781,8 +781,404 @@ El punto clave es cómo se completa aquí toda la cadena que construimos a parti
 
 6. Si el token no es válido, ha caducado o falta, Guard finaliza la solicitud prematuramente, el cuerpo del método getMe no se ejecuta y el cliente recibe automáticamente una respuesta 401 No autorizado.
 
+---
+
+## 🔒 Refactorización de Seguridad: Tokens en Cookies HTTP-Only
+
+Durante el diseño de la arquitectura de autenticación, tomamos una decisión crítica de seguridad: **separar el almacenamiento del Access Token y del Refresh Token** para proteger la aplicación contra ataques XSS (Cross-Site Scripting).
+
+---
+
+### ⚠️ El problema del almacenamiento en `localStorage`
+
+Si devolvemos ambos tokens en el cuerpo de la respuesta JSON, el Frontend se ve obligado a guardarlos en la memoria del navegador (usualmente en `localStorage` o `sessionStorage`). 
+
+*   **Vulnerabilidad:** Cualquier script malicioso de terceros que consiga ejecutarse en nuestra página (XSS) tendrá acceso total al `localStorage`. Si un atacante roba el `RefreshToken`, tendrá acceso indefinido a la cuenta del usuario.
+*   **La regla de oro:** El `AccessToken` puede vivir en la memoria de la aplicación (variables de React) porque expira en 15 minutos. El `RefreshToken`, al ser de larga duración (7 días), **nunca** debe ser accesible desde JavaScript.
+
+---
+
+### 🛡️ La solución: Cookies con la directiva `HttpOnly`
+
+Para mitigar este riesgo, implementamos el siguiente flujo:
+
+1.  **Access Token:** Se sigue devolviendo en el JSON de respuesta. El Frontend lo guarda en memoria dinámica (un estado de React/Pinia). Si el usuario refresca la pestaña, el token se pierde (lo cual está bien, ya que pedirá uno nuevo usando el Refresh Token de inmediato).
+2.  **Refresh Token:** El servidor lo inyecta directamente en las cabeceras de respuesta como una cookie con los siguientes atributos de seguridad:
+    *   `httpOnly: true` -> Impide que cualquier código JavaScript (incluyendo exploits XSS) acceda o lea la cookie a través de `document.cookie`.
+    *   `secure: true` -> Fuerza a que la cookie solo viaje a través de conexiones cifradas HTTPS (obligatorio en nuestro entorno de producción con Nginx).
+    *   `sameSite: 'strict'` -> Protege contra ataques CSRF (Cross-Site Request Forgery) al asegurar que la cookie solo se envíe en peticiones originadas desde nuestro propio dominio.
+    *   `path: '/api/auth'` -> Limita la cookie para que solo se envíe automáticamente en las peticiones que vayan a los endpoints de autenticación, protegiendo el resto de rutas.
+
+---
+
+### 🔄 Flujo de comunicación refinado:
+
+```text
+[ Frontend (React) ]                                [ Backend (NestJS) ]
+        │                                                    │
+        │─── (POST /api/auth/login) ────────────────────────>│
+        │                                                    │ (Genera tokens)
+        │<── [ JSON: { accessToken } ] ──────────────────────│
+        │<── [ Header: Set-Cookie: refreshToken (HttpOnly) ]─│
+        │                                                    │
+   (Guarda accessToken)                                      │
+   (El navegador guarda la cookie de forma aislada)          │
+        │                                                    │
+        │                                                    │
+  ⏱️ Transcurren 15 minutos (Access Token expira)              │
+        │                                                    │
+        │─── (POST /api/auth/refresh) ──────────────────────>│
+        │    (El navegador adjunta la cookie HttpOnly        │ (Verifica cookie)
+        │     de forma automática y transparente para JS)    │ (Genera nuevos tokens)
+        │                                                    │
+        │<── [ JSON: { accessToken } ] ──────────────────────│
+        │<── [ Header: Set-Cookie: refreshToken (HttpOnly) ]─│
+
+```
+---
+
+### 🍪 Guía de Ingeniería: ¿Qué es realmente una Cookie `HttpOnly`?
+Una **cookie** es simplemente un pequeño fragmento de texto que el servidor web envía al navegador del usuario. El navegador guarda este texto de forma persistente y lo **devuelve automáticamente** al servidor en cada petición posterior que coincida con las reglas de la cookie.
+
+Sin embargo, las cookies tradicionales creadas con JavaScript o enviadas sin configuración tienen una vulnerabilidad crítica: **cualquier script que se ejecute en la página puede leerlas, modificarlas o enviarlas a servidores externos** utilizando la API global `document.cookie`.
+
+El flag `HttpOnly` es una directiva de seguridad añadida en la cabecera HTTP `Set-Cookie` del servidor que cambia por completo este comportamiento.
+
+1. El Flag HttpOnly (La barrera contra XSS)
+Cuando el backend responde al cliente con la siguiente cabecera HTTP:
+
+```http
+Set-Cookie: refreshToken=ey...; HttpOnly;
+```
+El navegador recibe la instrucción y almacena la cookie en un compartimento estanco de su sistema de almacenamiento, aislado del entorno de ejecución de la página web.
+
+ * **Bloqueo de la API del navegador**: A partir de ese momento, si un atacante intenta ejecutar console.log(document.cookie) en la consola, o si consigue inyectar un script malicioso mediante una vulnerabilidad XSS (Cross-Site Scripting), la cookie refreshToken simplemente no aparecerá. Es 100% invisible para el motor de JavaScript del navegador.
+
+ * **Envío automático por red**: A pesar de ser invisible para el código JS, cuando el navegador realiza una petición HTTP (o una llamada con fetch/axios) hacia el dominio del backend, el propio motor de red del navegador (un proceso nativo del sistema operativo) adjunta la cookie automáticamente en las cabeceras:
+
+```http
+Cookie: refreshToken=ey...
+```
+2. La Santísima Trinidad de la seguridad en Cookies
+Para que una cookie de sesión (como nuestro `refreshToken`) sea verdaderamente inexpugnable, el flag `HttpOnly` debe ir acompañado de otros tres atributos obligatorios en entornos modernos:
+
+```http
+Set-Cookie: refreshToken=ey...; HttpOnly; Secure; SameSite=Strict; Path=/api/auth;
+```
+
+A. El flag `Secure` (Protección contra Man-in-the-Middle)
+Fuerza al navegador a enviar la cookie únicamente si la petición se realiza a través de un canal cifrado **HTTPS**.
+
+Si el usuario está conectado a una red Wi-Fi pública y el frontend hiciera una petición accidental por HTTP plano (`http://`), un atacante con un sniffer de red (como Wireshark) podría interceptar el tráfico. Con `Secure`, el navegador previene este envío en texto plano.
+
+B. El flag `SameSite` (Protección contra CSRF)
+Controla si la cookie se envía o no en peticiones que se originan desde sitios web de terceros (peticiones cross-site) para mitigar ataques **CSRF** (**Cross-Site Request Forgery**). Tiene tres modos:
+
+ * `None`: La cookie se envía siempre, incluso desde sitios externos (requiere obligatoriamente el flag `Secure`).
+
+ * `Lax` (Por defecto en navegadores modernos): La cookie se envía en navegaciones seguras de primer nivel (como pinchar un enlace normal), pero no en peticiones hechas por scripts de terceros.
+
+ * `Strict`: La cookie **solo** se envía si la petición actual se origina exactamente desde el mismo dominio que la aloja. Si el usuario está en `sitio-malicioso.com` e intenta hacer un `fetch` hacia nuestra API, el navegador **bloqueará el envío de la cookie**.
+
+C. El flag `Path` (Principio de mínimo privilegio)
+Limita el alcance de la cookie a rutas específicas de la API. Al definir `Path=/api/auth`, el navegador solo adjuntará la cookie de refresco cuando el frontend haga peticiones a endpoints dentro de la autenticación (como `/api/auth/refresh` o `/api/auth/logout`), evitando saturar el ancho de banda enviando un token pesado en peticiones innecesarias (como chats o estados de juego).
+
+📊 Comparativa de almacenamiento: localStorage vs. Cookies HttpOnly
+
+| Característica | `localStorage` | Cookie `HttpOnly` + `Secure` + `SameSite` |
+| :--- | :--- | :--- |
+| **Accesible por JavaScript** | Sí (`localStorage.getItem()`) | **No** (Inmune a XSS en el cliente) |
+| **Envío en las peticiones** | Manual (Debes programar las cabeceras) | **Automático** por el propio navegador |
+| **Vulnerable a CSRF** | No (JavaScript debe adjuntarlo explícitamente) | **Protegido** (Configurando `SameSite=Strict`) |
+| **Gestión de Caducidad** | Manual (Hay que borrarlo por código) | **Automática** (Gestionada por el navegador vía `Max-Age`) |
 
 
+## 📦 Configuración del Entorno: Instalación de `cookie-parser`
+
+Para que NestJS sea capaz de leer las cookies que el navegador envía automáticamente en las cabeceras de las peticiones, necesitamos instalar y configurar un middleware clásico del ecosistema de Node.js: `cookie-parser`.
+
+### 1. Instalación de dependencias
+
+Ejecuta los siguientes comandos en tu terminal para instalar el paquete de producción y sus tipos de desarrollo dentro del contenedor del backend:
+
+```bash
+docker compose exec backend npm install cookie-parser
+docker compose exec backend npm install --save-dev @types/cookie-parser
+```
+
+ * `cookie-parser`: Es el paquete principal que intercepta las peticiones HTTP entrantes, busca la cabecera `Cookie`, la procesa y la transforma en un objeto de JavaScript fácil de leer (`req.cookies`).
+
+ * `@types/cookie-parser`: Proporciona el tipado estricto para TypeScript, permitiendo que el compilador reconozca las propiedades de las cookies sin lanzar errores de tipo.
+
+💡 Nota: Al instalar estos paquetes utilizando `docker compose exec backend`, las dependencias se guardan directamente dentro del volumen de `node_modules` del contenedor y se actualiza el archivo `package.json` en tu máquina local automáticamente.
+
+## 🔧 Refactorización del Código: Implementación de Cookies HttpOnly
+
+Con `cookie-parser` ya instalado, procedemos a activarlo a nivel global en nuestra aplicación y a refactorizar el controlador de autenticación para gestionar de forma segura el envío y recepción de los tokens.
+
+---
+
+### 1. `main.ts` — Activación del Middleware global
+
+Para que NestJS comience a interceptar las cabeceras HTTP y a rellenar el objeto `req.cookies` en cada petición, debemos registrar `cookie-parser` en el archivo de arranque de la aplicación:
+
+```typescript
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser'; // 1. Importamos el middleware
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  
+  app.use(cookieParser()); // 2. Lo activamos globalmente antes de cualquier ruta
+  
+  app.useGlobalPipes(new ValidationPipe());
+  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+}
+bootstrap();
+```
+
+### 2. `auth.controller.ts` — El nuevo flujo de Tokens
+Ahora modificamos el controlador de autenticación. Los cambios clave son:
+
+ * Utilizamos `@Res({ passthrough: true })` para poder inyectar la cookie en la respuesta HTTP sin perder el comportamiento nativo de NestJS (evitando tener que enviar la respuesta con un `res.send()` manual).
+
+ * El cliente ya nunca recibe el `refreshToken` en el cuerpo del JSON. Solo recibe el `accessToken`.
+
+ * Añadimos el endpoint `@Post('logout')` para invalidar la sesión tanto en la base de datos como en el navegador (limpiando la cookie).
+
+Aquí tienes el código completo del controlador refinado:
+
+```ts
+import {
+  Body,
+  Controller,
+  Post,
+  HttpCode,
+  HttpStatus,
+  Res,
+  Req,
+} from '@nestjs/common';
+import type { Response, Request } from 'express';
+import { AuthService } from './auth.service';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
+
+const REFRESH_COOKIE_NAME = 'refreshToken';
+const REFRESH_COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 días (coincide con REFRESH_TOKEN_TTL_DAYS)
+
+@Controller('auth')
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
+
+  @Post('register')
+  async register(
+    @Body() dto: RegisterDto,
+    @Res({ passthrough: true }) res: Response, // Permite manipular la respuesta Express sin bloquear a NestJS
+  ) {
+    const { accessToken, refreshToken } = await this.authService.register(dto);
+    this.setRefreshCookie(res, refreshToken); // Inyecta la cookie HttpOnly
+    return { accessToken }; // Solo devolvemos el accessToken en el JSON
+  }
+
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, refreshToken } = await this.authService.login(dto);
+    this.setRefreshCookie(res, refreshToken);
+    return { accessToken };
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    // Extraemos la cookie del objeto req de forma segura gracias a cookie-parser
+    const oldRefreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
+    
+    const { accessToken, refreshToken } = await this.authService.refresh(oldRefreshToken);
+    this.setRefreshCookie(res, refreshToken); // Rotación de Refresh Token (enviamos uno nuevo)
+    return { accessToken };
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT) // Código 204: Petición exitosa, sin contenido en la respuesta
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
+    
+    // Eliminamos el token de la base de datos para que quede invalidado
+    await this.authService.logout(refreshToken);
+    
+    // Le ordenamos al navegador que destruya la cookie localmente
+    res.clearCookie(REFRESH_COOKIE_NAME);
+  }
+
+  // Método auxiliar privado para centralizar la configuración de seguridad de las cookies
+  private setRefreshCookie(res: Response, token: string) {
+    res.cookie(REFRESH_COOKIE_NAME, token, {
+      httpOnly: true,     // Protege contra XSS: invisible para JavaScript
+      secure: true,       // Protege el canal de red: solo viaja por HTTPS (gestionado por Nginx)
+      sameSite: 'strict', // Protege contra CSRF: solo se envía si la petición nace en nuestro dominio
+      maxAge: REFRESH_COOKIE_MAX_AGE_MS,
+      path: '/api/auth',   // Principio de mínimo privilegio: el navegador solo envía la cookie a endpoints de auth
+    });
+  }
+}
+```
+
+### 🔍 Explicación detallada de la Implementación
+
+Para que todo el equipo comprenda el porqué de cada línea en el controlador, desglosamos los puntos clave explicados por nuestra arquitectura:
+
+#### 1. `@Res({ passthrough: true })` — La clave del control híbrido
+Cuando inyectas el objeto de respuesta nativo con `@Res()` en NestJS, el framework por defecto asume que tú vas a gestionar todo el ciclo de vida de la petición de forma manual (obligándote a escribir `res.json(...)`, `res.send(...)` y a gestionar los códigos de estado por tu cuenta). 
+
+Al activar el flag **`passthrough: true`**, obtenemos "lo mejor de ambos mundos":
+*   Tenemos acceso directo al objeto `res` de Express para realizar tareas específicas (como inyectar la cookie con `res.cookie()`).
+*   Dejamos que NestJS siga gestionando automáticamente el ciclo de vida del endpoint, transformando el `return { accessToken }` en una respuesta JSON estructurada de forma nativa.
+
+---
+
+#### 2. Configuración de Seguridad de la Cookie (Flag por Flag)
+
+*   `httpOnly: true`: Es la barrera física contra ataques **XSS**. Ningún script de JavaScript que corra en el navegador (ni siquiera nuestras propias herramientas de desarrollo o código malicioso inyectado) podrá leer o interactuar con esta cookie a través de `document.cookie`.
+*   `secure: true`: La cookie solo viajará encriptada a través de conexiones **HTTPS**. Dado que toda nuestra infraestructura local ya está orquestada bajo SSL gracias a Nginx, esto funciona a la perfección. *(Nota de desarrollo: si intentas conectarte directamente al puerto HTTP del backend sin pasar por Nginx, el navegador ignorará la cookie debido a este flag).*
+*   `sameSite: 'strict'`: Bloquea por completo los ataques **CSRF**. El navegador tiene prohibido adjuntar esta cookie si la petición HTTP se inicia desde un dominio externo. Incluso si el usuario hace clic en un enlace legítimo que apunte a nuestra app desde un sitio externo, la cookie no se enviará en esa primera carga de página.
+*   `path: '/api/auth'`: Aplicamos el principio de mínimo privilegio. La cookie solo se adjuntará en peticiones cuyas rutas comiencen exactamente por `/api/auth` (como `/refresh` o `/logout`). No tiene ningún sentido que el navegador envíe el token de refresco en peticiones destinadas a `/api/users` o al WebSocket del juego, reduciendo drásticamente la exposición del token en la red.
+
+---
+
+### 🧪 ¿Cómo probar el nuevo flujo usando `curl`?
+
+A diferencia de un navegador web, la herramienta **`curl`** no almacena ni envía cookies de forma automática entre peticiones por defecto. Para emular el comportamiento que tendrá nuestro frontend en React, debemos indicarle explícitamente a `curl` dónde guardar y leer las cookies.
+
+#### Paso 1: Login y almacenamiento de la Cookie (`-c`)
+Para iniciar sesión y guardar la cookie `HttpOnly` que nos envía el servidor en un archivo temporal llamado `cookies.txt`, añadimos el flag `-c` (cookie-jar):
+
+```bash
+curl -k -c cookies.txt -X POST https://localhost:8443/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","password":"password123"}'
+```
+Qué sucede aquí: En la respuesta verás que el cuerpo JSON ahora solo contiene el `accessToken`. El `refreshToken` se ha guardado de forma silenciosa dentro del archivo local `cookies.txt` en tu máquina.
+
+### Paso 2: Refrescar el token leyendo la Cookie (`-b`)
+Cuando el `accessToken` expire, el frontend llamará al endpoint de refresco. Para emular esta petición enviando la cookie que acabamos de guardar, utilizamos el flag `-b` (read cookies):
+
+```bash
+curl -k -b cookies.txt -X POST https://localhost:8443/api/auth/refresh
+```
+Qué sucede aquí: NestJS recibirá la cookie automáticamente gracias a `cookie-parser`, validará el token, generará un nuevo par de tokens, actualizará la base de datos, te inyectará una nueva cookie actualizada en el archivo `cookies.txt` y te devolverá el nuevo `accessToken` en el cuerpo del JSON.
+
+---
+
+## 🏆 Conclusión del Sistema de Autenticación y Pruebas de Integración
+
+Tras refactorizar el backend para utilizar **Cookies HttpOnly**, realizamos un proceso de depuración y pruebas de integración extremo a extremo (*End-to-End*). Este análisis nos permitió validar no solo el correcto funcionamiento del código, sino también el comportamiento del sistema ante la pérdida de persistencia (recreación de contenedores).
+
+---
+
+### 🕵️ Crónica de un "Bug Fantasma": El misterio del 401 Unauthorized
+
+Durante las pruebas iniciales con `curl`, el endpoint `POST /api/auth/login` devolvía un código `401 Unauthorized` y la cookie `refreshToken` no se inyectaba en la cabecera `Set-Cookie`. 
+
+#### 1. Diagnóstico del problema:
+Al revisar los logs de Nginx y ejecutar una consulta directa en la base de datos PostgreSQL:
+
+```bash
+docker compose exec postgres psql -U ft_user -d ft_transcendence -c "SELECT id, email FROM \"User\";"
+```
+
+Confirmamos que la tabla de usuarios estaba completamente vacía.
+
+#### 2. La causa raíz:
+Durante el desarrollo, comandos destructivos como `docker compose down -v` (usado para limpiar volúmenes de red o corregir el healthcheck de Postgres) o la ejecución de `prisma migrate dev` con recreación de esquema, eliminaron la base de datos física. El usuario de pruebas `test@test.com` ya no existía. Al fallar la autenticación en el servicio, el controlador interceptaba la excepción antes de llegar a la línea encargada de inyectar la cookie.
+
+#### 3. Aprendizaje clave (Fail-Fast):
+Este escenario nos obligó a implementar una validación robusta en el método `refresh` de AuthService. Si el cliente no envía la cookie (llega como `undefined`), el sistema aborta la operación inmediatamente con un `401 Unauthorized`, evitando que Prisma intente realizar una consulta fallida (`where: { token: undefined }`) que provocaría una excepción interna de tipo `500`.
+
+🧪 Protocolo de Pruebas Exitosas (Paso a Paso)
+Una vez recreado el usuario de pruebas, procedimos a validar de forma estricta todo el ciclo de vida de los tokens empleando `curl` y gestionando el almacenamiento físico de cookies en el cliente.
+
+Paso 1: Registro de un nuevo usuario
+Creamos la identidad del jugador en la base de datos:
+
+```bash
+curl -k -X POST https://localhost:8443/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","password":"password123","displayName":"TestPlayer"}'
+```
+
+ * Resultado: `201 Created`. El backend devuelve únicamente el `accessToken` en el cuerpo del JSON e inyecta la cookie de refresco en las cabeceras HTTP.
+
+Paso 2: Login con almacenamiento de Cookies (-c)
+Iniciamos sesión forzando a curl a escribir las cookies de respuesta en un archivo local llamado `cookies.txt`:
+
+```bash
+curl -k -c cookies.txt -X POST https://localhost:8443/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","password":"password123"}'
+```
+
+ * Resultado: 200 OK. El archivo cookies.txt ahora contiene la directiva de la cookie:
+
+```bash
+# Netscape HTTP Cookie File
+# https://curl.se/docs/http-cookies.html
+# This file was generated by libcurl! Edit at your own risk.
+
+#HttpOnly_localhost	FALSE	/api/auth	TRUE	1784642922	refreshToken	9868fa2b682cc0de3b4328a3f8305d54240292bdff127eeccc134eba5571d7de5ad2ba8290b55dd3c90272f2bbc14318ae8e8a42fe8438c9f27940ee0cb304d2
+```
+
+Paso 3: Acceso a la ruta protegida (`/users/me`)
+Extraemos el `accessToken` obtenido en el paso anterior y lo enviamos en la cabecera `Authorization`:
+
+```bash
+curl -k https://localhost:8443/api/users/me \
+  -H "Authorization: Bearer <accessToken>"
+```
+
+ * Resultado: `200 OK`. Retorna la información limpia del usuario actual (excluyendo el hash de la contraseña por motivos de seguridad).
+
+Paso 4: Refresco de sesión con Rotación de Tokens (`-b` y `-c`)
+Cuando el `accessToken` expira, solicitamos un nuevo juego de tokens enviando la cookie almacenada (`-b`) y permitiendo que la respuesta actualice nuestro archivo de cookies (`-c`):
+
+```bash
+curl -k -b cookies.txt -c cookies.txt -X POST https://localhost:8443/api/auth/refresh
+```
+
+ * Resultado: `200 OK`. Recibimos un nuevo `accessToken` en el JSON de respuesta. Si inspeccionamos el archivo `cookies.txt`, vemos que **el valor de** `refreshToken` **ha cambiado por completo**. El servidor ha invalidado el token antiguo en la base de datos y ha generado uno nuevo (Mecanismo de Rotación de Tokens).
+
+Paso 5: Prueba de Re-uso (Protección contra robo de tokens)
+Para comprobar que la seguridad de rotación funciona, intentamos hacer un refresco utilizando el token antiguo (guardado previamente en un backup del archivo de cookies antes del paso 4):
+
+```bash
+curl -k -b cookies_antiguas.txt -X POST https://localhost:8443/api/auth/refresh
+```
+
+ * Resultado: `401 Unauthorized`. El backend detecta que el token enviado ya no es el actual (ha sido marcado como revocado o eliminado de la base de datos), impidiendo que un atacante que haya interceptado un token antiguo pueda generar nuevas sesiones.
+
+📈 Resumen Técnico de lo que hemos construido
+
+| Componente | Qué hace | Garantía de Seguridad |
+| :--- | :--- | :--- |
+| **`UsersModule`** | Gestiona perfiles y datos de jugadores. | Encapsulación de lógica y desacoplamiento del módulo Auth. |
+| **`Safe Selection`** | Filtra campos sensibles en consultas de Prisma. | Inmunidad contra filtraciones accidentales de `passwordHash` al Frontend. |
+| **`HttpOnly Cookies`** | Almacena el `refreshToken` fuera del sandbox de JS. | Resistencia total contra robos de sesión mediante ataques **XSS**. |
+| **`SameSite: Strict`** | Restringe el envío de cookies a peticiones del mismo dominio. | Protección robusta contra falsificación de peticiones en sitios cruzados (**CSRF**). |
+| **`Token Rotation`** | Destruye el `refreshToken` antiguo al generar uno nuevo. | Mitigación del impacto en caso de interceptación física del token. |
+| **`Fail-Fast Gate`** | Rechaza peticiones sin cookie de forma preventiva. | Evita errores de ejecución de base de datos en Prisma y caídas del servidor. |
+
+---
 
 
 
