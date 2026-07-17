@@ -73,3 +73,13 @@ export default defineConfig([
 ])
 
 ```
+Un conjunto estándar de archivos generados por npm create vite@latest . -- --template react-ts:
+
+ - index.html: el punto de entrada para el navegador; aquí es donde Vite incluye tu código React mediante `<script type="module" src="/src/main.tsx">`
+ - src/: toda tu lógica; aquí es donde ahora colocamos api/, context/ y pages/
+ - public/: archivos estáticos que se sirven tal cual (iconos, favicons, etc.); no pasan por el proceso de compilación de Vite.
+ - vite.config.ts — Configuración propia de Vite (plugins, alias de ruta, etc.)
+ - tsconfig.json / tsconfig.app.json / tsconfig.node.json — Configuración de TypeScript dividida: una parte para el código de la aplicación (app), la otra para los archivos de configuración propios de Vite (node). Vite ha estado separando estos archivos en versiones recientes para que la configuración de compilación y el código de la aplicación tengan reglas de compilación diferentes.
+ - package.json/package-lock.json — Dependencias; ya las has añadido mediante npm install axios react-router-dom.
+ - eslint.config.js — El linter, el mismo ESLint que vimos en el contexto de Oxlint.
+
