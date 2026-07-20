@@ -1,5 +1,43 @@
 # ft_transcendence — Notas de progreso
 
+## 🚀 Como comenzar a trabajar (Quick Start)
+
+Sigue estos sencillos pasos para clonar el repositorio, configurar tu entorno y levantar el proyecto en local:
+
+### A. Clonar el repositorio
+Clona el proyecto en tu máquina local y accede a la carpeta raíz:
+```bash
+git clone <URL_DE_TU_REPOSITORIO>
+cd <NOMBRE_DE_LA_CARPETA>
+```
+### B. Configurar las variables de entorno
+Cada desarrollador debe tener su propio archivo de configuración local. Copia el archivo de plantilla .env.example y renómbralo a .env:
+```bash
+cp .env.example .env
+```
+⚠️ **Importante**: Abre el archivo .env recién creado y define tus propias contraseñas, credenciales de la base de datos y la clave secreta para los tokens (JWT_SECRET). Nunca subas tu archivo .env personal al repositorio.
+
+#### 📝 Configuración del archivo `.env`
+
+Cuando copies el archivo `.env.example` a `.env`, verás las siguientes variables. Aquí tienes qué significa cada una y qué debes cambiar:
+
+| Variable | Valor por defecto | ¿Qué debes hacer? |
+| :--- | :--- | :--- |
+| `POSTGRES_USER` | `ft_user` | Puedes dejarlo por defecto para desarrollo local. |
+| `POSTGRES_PASSWORD` | `change_me` | **¡CÁMBIALO!** Pon una contraseña segura para tu base de datos local, sin caracteres especiales como `@ : / # ?` (ej. `mi_super_clave_123`). |
+| `POSTGRES_DB` | `ft_transcendence`| Puedes dejarlo por defecto. Es el nombre de la base de datos que se creará automáticamente en PostgreSQL. |
+| `JWT_SECRET` | `change_me_access_secret` | **¡CÁMBIALO!** Genera una cadena de texto larga y aleatoria. Se usa para firmar los Access Tokens (15 min). |
+| `JWT_REFRESH_SECRET` | `change_me_refresh_secret` | **¡CÁMBIALO!** Genera otra cadena de texto aleatoria distinta a la anterior. Se usa para firmar los Refresh Tokens (7 días). |
+| `NODE_ENV` | `development` | Déjalo en `development` para habilitar los logs detallados y el modo de recarga rápida (watch mode) en NestJS. |
+| `VITE_API_URL` | `https://localhost/api` | Déjalo así. Es la URL que usará el Frontend (Vite) para comunicarse con el Backend a través del puerto seguro de Nginx. |
+
+> 🔑 **Pro Tip para generar secretos seguros:**  
+Puedes generar claves aleatorias fuertes rápidamente desde tu terminal ejecutando:
+```bash
+openssl rand -base64 32
+```
+Copia el resultado y pégalo en tu `JWT_SECRET` y `JWT_REFRESH_SECRET`.
+
 **Proyecto:** "La Iglesia del Verdadero Relink" — red social satírica sobre la cultura del cargo cult en 42
 **Periodo cubierto:** primera semana de desarrollo (infraestructura + módulo de autenticación)
 
