@@ -128,6 +128,8 @@ Para un proyecto universitario con plazos ajustados, migrar a la arquitectura de
 
 ## 4. Módulo de autenticación (Auth)
 
+## BACKEND:
+
 ### Esquema de base de datos (Prisma)
 - `User`: email, passwordHash (nunca se guarda la contraseña en texto plano), displayName, avatarUrl, timestamps
 - `RefreshToken`: token, relación con User, fecha de expiración, flag `revoked` — permite revocar sesiones individuales sin afectar a las demás
@@ -179,6 +181,9 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 ---
 
+## FRONTEND:
+[Notas de trabajo AUTH Frontend part](./frontend-auth-notas.md)
+
 ## 5. Verificación end-to-end
 
 Todo el ciclo se probó manualmente con `curl` (con flags `-k` para el certificado autofirmado, `-c`/`-b` para gestionar cookies) y posteriormente también con Insomnia:
@@ -213,5 +218,3 @@ Todo el ciclo se probó manualmente con `curl` (con flags `-k` para el certifica
 - OAuth con 42 intra
 - Sistema de permisos avanzado (roles)
 
-### Próximo paso sugerido
-Decidir entre completar los formularios de frontend para Auth (para tener un flujo funcional de extremo a extremo) o continuar con el backend (`UsersModule` con perfil, avatar, sistema de amigos) antes de volver al frontend.
