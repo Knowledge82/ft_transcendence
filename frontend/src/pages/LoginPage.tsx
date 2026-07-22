@@ -1,26 +1,46 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { validateEmail, validatePassword } from '../utils/validation';
+
+interface FieldErrors {
+  email?: string;
+  password?: string;
+}
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  function validate(): boolean {
+    const errors: FieldErrors = {
+      email: validateEmail(email) ?? undefined,
+      password: validatePassword(password) ?? undefined,
+    };
+    setFieldErrors(errors);
+    return Object.values(errors).every((error) => error === undefined);
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+    setSubmitError(null);
 
+    if (!validate()) {
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       await login(email, password);
       navigate('/');
     } catch (err) {
-      setError('Email o contraseña incorrectos.');
+      setSubmitError('Email o contraseña incorrectos.');
     } finally {
       setIsSubmitting(false);
     }
@@ -29,7 +49,7 @@ export function LoginPage() {
   return (
     <div>
       <h1>Iniciar sesión</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <div>
           <label htmlFor="email">Email</label>
           <input
@@ -37,8 +57,8 @@ export function LoginPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
           />
+          {fieldErrors.email && <p style={{ color: 'red' }}>{fieldErrors.email}</p>}
         </div>
 
         <div>
@@ -48,11 +68,13 @@ export function LoginPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
           />
+          {fieldErrors.password && (
+            <p style={{ color: 'red' }}>{fieldErrors.password}</p>
+          )}
         </div>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {submitError && <p style={{ color: 'red' }}>{submitError}</p>}
 
         <button type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Entrando...' : 'Entrar'}

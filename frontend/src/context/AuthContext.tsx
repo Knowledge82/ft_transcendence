@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { setAccessToken as setClientAccessToken } from '../api/client';
+import { setAccessToken as setClientAccessToken, setOnSessionExpired } from '../api/client';
 import {
   loginRequest,
   registerRequest,
@@ -9,7 +9,7 @@ import {
 
 interface AuthContextValue {
   isAuthenticated: boolean;
-  isLoading: boolean; // true while the initial silent refresh is in progress
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, displayName: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -21,8 +21,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // On every app load (including page refresh), try to silently restore
-  // the session using the httpOnly refresh cookie the browser already has
+  // Register the bridge callback ONCE: if a background request refresh
+  // fails (the refresh cookie itself expired), client.ts calls this to
+  // tell React the session is really over — no direct navigation here,
+  // ProtectedRoute reacts to isAuthenticated becoming false on its own
+  useEffect(() => {
+    setOnSessionExpired(() => {
+      setIsAuthenticated(false);
+    });
+  }, []);
+
   useEffect(() => {
     refreshRequest()
       .then(({ accessToken }) => {
@@ -30,7 +38,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(true);
       })
       .catch(() => {
-        // No valid cookie, or it expired — the user simply isn't logged in
         setClientAccessToken(null);
         setIsAuthenticated(false);
       })
@@ -62,8 +69,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Custom hook: lets components do `const { login } = useAuth();`
-// instead of importing useContext + AuthContext everywhere
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
