@@ -102,5 +102,5 @@ En DevTools del navegador:
 - Manejo de expiración del access token durante el uso de la app (actualmente el refresh solo se dispara al cargar la página, no automáticamente si el access token caduca a mitad de sesión)
 
 
-[VOLVER] (./README.md)
+[VOLVER](./README.md)
 
