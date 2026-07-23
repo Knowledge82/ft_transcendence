@@ -1,4 +1,5 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios from 'axios';
+import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 export const apiClient = axios.create({
   baseURL: '/api',
@@ -45,14 +46,14 @@ async function performRefresh(): Promise<string> {
   return data.accessToken;
 }
 
-interface RetriableConfig extends InternalAxiosRequestConfig {
+interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as RetriableConfig | undefined;
+    const originalRequest = error.config as ExtendedAxiosRequestConfig | undefined;
     const isRefreshCall = originalRequest?.url === '/auth/refresh';
 
     const shouldAttemptRefresh =
