@@ -11,7 +11,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
 const SALT_ROUNDS = 12; // coste del hash: más alto = más lento = más seguro contra fuerza bruta
-const ACCESS_TOKEN_TTL = '10s';
+const ACCESS_TOKEN_TTL = '15m';
 const REFRESH_TOKEN_TTL_DAYS = 7;
 
 @Injectable()

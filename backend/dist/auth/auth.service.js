@@ -49,7 +49,7 @@ const bcrypt = __importStar(require("bcrypt"));
 const crypto = __importStar(require("crypto"));
 const prisma_service_1 = require("../prisma/prisma.service");
 const SALT_ROUNDS = 12;
-const ACCESS_TOKEN_TTL = '10s';
+const ACCESS_TOKEN_TTL = '15m';
 const REFRESH_TOKEN_TTL_DAYS = 7;
 let AuthService = class AuthService {
     prisma;
