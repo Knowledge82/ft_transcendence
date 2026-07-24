@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+@theme {
+  --color-ink-950: #0b0a0f;
+  --color-ink-900: #17151d;
+  --color-ink-800: #2a2732;
+
+  --color-gold-400: #e8c766;
+  --color-gold-500: #d4af37;
+  --color-gold-on: #2c2205;
+
+  --color-cream-100: #f5f0e8;
+  --color-cream-400: #9c96a8;
+
+  --color-error-500: #e85d5d;
+}
+
 body {
   margin: 0;
 }

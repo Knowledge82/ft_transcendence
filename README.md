@@ -188,6 +188,10 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [El problema y la solucion](./access-token-refresh.md)
 
+## TailwindCSS
+
+[TailwindCSS y paleta de colores principal](docs-tailwind-paleta.md)
+
 ---
 
 ## 5. Verificación end-to-end
