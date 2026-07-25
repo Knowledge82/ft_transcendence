@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+}
+
 // Modelo de usuario: datos base de autenticación y perfil
 model User {
   id           Int      @id @default(autoincrement())
@@ -18,6 +23,12 @@ model User {
   updatedAt    DateTime @updatedAt
 
   refreshTokens RefreshToken[]
+
+  // A user can appear on either side of a friendship: as the one who sent
+  // the request, or as the one who received it. Two separate relation
+  // names are required because both point to the same User model.
+  sentFriendRequests     Friendship[] @relation("FriendshipRequester")
+  receivedFriendRequests Friendship[] @relation("FriendshipAddressee")
 }
 
 // Guardamos los refresh tokens en la base de datos para poder revocarlos
@@ -30,4 +41,18 @@ model RefreshToken {
   expiresAt DateTime
   revoked   Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model Friendship {
+  id          Int              @id @default(autoincrement())
+  requesterId Int
+  addresseeId Int
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+
+  requester User @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee User @relation("FriendshipAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  // Prevents sending a duplicate request to the same person twice
+  @@unique([requesterId, addresseeId])
 }

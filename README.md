@@ -181,6 +181,8 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [UPDATE of UsersModule](./docs/docs-users-avatar.md)
 
+[FriendsModule](./docs/docs-friends-module.md)
+
 ---
 
 ## FRONTEND:
