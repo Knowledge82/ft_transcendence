@@ -101,3 +101,6 @@ La directiva `@theme` es la forma que tiene Tailwind v4 de declarar tokens de di
 ## Estado
 
 Paleta aplicada a `LoginPage`, `RegisterPage` y `HomePage`. El resto de la aplicación (a medida que se construya) debe usar estos mismos tokens en vez de colores sueltos, para mantener consistencia visual.
+
+
+[VOLVER](../README.md)

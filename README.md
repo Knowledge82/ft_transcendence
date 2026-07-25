@@ -182,15 +182,15 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 ---
 
 ## FRONTEND:
-[Notas de trabajo AUTH Frontend part](./frontend-auth-notas.md)
+[Notas de trabajo AUTH Frontend part](./docs/frontend-auth-notas.md)
 
 ## Renovación automática del Access Token
 
-[El problema y la solucion](./access-token-refresh.md)
+[El problema y la solucion](./docs/access-token-refresh.md)
 
 ## TailwindCSS
 
-[TailwindCSS y paleta de colores principal](docs-tailwind-paleta.md)
+[TailwindCSS y paleta de colores principal](./docs/docs-tailwind-paleta.md)
 
 ---
 
