@@ -59,3 +59,6 @@ El segundo paquete son solo los tipos de TypeScript para Multer — necesarios p
 Passport (la librería de autenticación que usa `@nestjs/passport` por debajo) añade automáticamente un campo `user` al objeto `Request` de Express — es ahí donde queda disponible lo que devuelve `JwtStrategy.validate()` en cada petición autenticada. Pero Passport declara ese campo con un tipo `Express.User` **vacío** a propósito: es una interfaz genérica, pensada para que cada proyecto la complete con la forma real de sus propios datos de usuario.
 
 Declarar esa forma (en `src/types/express.d.ts`) le dice a TypeScript exactamente qué campos tiene `req.user` en todo el proyecto (`userId`, `email`, en nuestro caso), en vez de dejarlo como un tipo vacío o genérico. Esto habilita el autocompletado del editor y la verificación real de tipos en cualquier controlador que use `req.user`, en lugar de tener que forzar el tipo manualmente cada vez.
+
+
+[VOLVER](../README.md)

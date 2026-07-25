@@ -179,6 +179,8 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 3. Si es válido, `validate()` devuelve `{ userId, email }`, inyectado en `req.user`
 4. El controlador usa `req.user.userId` para buscar el perfil
 
+[UPDATE of UsersModule](./docs/docs-users-avatar.md)
+
 ---
 
 ## FRONTEND:
@@ -210,21 +212,4 @@ Todo el ciclo se probó manualmente con `curl` (con flags `-k` para el certifica
 
 ## 6. Estado actual y pendientes
 
-### Completado
-- Infraestructura Docker completa y estable (postgres, backend, frontend, nginx, HTTPS)
-- Módulo de autenticación backend: registro, login, refresh con rotación, logout con revocación
-- Primera ruta protegida (`GET /users/me`)
-
-### Pendiente (requisitos obligatorios del enunciado)
-- **Formularios de frontend** para registro/login — todavía no existe ninguna pantalla de React para esto
-- **Validación en frontend** — el enunciado exige validación tanto en frontend como en backend; solo tenemos la de backend
-
-### Pendiente (deuda técnica / buenas prácticas)
-- Rate limiting en `/auth/login` (actualmente sin protección contra fuerza bruta)
-- Limpieza periódica de refresh tokens expirados/revocados en la base de datos
-
-### Pendiente (módulos bonus relacionados con Auth)
-- 2FA
-- OAuth con 42 intra
-- Sistema de permisos avanzado (roles)
-
+[Estado actualizado para 25-06-2026](./docs/estado-actualizado.md)
