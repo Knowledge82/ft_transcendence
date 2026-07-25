@@ -1,17 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UpdateProfileDto } from './dto/update-profile.dto'
 
-//Registers the service in the NestJS DI container.
-//It can now be injected into other controllers or modules.
 @Injectable()
 export class UsersService {
-  //private readonly prisma: PrismaService — we request NestJS access to our global database module. 
-  //Through this.prisma , we gain full access to all tables.
   constructor(private readonly prisma: PrismaService) {}
 
   // Safe selection via select
-  // findUnique({ where: { id: userId } }) — Prizma executes the fastest SQL query SELECT ... WHERE id = $1, using a unique index on id.
-  // select: { ... } — The golden rule of security. By default, Prizma scrapes all table fields from the database, including passwordHash. If a developer accidentally returns such an object to a client, the password hash will leak to the frontend (a huge security hole!).
+  // findUnique({ where: { id: userId } }) — Prisma executes the fastest SQL query SELECT ... WHERE id = $1, using a unique index on id.
+  // select: { ... } — The golden rule of security. By default, Prisma scrapes all table fields from the database, including passwordHash. If a developer accidentally returns such an object to a client, the password hash will leak to the frontend (a huge security hole!).
   // Using the select object, we firmly instructed the database: "Return me only the id, email, name, avatar, and creation date. Don't even retrieve the passwordHash field from the database." This guarantees that the password hash will never leak, even if you forget to filter the response somewhere.
   async findById(userId: number) {
     const user = await this.prisma.user.findUnique({
@@ -26,13 +23,38 @@ export class UsersService {
       },
     });
 
-    //If there's no user with that ID in the database (for example, the token is old and the user has already been manually deleted), Prizma will return null.
-    //The throw new NotFoundException(...) line intercepts this and throws a standard NestJS exception. On the client, this will automatically be converted into a nice response with a 404 Not Found status and the error text.
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    //If the user is found, the method simply returns this clean, filtered object.
     return user;
+  }
+
+  async updateProfile(userId: number, dto: UpdateProfileDto) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: dto,
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        avatarUrl: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  async updateAvatar(userId: number, avatarUrl: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        avatarUrl: true,
+        createdAt: true,
+      },
+    });
   }
 }

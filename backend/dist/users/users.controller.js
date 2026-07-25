@@ -14,8 +14,14 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
+const path_1 = require("path");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const users_service_1 = require("./users.service");
+const update_profile_dto_1 = require("./dto/update-profile.dto");
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_AVATAR_SIZE_BYTES = 2 * 1024 * 1024;
 let UsersController = class UsersController {
     usersService;
     constructor(usersService) {
@@ -24,18 +30,67 @@ let UsersController = class UsersController {
     async getMe(req) {
         return this.usersService.findById(req.user.userId);
     }
+    async updateMe(req, dto) {
+        return this.usersService.updateProfile(req.user.userId, dto);
+    }
+    async uploadAvatar(req, file) {
+        if (!file) {
+            throw new common_1.BadRequestException('No file uploaded');
+        }
+        const avatarUrl = `/api/uploads/avatars/${file.filename}`;
+        return this.usersService.updateAvatar(req.user.userId, avatarUrl);
+    }
 };
 exports.UsersController = UsersController;
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Get)('me'),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getMe", null);
+__decorate([
+    (0, common_1.Patch)('me'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, update_profile_dto_1.UpdateProfileDto]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "updateMe", null);
+__decorate([
+    (0, common_1.Post)('me/avatar'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('avatar', {
+        storage: (0, multer_1.diskStorage)({
+            destination: './uploads/avatars',
+            filename: (req, file, callback) => {
+                const userId = req.user?.userId;
+                if (!userId) {
+                    callback(new Error('Unauthenticated upload attempt'), '');
+                    return;
+                }
+                const uniqueSuffix = Date.now();
+                const ext = (0, path_1.extname)(file.originalname);
+                callback(null, `${userId}-${uniqueSuffix}${ext}`);
+            },
+        }),
+        limits: { fileSize: MAX_AVATAR_SIZE_BYTES },
+        fileFilter: (req, file, callback) => {
+            if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+                callback(new common_1.BadRequestException('Only JPEG, PNG or WEBP images are allowed'), false);
+                return;
+            }
+            callback(null, true);
+        },
+    })),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "uploadAvatar", null);
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [users_service_1.UsersService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

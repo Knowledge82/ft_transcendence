@@ -33,6 +33,32 @@ let UsersService = class UsersService {
         }
         return user;
     }
+    async updateProfile(userId, dto) {
+        return this.prisma.user.update({
+            where: { id: userId },
+            data: dto,
+            select: {
+                id: true,
+                email: true,
+                displayName: true,
+                avatarUrl: true,
+                createdAt: true,
+            },
+        });
+    }
+    async updateAvatar(userId, avatarUrl) {
+        return this.prisma.user.update({
+            where: { id: userId },
+            data: { avatarUrl },
+            select: {
+                id: true,
+                email: true,
+                displayName: true,
+                avatarUrl: true,
+                createdAt: true,
+            },
+        });
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([

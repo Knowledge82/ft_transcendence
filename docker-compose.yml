@@ -38,6 +38,7 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+      - ./backend/uploads:/app/uploads
     networks:
       - ft_network
     expose:
@@ -86,3 +87,4 @@ networks:
 
 volumes:
   postgres_data:
+
