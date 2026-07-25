@@ -1,106 +1,61 @@
 # UsersModule — Perfil y avatar
 
-## Qué se implementó
+## Para qué sirve este módulo
 
-### 1. Actualización de perfil
+`UsersModule` gestiona todo lo relacionado con los datos del usuario ya autenticado: consultar su perfil, actualizarlo, y subir una foto de perfil. Es distinto de `AuthModule`: `AuthModule` se encarga de **entrar** al sistema (registro, login, tokens); `UsersModule` se encarga de **gestionar los datos** de alguien que ya entró. Todas sus rutas están protegidas con `JwtAuthGuard` a nivel de controlador — nadie sin sesión válida puede tocar nada aquí.
 
-`PATCH /api/users/me` — permite al usuario actualizar sus datos (por ahora, `displayName`). Usa `UpdateProfileDto` con `@IsOptional()` en cada campo, porque a diferencia del registro, aquí el usuario puede enviar una actualización parcial (solo el campo que quiere cambiar).
+## Los DTOs de este módulo
 
-### 2. Subida de avatar
+### `UpdateProfileDto`
 
-`POST /api/users/me/avatar` — primera funcionalidad de subida de archivos del proyecto. Diferencias clave respecto a los endpoints anteriores:
-
-- El `Content-Type` es `multipart/form-data`, no `application/json` — permite enviar archivos binarios junto con campos de texto en una sola petición.
-- Se gestiona con **Multer**, la librería estándar de Node.js para procesar este tipo de peticiones, integrada en NestJS mediante `FileInterceptor`.
-
-**Reglas aplicadas:**
-- Solo se aceptan imágenes JPEG, PNG o WEBP (`fileFilter`)
-- Tamaño máximo: 2 MB (`limits.fileSize`)
-- Cada archivo se guarda con un nombre único (`userId-timestamp.ext`) para evitar colisiones entre usuarios o entre subidas sucesivas del mismo usuario
-
-**Dónde se guardan los archivos:** `backend/uploads/avatars/`, montado como *bind mount* en `docker-compose.yml` (`./backend/uploads:/app/uploads`) — así los archivos sobreviven a la reconstrucción de contenedores y son visibles directamente en el sistema de archivos del proyecto, a diferencia de los datos de Postgres (que usan un *named volume*, gestionado internamente por Docker, sin acceso directo desde el host).
-
-**Cómo se sirven:** el backend expone la carpeta `uploads/` como contenido estático (`app.useStaticAssets` en `main.ts`, con prefijo `/uploads`). La URL guardada en base de datos es del tipo `/api/uploads/avatars/archivo.jpg` — el prefijo `/api` hace que la petición pase por el mismo proxy de nginx que el resto del backend (`location /api/`), sin necesidad de una regla de nginx aparte.
-
-## Problemas encontrados
-
-### DTO en la carpeta equivocada
-
-`update-profile.dto.ts` se creó inicialmente dentro de `auth/dto/`, cuando pertenece a `users/dto/` — es el DTO que usa `UsersController`, no `AuthController`. Regla general del proyecto: cada DTO vive junto al controlador que lo usa, no en una carpeta común.
-
-### `req.user` sin tipo definido
-
-Al escribir la función `filename` dentro de la configuración de Multer, TypeScript lanzó dos errores:
-- `'req.user' is possibly 'undefined'`
-- `Property 'userId' does not exist on type 'User'`
-
-**Causa:** Passport declara globalmente `Express.Request.user`, pero como un tipo `Express.User` **vacío**, pensado para que cada proyecto lo complete con sus propios campos mediante *module augmentation*. Nunca habíamos declarado explícitamente que `Express.User` contiene `userId` y `email` — hasta ahora no había dado problemas porque en otros archivos TypeScript no fue tan estricto verificando la forma exacta del objeto.
-
-**Solución:** se creó `src/types/express.d.ts`:
 ```typescript
-declare global {
-  namespace Express {
-    interface User {
-      userId: number;
-      email: string;
-    }
-  }
+export class UpdateProfileDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(30)
+  displayName?: string;
 }
-export {};
-```
-Esto "fusiona" nuestros campos con la interfaz vacía existente de Passport, en vez de reemplazarla — mecanismo de TypeScript llamado *declaration merging*. Además, se usó `req.user?.userId` (optional chaining) con una comprobación explícita en vez de forzar el tipo con `!`, para manejar con un error claro el caso (improbable, pero posible en teoría) de que el guard no haya poblado `req.user`.
-
-### Confusión entre los dos significados de `volumes` en docker-compose
-
-`docker-compose.yml` usa la palabra `volumes` en dos sitios distintos con significados diferentes:
-
-- **Dentro de un servicio** (`services.backend.volumes`): lista de qué montar y dónde, para ese servicio concreto.
-- **En el nivel superior del archivo** (junto a `services:`, no dentro de él): declara *named volumes*, gestionados internamente por Docker.
-
-Error cometido: se colocó la declaración `postgres_data:` (named volume) dentro de la lista `volumes` del servicio `backend`, en vez de como sección independiente al final del archivo. Corrección:
-
-```yaml
-services:
-  backend:
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-      - ./backend/uploads:/app/uploads
-  postgres:
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
 ```
 
-## Cómo verificar
+Define qué datos puede modificar un usuario de su propio perfil, y con qué reglas.
 
-### Actualizar perfil
+**`@IsOptional()`** es la pieza clave que diferencia este DTO de los de `AuthModule` (`RegisterDto`, `LoginDto`). En el registro, todos los campos son obligatorios — no se puede crear una cuenta sin contraseña. Aquí, en cambio, el usuario puede enviar una actualización **parcial**: solo el campo que quiere cambiar, sin tener que reenviar todos los demás. `@IsOptional()` le dice a `class-validator`: "si este campo no viene en la petición, no es un error; pero si viene, aplícale el resto de reglas (`@IsString`, `@MinLength`, `@MaxLength`)".
 
+Este patrón (`@IsOptional()` en cada campo) es el estándar para cualquier DTO de tipo "actualización parcial" — se repetirá en otros módulos del proyecto cada vez que haya un endpoint tipo `PATCH`.
+
+## Qué es PATCH y por qué se usa aquí
+
+HTTP define varios métodos, cada uno con un significado semántico distinto:
+
+- **`POST`** — crear algo nuevo (usado en `/auth/register`, o para subir el avatar)
+- **`GET`** — leer datos, sin modificar nada (`/users/me`)
+- **`PUT`** — reemplazar un recurso **completo** por otro
+- **`PATCH`** — modificar **parcialmente** un recurso existente
+
+`PATCH /users/me` encaja exactamente con lo que hace este endpoint: el cliente envía solo los campos que quiere cambiar, y el resto del perfil queda intacto. Usar `PUT` aquí sería semánticamente incorrecto, porque `PUT` implica enviar el objeto completo (y cualquier campo omitido debería, en teoría, borrarse o resetearse) — no es el comportamiento que queremos para una edición de perfil.
+
+## Multer — qué es y por qué hace falta
+
+Todos los endpoints anteriores (`register`, `login`, `updateMe`) reciben `Content-Type: application/json` — texto plano estructurado, que NestJS parsea de forma nativa sin ninguna configuración especial. Subir un archivo (la foto de avatar) es distinto: el navegador envía `Content-Type: multipart/form-data`, un formato binario mixto, pensado para poder mandar archivos junto con campos de texto en una sola petición HTTP.
+
+**Multer** es la librería estándar de Node.js para procesar este tipo de peticiones — se encarga de leer el stream binario entrante, separar los distintos campos y archivos, y (en nuestro caso) escribir el archivo en disco. NestJS lo integra mediante `FileInterceptor`, que conecta Multer con el sistema de decoradores de Nest (`@UploadedFile()`).
+
+Instalación:
 ```bash
-curl -k -b cookies.txt https://localhost:8443/api/users/me \
-  -X PATCH \
-  -H "Content-Type: application/json" \
-  -d '{"displayName": "Nuevo Nombre"}'
+npm install multer
+npm install --save-dev @types/multer
 ```
+El segundo paquete son solo los tipos de TypeScript para Multer — necesarios para que el editor y el compilador entiendan la forma de los objetos que Multer produce (`Express.Multer.File`, por ejemplo); sin ellos TypeScript trataría todo como `any`.
 
-### Subir avatar
+**Configuración usada para el avatar:**
+- `diskStorage` — guarda el archivo directamente en el disco del contenedor (en `uploads/avatars/`), en vez de mantenerlo solo en memoria
+- `filename` — genera un nombre único por archivo (`userId-timestamp.ext`), para que dos usuarios (o dos subidas del mismo usuario) nunca se sobrescriban entre sí
+- `fileFilter` — rechaza cualquier archivo que no sea JPEG, PNG o WEBP, antes de guardarlo
+- `limits.fileSize` — rechaza archivos de más de 2 MB
 
-Con curl, la subida de archivos usa el flag `-F` (form data), no `-d`:
+## `Express.User` — por qué se declaró explícitamente
 
-```bash
-curl -k -b cookies.txt https://localhost:8443/api/users/me/avatar \
-  -X POST \
-  -F "avatar=@/ruta/a/una/imagen.jpg"
-```
+Passport (la librería de autenticación que usa `@nestjs/passport` por debajo) añade automáticamente un campo `user` al objeto `Request` de Express — es ahí donde queda disponible lo que devuelve `JwtStrategy.validate()` en cada petición autenticada. Pero Passport declara ese campo con un tipo `Express.User` **vacío** a propósito: es una interfaz genérica, pensada para que cada proyecto la complete con la forma real de sus propios datos de usuario.
 
-El nombre `avatar` antes del `=` debe coincidir exactamente con el que se pasó a `FileInterceptor('avatar', ...)` en el backend — si no coincide, Multer no encuentra el archivo en la petición.
-
-**Respuesta esperada:** el objeto de usuario actualizado, con `avatarUrl` apuntando a `/api/uploads/avatars/<archivo>`.
-
-**Verificación visual:** pegar esa URL completa (`https://localhost:8443/api/uploads/avatars/...`) directamente en el navegador — debería mostrar la imagen subida.
-
-**Casos de error a probar:**
-- Subir un archivo que no sea imagen (por ejemplo un `.txt`) → debe devolver `400 Bad Request`
-- Subir una imagen de más de 2 MB → debe ser rechazada por el límite de tamaño
+Declarar esa forma (en `src/types/express.d.ts`) le dice a TypeScript exactamente qué campos tiene `req.user` en todo el proyecto (`userId`, `email`, en nuestro caso), en vez de dejarlo como un tipo vacío o genérico. Esto habilita el autocompletado del editor y la verificación real de tipos en cualquier controlador que use `req.user`, en lugar de tener que forzar el tipo manualmente cada vez.
