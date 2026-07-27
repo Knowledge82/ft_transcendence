@@ -3,14 +3,14 @@ export declare class FriendsController {
     private readonly friendsService;
     constructor(friendsService: FriendsService);
     listFriends(req: any): Promise<{
-        id: number;
         displayName: string | null;
+        id: number;
         avatarUrl: string | null;
     }[]>;
     listPendingRequests(req: any): Promise<({
         requester: {
-            id: number;
             displayName: string | null;
+            id: number;
             avatarUrl: string | null;
         };
     } & {

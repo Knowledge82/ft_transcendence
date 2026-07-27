@@ -18,14 +18,14 @@ export declare class FriendsService {
     }>;
     removeFriendship(userId: number, otherUserId: number): Promise<void>;
     listFriends(userId: number): Promise<{
-        id: number;
         displayName: string | null;
+        id: number;
         avatarUrl: string | null;
     }[]>;
     listPendingRequests(userId: number): Promise<({
         requester: {
-            id: number;
             displayName: string | null;
+            id: number;
             avatarUrl: string | null;
         };
     } & {

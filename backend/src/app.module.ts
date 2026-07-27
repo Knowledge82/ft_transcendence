@@ -12,6 +12,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { FriendsModule } from './friends/friends.module';
+import { ChatModule } from './chat/chat.module';
 
 //Setting up the @Module decorator (Building a dependency tree)
 //In NestJS, the architecture is built like a tree.
@@ -21,7 +22,7 @@ import { FriendsModule } from './friends/friends.module';
   //What's going on under the hood here: When NestJS runs inside a Docker container, it goes into this array and sees:
   //1) PrismaModule: NestJS goes there, sees the @Global() decorator, starts PrismaService, opens one pure connection to Postgres and makes it available to the entire application.
   //2) AuthModule: NestJS goes into it, sees the token settings (15 minutes of life, secret key), registers registration/login endpoints and runs security strategies.
-  imports: [PrismaModule, AuthModule, UsersModule, FriendsModule],
+  imports: [PrismaModule, AuthModule, UsersModule, FriendsModule, ChatModule],
 
   //controllers and providers — the standard core application files remain here (AppController for top-level routes and AppService for their logic).
   //export class AppModule {} — the root class itself, which NestJS will pick up in the main.ts file when starting the server.
