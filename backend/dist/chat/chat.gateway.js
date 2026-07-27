@@ -12,13 +12,50 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatGateway = void 0;
 const websockets_1 = require("@nestjs/websockets");
 const socket_io_1 = require("socket.io");
+const jwt_1 = require("@nestjs/jwt");
 let ChatGateway = class ChatGateway {
+    jwtService;
     server;
+    constructor(jwtService) {
+        this.jwtService = jwtService;
+    }
+    onlineUsers = new Map();
     handleConnection(client) {
-        console.log(`Client connected: ${client.id}`);
+        const token = client.handshake.auth?.token;
+        if (!token) {
+            client.disconnect();
+            return;
+        }
+        let payload;
+        try {
+            payload = this.jwtService.verify(token, {
+                secret: process.env.JWT_SECRET,
+            });
+        }
+        catch {
+            client.disconnect();
+            return;
+        }
+        client.data.userId = payload.sub;
+        const existing = this.onlineUsers.get(payload.sub) ?? new Set();
+        existing.add(client.id);
+        this.onlineUsers.set(payload.sub, existing);
+        console.log(`User ${payload.sub} connected (socket ${client.id})`);
     }
     handleDisconnect(client) {
-        console.log(`Client disconnected: ${client.id}`);
+        const userId = client.data.userId;
+        if (!userId) {
+            return;
+        }
+        const sockets = this.onlineUsers.get(userId);
+        sockets?.delete(client.id);
+        if (sockets && sockets.size === 0) {
+            this.onlineUsers.delete(userId);
+            console.log(`User ${userId} is now offline`);
+        }
+    }
+    isUserOnline(userId) {
+        return this.onlineUsers.has(userId);
     }
     handlePing() {
         return 'pong';
@@ -36,6 +73,7 @@ __decorate([
     __metadata("design:returntype", String)
 ], ChatGateway.prototype, "handlePing", null);
 exports.ChatGateway = ChatGateway = __decorate([
-    (0, websockets_1.WebSocketGateway)({ cors: true })
+    (0, websockets_1.WebSocketGateway)({ cors: true }),
+    __metadata("design:paramtypes", [jwt_1.JwtService])
 ], ChatGateway);
 //# sourceMappingURL=chat.gateway.js.map
