@@ -4,43 +4,43 @@ export declare class ChatService {
     constructor(prisma: PrismaService);
     getOrCreateGeneralChannel(): Promise<{
         id: number;
-        type: import("@prisma/client").$Enums.ConversationType;
-        name: string | null;
         createdAt: Date;
+        name: string | null;
+        type: import("@prisma/client").$Enums.ConversationType;
     }>;
     ensureParticipant(conversationId: number, userId: number): Promise<void>;
     findOrCreateDirectConversation(userIdA: number, userIdB: number): Promise<{
         id: number;
-        type: import("@prisma/client").$Enums.ConversationType;
-        name: string | null;
         createdAt: Date;
+        name: string | null;
+        type: import("@prisma/client").$Enums.ConversationType;
     }>;
     getUserConversationIds(userId: number): Promise<number[]>;
     isParticipant(conversationId: number, userId: number): Promise<boolean>;
     saveMessage(conversationId: number, senderId: number, content: string): Promise<{
         sender: {
-            id: number;
             displayName: string | null;
+            id: number;
             avatarUrl: string | null;
         };
     } & {
         id: number;
         createdAt: Date;
-        content: string;
         conversationId: number;
+        content: string;
         senderId: number;
     }>;
     getMessageHistory(conversationId: number, userId: number, limit?: number): Promise<({
         sender: {
-            id: number;
             displayName: string | null;
+            id: number;
             avatarUrl: string | null;
         };
     } & {
         id: number;
         createdAt: Date;
-        content: string;
         conversationId: number;
+        content: string;
         senderId: number;
     })[]>;
 }

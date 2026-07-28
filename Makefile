@@ -44,6 +44,10 @@ fclean: clean
 	@echo "$(GREEN)Eliminando imágenes específicas del proyecto...$(RESET)"
 	$(COMPOSE) down --rmi all --volumes --remove-orphans	
 
+rebuild:
+	@echo "$(GREEN)Reconstruyendo sin borrar datos...$(RESET)"
+	$(COMPOSE) up --build
+
 # Reconstruir todo el proyecto desde cero
 re: fclean all
 

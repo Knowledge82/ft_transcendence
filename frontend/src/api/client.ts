@@ -12,6 +12,10 @@ export function setAccessToken(token: string | null) {
   accessToken = token;
 }
 
+export function getAccessToken(): string | null {
+  return accessToken;
+}
+
 // AuthContext registers a callback here so this plain module can notify it
 // when the session truly ends (refresh failed) — a plain TS file can't use
 // React state directly, so we bridge with a simple callback reference.
