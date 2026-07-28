@@ -183,6 +183,8 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [FriendsModule](./docs/docs-friends-module.md)
 
+[ChatModule](./docs/docs-chat-module.md)
+
 ---
 
 ## FRONTEND:

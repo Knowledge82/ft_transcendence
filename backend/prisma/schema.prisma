@@ -12,11 +12,15 @@ enum FriendshipStatus {
   ACCEPTED
 }
 
-// Modelo de usuario: datos base de autenticación y perfil
+enum ConversationType {
+  DIRECT
+  CHANNEL
+}
+
 model User {
   id           Int      @id @default(autoincrement())
   email        String   @unique
-  passwordHash String   // Nunca guardamos la contraseña en texto plano, solo el hash
+  passwordHash String
   displayName  String?
   avatarUrl    String?
   createdAt    DateTime @default(now())
@@ -24,15 +28,13 @@ model User {
 
   refreshTokens RefreshToken[]
 
-  // A user can appear on either side of a friendship: as the one who sent
-  // the request, or as the one who received it. Two separate relation
-  // names are required because both point to the same User model.
   sentFriendRequests     Friendship[] @relation("FriendshipRequester")
   receivedFriendRequests Friendship[] @relation("FriendshipAddressee")
+
+  conversations ConversationParticipant[]
+  messages      Message[]
 }
 
-// Guardamos los refresh tokens en la base de datos para poder revocarlos
-// individualmente (logout de una sola sesión, no de todas)
 model RefreshToken {
   id        Int      @id @default(autoincrement())
   token     String   @unique
@@ -53,6 +55,42 @@ model Friendship {
   requester User @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
   addressee User @relation("FriendshipAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
 
-  // Prevents sending a duplicate request to the same person twice
   @@unique([requesterId, addresseeId])
+}
+
+// A conversation is either a DIRECT chat (exactly 2 participants) or a
+// CHANNEL (many participants, e.g. the general chat everyone joins).
+// Both share the same message history model below.
+model Conversation {
+  id        Int              @id @default(autoincrement())
+  type      ConversationType
+  name      String?          // only meaningful for CHANNEL type
+  createdAt DateTime         @default(now())
+
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+// Join table: which users belong to which conversation
+model ConversationParticipant {
+  id             Int      @id @default(autoincrement())
+  conversationId Int
+  userId         Int
+  joinedAt       DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+}
+
+model Message {
+  id             Int      @id @default(autoincrement())
+  conversationId Int
+  senderId       Int
+  content        String
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
 }
