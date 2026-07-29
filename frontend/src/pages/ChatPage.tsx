@@ -22,6 +22,7 @@ export function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState('');
   const [ownUserId, setOwnUserId] = useState<number | null>(null);
+  const [ownDisplayName, setOwnDisplayName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // A ref to an invisible element placed right after the last message.
@@ -36,7 +37,7 @@ export function ChatPage() {
       listFriends(),
       getGeneralMembers(),
       listPendingRequests(),
-      apiClient.get<{ id: number }>('/users/me'),
+      apiClient.get<{ id: number; displayName: string | null }>('/users/me'),
     ])
       .then(([general, friendsList, membersList, pending, me]) => {
         setGeneralChannel(general);
@@ -44,6 +45,7 @@ export function ChatPage() {
         setMembers(membersList);
         setPendingRequests(pending);
         setOwnUserId(me.data.id);
+        setOwnDisplayName(me.data.displayName);
         setSelectedConversationId(general.id);
       })
       .finally(() => setIsLoading(false));
@@ -140,7 +142,14 @@ export function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen flex bg-ink-950">
+    <div className="min-h-screen flex flex-col bg-ink-950">
+      <header className="flex justify-end items-center px-4 py-2 bg-ink-900 border-b border-ink-800">
+        <span className="text-sm text-cream-400">
+          Conectado como <span className="text-gold-500 font-medium">{ownDisplayName ?? `Usuario ${ownUserId}`}</span>
+        </span>
+      </header>
+
+      <div className="flex flex-1">
       <aside className="w-64 bg-ink-900 border-r border-ink-800 flex flex-col">
         <div className="p-4 border-b border-ink-800">
           <Link to="/" className="text-sm text-gold-500 hover:text-gold-400">
@@ -288,6 +297,7 @@ export function ChatPage() {
             );
           })}
       </aside>
+      </div>
     </div>
   );
 }
