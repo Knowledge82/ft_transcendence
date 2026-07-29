@@ -1,30 +1,38 @@
 import { ChatService } from './chat.service';
+import { ChatGateway } from './chat.gateway';
 export declare class ChatController {
     private readonly chatService;
-    constructor(chatService: ChatService);
+    private readonly chatGateway;
+    constructor(chatService: ChatService, chatGateway: ChatGateway);
     getGeneralChannel(): Promise<{
         id: number;
-        createdAt: Date;
-        name: string | null;
         type: import("@prisma/client").$Enums.ConversationType;
+        name: string | null;
+        createdAt: Date;
     }>;
+    getGeneralMembers(): Promise<{
+        isOnline: boolean;
+        id: number;
+        displayName: string | null;
+        avatarUrl: string | null;
+    }[]>;
     startDirectConversation(req: any, otherUserId: number): Promise<{
         id: number;
-        createdAt: Date;
-        name: string | null;
         type: import("@prisma/client").$Enums.ConversationType;
+        name: string | null;
+        createdAt: Date;
     }>;
     getHistory(req: any, conversationId: number): Promise<({
         sender: {
-            displayName: string | null;
             id: number;
+            displayName: string | null;
             avatarUrl: string | null;
         };
     } & {
         id: number;
         createdAt: Date;
         conversationId: number;
-        content: string;
         senderId: number;
+        content: string;
     })[]>;
 }

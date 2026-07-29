@@ -29,6 +29,16 @@ let ChatService = class ChatService {
             data: { type: 'CHANNEL', name: GENERAL_CHANNEL_NAME },
         });
     }
+    async getGeneralChannelMembers() {
+        const general = await this.getOrCreateGeneralChannel();
+        const participants = await this.prisma.conversationParticipant.findMany({
+            where: { conversationId: general.id },
+            include: {
+                user: { select: { id: true, displayName: true, avatarUrl: true } },
+            },
+        });
+        return participants.map((p) => p.user);
+    }
     async ensureParticipant(conversationId, userId) {
         await this.prisma.conversationParticipant.upsert({
             where: { conversationId_userId: { conversationId, userId } },

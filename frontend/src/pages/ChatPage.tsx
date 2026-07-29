@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { getGeneralChannel, startDirectConversation, getMessageHistory } from '../api/chat';
-import type { Conversation, Message } from '../api/chat';
+import { getGeneralChannel, startDirectConversation, getMessageHistory, getGeneralMembers } from '../api/chat';
+import type { Conversation, Message, Member } from '../api/chat';
 import { listFriends } from '../api/friends';
 import type { Friend } from '../api/friends';
 import { apiClient } from '../api/client';
@@ -12,6 +12,7 @@ export function ChatPage() {
 
   const [generalChannel, setGeneralChannel] = useState<Conversation | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState('');
@@ -28,11 +29,13 @@ export function ChatPage() {
     Promise.all([
       getGeneralChannel(),
       listFriends(),
+      getGeneralMembers(),
       apiClient.get<{ id: number }>('/users/me'),
     ])
-      .then(([general, friendsList, me]) => {
+      .then(([general, friendsList, membersList, me]) => {
         setGeneralChannel(general);
         setFriends(friendsList);
+        setMembers(membersList);
         setOwnUserId(me.data.id);
         setSelectedConversationId(general.id);
       })
@@ -59,10 +62,21 @@ export function ChatPage() {
       }
     }
 
+    function handleStatusChanged({ userId, isOnline }: { userId: number; isOnline: boolean }) {
+      setFriends((prev) =>
+        prev.map((friend) => (friend.id === userId ? { ...friend, isOnline } : friend)),
+      );
+      setMembers((prev) =>
+        prev.map((member) => (member.id === userId ? { ...member, isOnline } : member)),
+      );
+    }
+
     socket.on('newMessage', handleNewMessage);
+    socket.on('userStatusChanged', handleStatusChanged);
 
     return () => {
       socket.off('newMessage', handleNewMessage);
+      socket.off('userStatusChanged', handleStatusChanged);
     };
   }, [socket, selectedConversationId]);
 
@@ -131,8 +145,13 @@ export function ChatPage() {
             <button
               key={friend.id}
               onClick={() => openDirectConversation(friend.id)}
-              className="w-full text-left px-3 py-2 rounded-md mb-1 text-cream-100 hover:bg-ink-800 transition-colors"
+              className="w-full flex items-center gap-2 text-left px-3 py-2 rounded-md mb-1 text-cream-100 hover:bg-ink-800 transition-colors"
             >
+              <span
+                className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                  friend.isOnline ? 'bg-green-500' : 'bg-ink-800'
+                }`}
+              />
               {friend.displayName ?? `Usuario ${friend.id}`}
             </button>
           ))}
@@ -182,6 +201,29 @@ export function ChatPage() {
           </button>
         </form>
       </main>
+
+      {/* Right panel: always-visible presence list — everyone in the
+          cult is a sibling, so the whole congregation's online status
+          is public, not just close friends' */}
+      <aside className="w-56 bg-ink-900 border-l border-ink-800 p-4 overflow-y-auto">
+        <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">
+          Hermanos ({members.filter((m) => m.isOnline).length}/{members.length})
+        </h2>
+        {[...members]
+          .sort((a, b) => Number(b.isOnline) - Number(a.isOnline))
+          .map((member) => (
+            <div key={member.id} className="flex items-center gap-2 px-1 py-1.5">
+              <span
+                className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                  member.isOnline ? 'bg-green-500' : 'bg-ink-800'
+                }`}
+              />
+              <span className="text-sm text-cream-100 truncate">
+                {member.displayName ?? `Usuario ${member.id}`}
+              </span>
+            </div>
+          ))}
+      </aside>
     </div>
   );
 }

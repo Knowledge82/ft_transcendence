@@ -16,13 +16,23 @@ exports.ChatController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const chat_service_1 = require("./chat.service");
+const chat_gateway_1 = require("./chat.gateway");
 let ChatController = class ChatController {
     chatService;
-    constructor(chatService) {
+    chatGateway;
+    constructor(chatService, chatGateway) {
         this.chatService = chatService;
+        this.chatGateway = chatGateway;
     }
     async getGeneralChannel() {
         return this.chatService.getOrCreateGeneralChannel();
+    }
+    async getGeneralMembers() {
+        const members = await this.chatService.getGeneralChannelMembers();
+        return members.map((member) => ({
+            ...member,
+            isOnline: this.chatGateway.isUserOnline(member.id),
+        }));
     }
     async startDirectConversation(req, otherUserId) {
         return this.chatService.findOrCreateDirectConversation(req.user.userId, otherUserId);
@@ -38,6 +48,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "getGeneralChannel", null);
+__decorate([
+    (0, common_1.Get)('general/members'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ChatController.prototype, "getGeneralMembers", null);
 __decorate([
     (0, common_1.Post)('dm/:userId'),
     __param(0, (0, common_1.Request)()),
@@ -57,6 +73,7 @@ __decorate([
 exports.ChatController = ChatController = __decorate([
     (0, common_1.Controller)('chat'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __metadata("design:paramtypes", [chat_service_1.ChatService])
+    __metadata("design:paramtypes", [chat_service_1.ChatService,
+        chat_gateway_1.ChatGateway])
 ], ChatController);
 //# sourceMappingURL=chat.controller.js.map

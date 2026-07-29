@@ -1,16 +1,19 @@
 import { FriendsService } from './friends.service';
+import { ChatGateway } from '../chat/chat.gateway';
 export declare class FriendsController {
     private readonly friendsService;
-    constructor(friendsService: FriendsService);
+    private readonly chatGateway;
+    constructor(friendsService: FriendsService, chatGateway: ChatGateway);
     listFriends(req: any): Promise<{
-        displayName: string | null;
+        isOnline: boolean;
         id: number;
+        displayName: string | null;
         avatarUrl: string | null;
     }[]>;
     listPendingRequests(req: any): Promise<({
         requester: {
-            displayName: string | null;
             id: number;
+            displayName: string | null;
             avatarUrl: string | null;
         };
     } & {

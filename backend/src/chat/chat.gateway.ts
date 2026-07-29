@@ -59,8 +59,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.data.userId = payload.sub;
 
     const existing = this.onlineUsers.get(payload.sub) ?? new Set<string>();
+    const isFirstConnection = existing.size === 0;
     existing.add(client.id);
     this.onlineUsers.set(payload.sub, existing);
+
+    // Only broadcast when this is the user's FIRST active connection —
+    // if they already had another tab open, they were already online,
+    // no need to notify anyone again
+    if (isFirstConnection) {
+      this.server.emit('userStatusChanged', { userId: payload.sub, isOnline: true });
+    }
 
     // Auto-join every room this user is part of: the general channel,
     // plus every existing direct conversation. This means as soon as
@@ -89,6 +97,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (sockets && sockets.size === 0) {
       this.onlineUsers.delete(userId);
+      this.server.emit('userStatusChanged', { userId, isOnline: false });
       console.log(`User ${userId} is now offline`);
     }
   }

@@ -10,15 +10,23 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FriendsService } from './friends.service';
+import { ChatGateway } from '../chat/chat.gateway';
 
 @Controller('friends')
 @UseGuards(JwtAuthGuard)
 export class FriendsController {
-  constructor(private readonly friendsService: FriendsService) {}
+  constructor(
+    private readonly friendsService: FriendsService,
+    private readonly chatGateway: ChatGateway,
+  ) {}
 
   @Get()
   async listFriends(@Request() req) {
-    return this.friendsService.listFriends(req.user.userId);
+    const friends = await this.friendsService.listFriends(req.user.userId);
+    return friends.map((friend) => ({
+      ...friend,
+      isOnline: this.chatGateway.isUserOnline(friend.id),
+    }));
   }
 
   @Get('requests')

@@ -21,6 +21,17 @@ export class ChatService {
     });
   }
 
+  async getGeneralChannelMembers() {
+    const general = await this.getOrCreateGeneralChannel();
+    const participants = await this.prisma.conversationParticipant.findMany({
+      where: { conversationId: general.id },
+      include: {
+        user: { select: { id: true, displayName: true, avatarUrl: true } },
+      },
+    });
+    return participants.map((p) => p.user);
+  }
+
   // Makes sure a ConversationParticipant row exists for this pair — safe
   // to call every time a user connects, even if they're already a member
   async ensureParticipant(conversationId: number, userId: number) {

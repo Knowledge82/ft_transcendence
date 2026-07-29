@@ -45,8 +45,12 @@ let ChatGateway = class ChatGateway {
         }
         client.data.userId = payload.sub;
         const existing = this.onlineUsers.get(payload.sub) ?? new Set();
+        const isFirstConnection = existing.size === 0;
         existing.add(client.id);
         this.onlineUsers.set(payload.sub, existing);
+        if (isFirstConnection) {
+            this.server.emit('userStatusChanged', { userId: payload.sub, isOnline: true });
+        }
         const general = await this.chatService.getOrCreateGeneralChannel();
         await this.chatService.ensureParticipant(general.id, payload.sub);
         const conversationIds = await this.chatService.getUserConversationIds(payload.sub);
@@ -65,6 +69,7 @@ let ChatGateway = class ChatGateway {
         sockets?.delete(client.id);
         if (sockets && sockets.size === 0) {
             this.onlineUsers.delete(userId);
+            this.server.emit('userStatusChanged', { userId, isOnline: false });
             console.log(`User ${userId} is now offline`);
         }
     }

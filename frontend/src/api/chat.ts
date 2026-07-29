@@ -19,6 +19,18 @@ export interface Message {
   };
 }
 
+export interface Member {
+  id: number;
+  displayName: string | null;
+  avatarUrl: string | null;
+  isOnline: boolean;
+}
+
+export async function getGeneralMembers(): Promise<Member[]> {
+  const { data } = await apiClient.get<Member[]>('/chat/general/members');
+  return data;
+}
+
 export async function getGeneralChannel(): Promise<Conversation> {
   const { data } = await apiClient.get<Conversation>('/chat/general');
   return data;

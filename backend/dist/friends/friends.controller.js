@@ -16,13 +16,20 @@ exports.FriendsController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const friends_service_1 = require("./friends.service");
+const chat_gateway_1 = require("../chat/chat.gateway");
 let FriendsController = class FriendsController {
     friendsService;
-    constructor(friendsService) {
+    chatGateway;
+    constructor(friendsService, chatGateway) {
         this.friendsService = friendsService;
+        this.chatGateway = chatGateway;
     }
     async listFriends(req) {
-        return this.friendsService.listFriends(req.user.userId);
+        const friends = await this.friendsService.listFriends(req.user.userId);
+        return friends.map((friend) => ({
+            ...friend,
+            isOnline: this.chatGateway.isUserOnline(friend.id),
+        }));
     }
     async listPendingRequests(req) {
         return this.friendsService.listPendingRequests(req.user.userId);
@@ -79,6 +86,7 @@ __decorate([
 exports.FriendsController = FriendsController = __decorate([
     (0, common_1.Controller)('friends'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __metadata("design:paramtypes", [friends_service_1.FriendsService])
+    __metadata("design:paramtypes", [friends_service_1.FriendsService,
+        chat_gateway_1.ChatGateway])
 ], FriendsController);
 //# sourceMappingURL=friends.controller.js.map
