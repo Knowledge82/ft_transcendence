@@ -188,6 +188,7 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 ---
 
 ## FRONTEND:
+
 [Notas de trabajo AUTH Frontend part](./docs/frontend-auth-notas.md)
 
 ## Renovación automática del Access Token
@@ -197,6 +198,10 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 ## TailwindCSS
 
 [TailwindCSS y paleta de colores principal](./docs/docs-tailwind-paleta.md)
+
+## Chat
+
+[ChatModule Frontend part](./docs/docs-chat-frontend.md)
 
 ---
 
