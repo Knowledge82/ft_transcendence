@@ -9,19 +9,22 @@
 - Validación de formularios tanto en frontend como en backend
 - Paleta visual definitiva aplicada (Tailwind v4, tema oscuro + dorado)
 - `UsersModule`: consulta y actualización de perfil (`GET`/`PATCH /users/me`), subida de avatar con validación de tipo y tamaño (`POST /users/me/avatar`)
+- `FriendsModule`: envío, aceptación y eliminación de solicitudes de amistad, listado de amigos (backend completo; el frontend todavía depende de pruebas manuales vía Insomnia para crear relaciones de amistad, ver pendientes)
+- `ChatModule`: WebSockets con autenticación por JWT en el handshake, canal general, chats directos 1 a 1, historial persistente en base de datos, mensajería en tiempo real con salas de Socket.IO
+- Frontend de chat: página `/chat` con barra de conversaciones, historial, envío y recepción en vivo, autoscroll al último mensaje
+- Estado online de los usuarios: presencia en tiempo real vía WebSockets, visible tanto en la lista de amigos como en un panel de miembros del canal general (siempre visible, ordenado por conectados primero)
 
 ### Pendiente (requisitos obligatorios del enunciado)
-- **Sistema de amigos** — añadir, aceptar, listar amigos (parte de "User interaction" en la sección Web y de "Standard user management" en User Management)
-- **Estado online de los usuarios** — deliberadamente pospuesto: un estado online real requiere la infraestructura de WebSockets (módulo de chat/tiempo real), que todavía no existe. Implementarlo ahora de forma provisional (por ejemplo con un campo `lastSeenAt`) se descartó para no tener que rehacerlo después
+- **Diseño responsive** — la interfaz actual (especialmente `ChatPage`, con barras laterales de ancho fijo) no está adaptada a pantallas pequeñas; el enunciado exige compatibilidad con todos los dispositivos
 
 ### Pendiente (deuda técnica / buenas prácticas)
 - Rate limiting en `/auth/login` (actualmente sin protección contra fuerza bruta)
 - Limpieza periódica de refresh tokens expirados/revocados en la base de datos
+- Flujo de amistad usable desde la interfaz (añadir amigos actualmente requiere probar los endpoints manualmente; se sustituirá por un botón directo desde el panel de miembros del canal general)
+- Notificaciones de mensaje nuevo cuando la conversación correspondiente no está abierta
+- Paginación del historial de mensajes (por ahora siempre se cargan los últimos 50, sin forma de pedir mensajes más antiguos)
 
 ### Pendiente (módulos bonus relacionados con Auth)
 - 2FA
 - OAuth con 42 intra
 - Sistema de permisos avanzado (roles)
-
-
-[VOLVER](../README.md)
