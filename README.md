@@ -1,4 +1,4 @@
-# ft_transcendence — Notas de progreso
+# ft_transcendence — Notas de progreso 
 
 ## 🚀 Como comenzar a trabajar (Quick Start)
 
