@@ -6,33 +6,33 @@ export declare class ChatController {
     constructor(chatService: ChatService, chatGateway: ChatGateway);
     getGeneralChannel(): Promise<{
         id: number;
-        type: import("@prisma/client").$Enums.ConversationType;
-        name: string | null;
         createdAt: Date;
+        name: string | null;
+        type: import("@prisma/client").$Enums.ConversationType;
     }>;
     getGeneralMembers(): Promise<{
         isOnline: boolean;
-        id: number;
         displayName: string | null;
+        id: number;
         avatarUrl: string | null;
     }[]>;
     startDirectConversation(req: any, otherUserId: number): Promise<{
         id: number;
-        type: import("@prisma/client").$Enums.ConversationType;
-        name: string | null;
         createdAt: Date;
+        name: string | null;
+        type: import("@prisma/client").$Enums.ConversationType;
     }>;
     getHistory(req: any, conversationId: number): Promise<({
         sender: {
-            id: number;
             displayName: string | null;
+            id: number;
             avatarUrl: string | null;
         };
     } & {
         id: number;
         createdAt: Date;
         conversationId: number;
-        senderId: number;
         content: string;
+        senderId: number;
     })[]>;
 }

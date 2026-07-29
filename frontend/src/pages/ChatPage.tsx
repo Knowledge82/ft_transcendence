@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { getGeneralChannel, startDirectConversation, getMessageHistory, getGeneralMembers } from '../api/chat';
 import type { Conversation, Message, Member } from '../api/chat';
-import { listFriends } from '../api/friends';
-import type { Friend } from '../api/friends';
+import { listFriends, sendFriendRequest, listPendingRequests, acceptFriendRequest } from '../api/friends';
+import type { Friend, PendingRequest } from '../api/friends';
 import { apiClient } from '../api/client';
 import { useSocket } from '../context/SocketContext';
 
@@ -13,6 +13,11 @@ export function ChatPage() {
   const [generalChannel, setGeneralChannel] = useState<Conversation | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
+  // Tracks requests sent during this session (frontend-only, resets on
+  // reload) — enough to disable the button and give feedback without
+  // needing a dedicated endpoint just for "pending requests I sent"
+  const [sentRequests, setSentRequests] = useState<Set<number>>(new Set());
+  const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState('');
@@ -30,12 +35,14 @@ export function ChatPage() {
       getGeneralChannel(),
       listFriends(),
       getGeneralMembers(),
+      listPendingRequests(),
       apiClient.get<{ id: number }>('/users/me'),
     ])
-      .then(([general, friendsList, membersList, me]) => {
+      .then(([general, friendsList, membersList, pending, me]) => {
         setGeneralChannel(general);
         setFriends(friendsList);
         setMembers(membersList);
+        setPendingRequests(pending);
         setOwnUserId(me.data.id);
         setSelectedConversationId(general.id);
       })
@@ -83,6 +90,27 @@ export function ChatPage() {
   async function openDirectConversation(friendId: number) {
     const conversation = await startDirectConversation(friendId);
     setSelectedConversationId(conversation.id);
+  }
+
+  async function handleAddFriend(userId: number) {
+    try {
+      await sendFriendRequest(userId);
+      setSentRequests((prev) => new Set(prev).add(userId));
+    } catch (err) {
+      // Most likely a 409 (already friends, or request already pending
+      // from a previous session) — nothing to recover from, just stop
+      console.error('No se pudo enviar la solicitud:', err);
+    }
+  }
+
+  async function handleAcceptRequest(requesterId: number) {
+    await acceptFriendRequest(requesterId);
+    // Remove it from the pending list...
+    setPendingRequests((prev) => prev.filter((r) => r.requesterId !== requesterId));
+    // ...and refresh the friends list so the new friend shows up
+    // immediately in the sidebar, including their current online status
+    const updatedFriends = await listFriends();
+    setFriends(updatedFriends);
   }
 
   // Runs after every render where `messages` changed — including the
@@ -135,6 +163,27 @@ export function ChatPage() {
             </button>
           )}
         </div>
+
+        {pendingRequests.length > 0 && (
+          <div className="p-4 border-t border-ink-800">
+            <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">
+              Solicitudes pendientes
+            </h2>
+            {pendingRequests.map((request) => (
+              <div key={request.id} className="flex items-center justify-between gap-2 mb-1">
+                <span className="text-sm text-cream-100 truncate">
+                  {request.requester.displayName ?? `Usuario ${request.requesterId}`}
+                </span>
+                <button
+                  onClick={() => handleAcceptRequest(request.requesterId)}
+                  className="text-xs text-gold-500 hover:text-gold-400 flex-shrink-0"
+                >
+                  Aceptar
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="p-4">
           <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">Amigos</h2>
@@ -211,18 +260,33 @@ export function ChatPage() {
         </h2>
         {[...members]
           .sort((a, b) => Number(b.isOnline) - Number(a.isOnline))
-          .map((member) => (
-            <div key={member.id} className="flex items-center gap-2 px-1 py-1.5">
-              <span
-                className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                  member.isOnline ? 'bg-green-500' : 'bg-ink-800'
-                }`}
-              />
-              <span className="text-sm text-cream-100 truncate">
-                {member.displayName ?? `Usuario ${member.id}`}
-              </span>
-            </div>
-          ))}
+          .map((member) => {
+            const isSelf = member.id === ownUserId;
+            const isFriend = friends.some((f) => f.id === member.id);
+            const alreadySent = sentRequests.has(member.id);
+
+            return (
+              <div key={member.id} className="flex items-center gap-2 px-1 py-1.5">
+                <span
+                  className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                    member.isOnline ? 'bg-green-500' : 'bg-ink-800'
+                  }`}
+                />
+                <span className="text-sm text-cream-100 truncate flex-1">
+                  {member.displayName ?? `Usuario ${member.id}`}
+                </span>
+                {!isSelf && !isFriend && (
+                  <button
+                    onClick={() => handleAddFriend(member.id)}
+                    disabled={alreadySent}
+                    className="text-xs text-gold-500 hover:text-gold-400 disabled:text-cream-400 disabled:cursor-not-allowed flex-shrink-0"
+                  >
+                    {alreadySent ? 'Enviada' : '+ Amigo'}
+                  </button>
+                )}
+              </div>
+            );
+          })}
       </aside>
     </div>
   );
