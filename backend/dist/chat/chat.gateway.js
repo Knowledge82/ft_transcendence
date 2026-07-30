@@ -52,7 +52,11 @@ let ChatGateway = class ChatGateway {
             this.server.emit('userStatusChanged', { userId: payload.sub, isOnline: true });
         }
         const general = await this.chatService.getOrCreateGeneralChannel();
-        await this.chatService.ensureParticipant(general.id, payload.sub);
+        const isNewMember = await this.chatService.ensureParticipant(general.id, payload.sub);
+        if (isNewMember) {
+            const user = await this.chatService.getUserBasicInfo(payload.sub);
+            this.server.emit('memberJoined', { ...user, isOnline: true });
+        }
         const conversationIds = await this.chatService.getUserConversationIds(payload.sub);
         const allRoomIds = new Set([general.id, ...conversationIds]);
         for (const id of allRoomIds) {
@@ -75,6 +79,15 @@ let ChatGateway = class ChatGateway {
     }
     isUserOnline(userId) {
         return this.onlineUsers.has(userId);
+    }
+    notifyUser(userId, event, payload) {
+        const sockets = this.onlineUsers.get(userId);
+        if (!sockets) {
+            return;
+        }
+        for (const socketId of sockets) {
+            this.server.to(socketId).emit(event, payload);
+        }
     }
     async handleSendMessage(client, payload) {
         const senderId = client.data.userId;

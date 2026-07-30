@@ -11,6 +11,13 @@ import { PrismaService } from '../prisma/prisma.service';
 export class FriendsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getBasicInfo(userId: number) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, displayName: true, avatarUrl: true },
+    });
+  }
+
   async sendRequest(requesterId: number, addresseeId: number) {
     if (requesterId === addresseeId) {
       throw new BadRequestException('You cannot send a friend request to yourself');
@@ -40,6 +47,9 @@ export class FriendsService {
 
     return this.prisma.friendship.create({
       data: { requesterId, addresseeId },
+      include: {
+        requester: { select: { id: true, displayName: true, avatarUrl: true } },
+      },
     });
   }
 

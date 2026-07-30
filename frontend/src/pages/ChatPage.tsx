@@ -80,12 +80,39 @@ export function ChatPage() {
       );
     }
 
+    function handleMemberJoined(newMember: Member) {
+      // Guard against duplicates in case this event somehow arrives twice
+      setMembers((prev) =>
+        prev.some((m) => m.id === newMember.id) ? prev : [...prev, newMember],
+      );
+    }
+
+    function handleFriendRequestReceived(request: PendingRequest) {
+      setPendingRequests((prev) =>
+        prev.some((r) => r.id === request.id) ? prev : [...prev, request],
+      );
+    }
+
+    function handleFriendRequestAccepted(newFriend: Friend) {
+      // The other person just accepted our request — add them straight
+      // to our own friends list, no need to refetch anything
+      setFriends((prev) =>
+        prev.some((f) => f.id === newFriend.id) ? prev : [...prev, { ...newFriend, isOnline: true }],
+      );
+    }
+
     socket.on('newMessage', handleNewMessage);
     socket.on('userStatusChanged', handleStatusChanged);
+    socket.on('memberJoined', handleMemberJoined);
+    socket.on('friendRequestReceived', handleFriendRequestReceived);
+    socket.on('friendRequestAccepted', handleFriendRequestAccepted);
 
     return () => {
       socket.off('newMessage', handleNewMessage);
       socket.off('userStatusChanged', handleStatusChanged);
+      socket.off('memberJoined', handleMemberJoined);
+      socket.off('friendRequestReceived', handleFriendRequestReceived);
+      socket.off('friendRequestAccepted', handleFriendRequestAccepted);
     };
   }, [socket, selectedConversationId]);
 

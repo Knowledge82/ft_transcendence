@@ -35,10 +35,15 @@ let FriendsController = class FriendsController {
         return this.friendsService.listPendingRequests(req.user.userId);
     }
     async sendRequest(req, addresseeId) {
-        return this.friendsService.sendRequest(req.user.userId, addresseeId);
+        const friendship = await this.friendsService.sendRequest(req.user.userId, addresseeId);
+        this.chatGateway.notifyUser(addresseeId, 'friendRequestReceived', friendship);
+        return friendship;
     }
     async acceptRequest(req, requesterId) {
-        return this.friendsService.acceptRequest(req.user.userId, requesterId);
+        const friendship = await this.friendsService.acceptRequest(req.user.userId, requesterId);
+        const accepter = await this.friendsService.getBasicInfo(req.user.userId);
+        this.chatGateway.notifyUser(requesterId, 'friendRequestAccepted', accepter);
+        return friendship;
     }
     async removeFriendship(req, otherUserId) {
         await this.friendsService.removeFriendship(req.user.userId, otherUserId);

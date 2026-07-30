@@ -40,10 +40,21 @@ let ChatService = class ChatService {
         return participants.map((p) => p.user);
     }
     async ensureParticipant(conversationId, userId) {
-        await this.prisma.conversationParticipant.upsert({
+        const existing = await this.prisma.conversationParticipant.findUnique({
             where: { conversationId_userId: { conversationId, userId } },
-            update: {},
-            create: { conversationId, userId },
+        });
+        if (existing) {
+            return false;
+        }
+        await this.prisma.conversationParticipant.create({
+            data: { conversationId, userId },
+        });
+        return true;
+    }
+    async getUserBasicInfo(userId) {
+        return this.prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true, displayName: true, avatarUrl: true },
         });
     }
     async findOrCreateDirectConversation(userIdA, userIdB) {

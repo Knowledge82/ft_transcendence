@@ -39,7 +39,9 @@ export class FriendsController {
     @Request() req,
     @Param('userId', ParseIntPipe) addresseeId: number,
   ) {
-    return this.friendsService.sendRequest(req.user.userId, addresseeId);
+    const friendship = await this.friendsService.sendRequest(req.user.userId, addresseeId);
+    this.chatGateway.notifyUser(addresseeId, 'friendRequestReceived', friendship);
+    return friendship;
   }
 
   @Post(':userId/accept')
@@ -47,7 +49,12 @@ export class FriendsController {
     @Request() req,
     @Param('userId', ParseIntPipe) requesterId: number,
   ) {
-    return this.friendsService.acceptRequest(req.user.userId, requesterId);
+    const friendship = await this.friendsService.acceptRequest(req.user.userId, requesterId);
+    // Notify the original requester too — otherwise their friends list
+    // only shows the new friend after a manual reload
+    const accepter = await this.friendsService.getBasicInfo(req.user.userId);
+    this.chatGateway.notifyUser(requesterId, 'friendRequestAccepted', accepter);
+    return friendship;
   }
 
   @Delete(':userId')

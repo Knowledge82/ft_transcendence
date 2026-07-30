@@ -32,13 +32,26 @@ export class ChatService {
     return participants.map((p) => p.user);
   }
 
-  // Makes sure a ConversationParticipant row exists for this pair — safe
-  // to call every time a user connects, even if they're already a member
-  async ensureParticipant(conversationId: number, userId: number) {
-    await this.prisma.conversationParticipant.upsert({
+  // Returns true only if this created a NEW participant row (i.e. this is
+  // genuinely the first time this user joined this conversation) — lets
+  // the caller decide whether it's worth broadcasting a "member joined" event
+  async ensureParticipant(conversationId: number, userId: number): Promise<boolean> {
+    const existing = await this.prisma.conversationParticipant.findUnique({
       where: { conversationId_userId: { conversationId, userId } },
-      update: {},
-      create: { conversationId, userId },
+    });
+    if (existing) {
+      return false;
+    }
+    await this.prisma.conversationParticipant.create({
+      data: { conversationId, userId },
+    });
+    return true;
+  }
+
+  async getUserBasicInfo(userId: number) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, displayName: true, avatarUrl: true },
     });
   }
 

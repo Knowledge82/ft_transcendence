@@ -75,7 +75,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // someone connects, they're ready to receive messages broadcast to
     // any of their chats, without having to manually subscribe to each one.
     const general = await this.chatService.getOrCreateGeneralChannel();
-    await this.chatService.ensureParticipant(general.id, payload.sub);
+    const isNewMember = await this.chatService.ensureParticipant(general.id, payload.sub);
+    if (isNewMember) {
+      const user = await this.chatService.getUserBasicInfo(payload.sub);
+      this.server.emit('memberJoined', { ...user, isOnline: true });
+    }
     const conversationIds = await this.chatService.getUserConversationIds(payload.sub);
     const allRoomIds = new Set([general.id, ...conversationIds]);
 
@@ -104,6 +108,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   isUserOnline(userId: number): boolean {
     return this.onlineUsers.has(userId);
+  }
+
+  // Sends an event only to a specific user's active connections (all of
+  // their open tabs, not everyone else) — used for things that shouldn't
+  // be broadcast globally, like "you received a friend request"
+  notifyUser(userId: number, event: string, payload: unknown) {
+    const sockets = this.onlineUsers.get(userId);
+    if (!sockets) {
+      return;
+    }
+    for (const socketId of sockets) {
+      this.server.to(socketId).emit(event, payload);
+    }
   }
 
   @SubscribeMessage('sendMessage')
