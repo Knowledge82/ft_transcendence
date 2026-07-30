@@ -48,6 +48,8 @@ Copia el resultado y pégalo en tu `JWT_SECRET` y `JWT_REFRESH_SECRET`.
 ### Concepto del proyecto
 Red social de "feligreses": perfiles de usuario, sistema de rangos/roles jerárquicos, chat en tiempo real, donaciones, y más adelante un chatbot basado en LLM (preferible) y un juego de cartas (opcional).
 
+[Concepto detallado y funcionalidades posibles](./docs/concepto.md)
+
 ### Stack tecnológico elegido
 - **Frontend:** React + TypeScript + Vite + Tailwind CSS
 - **Backend:** NestJS + TypeScript
@@ -60,7 +62,9 @@ Red social de "feligreses": perfiles de usuario, sistema de rangos/roles jerárq
 ### Planificación de módulos bonus
 Se repasaron las categorías de módulos del enunciado (Web, User Management, AI, Cybersecurity, Gaming, DevOps, Data & Analytics, Blockchain) y se seleccionaron los que encajan de forma natural con el concepto del proyecto, apuntando a superar los 14 puntos mínimos exigidos como margen de seguridad ante módulos que puedan no validarse en la evaluación.
 
+
 ---
+
 
 ## 2. Infraestructura Docker — construcción y depuración
 
