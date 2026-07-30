@@ -134,5 +134,8 @@ Si no, no somos más que la secta de gilipollas número 2, solo que con otra ban
 - Gestión del contenido del Catecismo
 - Estadísticas (cuántos herejes se han convertido, errores más frecuentes, etc.)
 
+
+[VOLVER](../README.md)
+
 ---
 
