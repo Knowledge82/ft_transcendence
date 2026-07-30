@@ -134,6 +134,43 @@ Si no, no somos más que la secta de gilipollas número 2, solo que con otra ban
 - Gestión del contenido del Catecismo
 - Estadísticas (cuántos herejes se han convertido, errores más frecuentes, etc.)
 
+---
+
+# Revisión y ajustes a la propuesta de funcionalidades
+
+Comentarios sobre la propuesta anterior: qué tomar casi tal cual, qué simplificar por tiempo/complejidad, y qué añadir que faltaba.
+
+## Lo que ya encaja de forma casi directa con la infraestructura existente
+
+Estas funcionalidades no requieren construir nada nuevo desde cero — son extensiones baratas sobre módulos que ya están implementados y probados:
+
+- **Rangos** (Novicio, Adepto, Guardián del Relink, Arzobispo del Make...) — es directamente el módulo de **roles y permisos avanzados** (categoría User Management) ya planificado desde el principio; solo cambia el naming, no la arquitectura.
+- **Canales temáticos** (`#herejías`, `#confesiones`, `#homilías`) — el `ChatModule` ya soporta conversaciones de tipo `CHANNEL`, actualmente solo existe el canal general; crear varios es una extensión trivial, no una funcionalidad nueva (categoría Web / Gaming and user experience, según cómo se enfoque).
+- **Feed de actividad** — se apoya en los mismos eventos en tiempo real que ya tenemos (WebSockets) más los datos que ya existen (amistades, mensajes); encaja con **Data and Analytics** o con un sistema de notificaciones.
+- **Reacciones temáticas** ("amén", "herejía") en vez de "me gusta" — coste de desarrollo mínimo, buen impacto visual.
+
+## Lo más interesante de la propuesta original
+
+- **Confesión + Confesor-bot**: subir un fragmento de Makefile "pecaminoso" y que un bot señale la herejía. Encaja de lleno con el módulo obligatorio de **Artificial Intelligence** (LLM system interface) que ya estaba en el plan — la diferencia es que aquí tiene un marco narrativo concreto, en vez de ser "un chatbot genérico".
+- **Catecismo** (base de conocimiento sobre relink/recompile, Makefiles correctos e incorrectos) — contenido que se escribe una vez y aporta mucho a la impresión general del proyecto; combina bien con un futuro módulo de búsqueda avanzada (categoría Web).
+
+## Qué simplificar o posponer, y por qué
+
+- **Sistema completo de logros/badges** ("Entendió la diferencia entre `-c` y el linkado", etc.) — no es una funcionalidad puntual, es un sistema entero: tabla de logros, lógica de condición para cada uno, interfaz para mostrarlos. Con un equipo de facto reducido y plazos ajustados, el riesgo de empantanarse aquí es alto. Mejor un conjunto pequeño y bien implementado (3-4 logros reales) que una lista larga a medio hacer.
+- **Excomunión con votación/temporizador** — mecánicamente es una máquina de estados compleja (quién puede iniciarla, cuántos votos hacen falta, qué pasa con el expulsado, si puede volver) para una función que en el fondo es una broma. Se propone una versión simplificada: un moderador puede "excomulgar" directamente (banear), sin sistema de votación.
+- **Comparador de Makefiles con veredicto automático** — dar un veredicto fiable de "herejía / no herejía" a partir de un diff requiere analizar sintaxis real de Makefile, no solo comparar texto. O se resuelve apoyándose en el mismo LLM del Confesor-bot (más barato de construir, menos determinista), o se descarta para la primera versión.
+
+## Lo que faltaba: la bienvenida al neófito
+
+La propuesta original no cubre explícitamente el primer contacto de un usuario nuevo con la aplicación. Se propone un **ritual de iniciación** al registrarse: una secuencia breve y temática (3-4 pantallas, no un formulario más) — "Has llamado a las puertas del Verdadero Relink..." con un par de "juramentos" (checkboxes con sabor narrativo: "Nunca tocarás un `.o` con tus propias manos") y terminando con una primera "comunión" (un mini-quiz de 2 preguntas tipo "¿esto es un relink o no?"). Solo después de esto, el usuario llega al panel principal. El coste de desarrollo es bajo (pantallas mayormente estáticas más un quiz ya sencillo) y el impacto en la primera impresión — especialmente relevante en una evaluación — es alto.
+
+## Orden de prioridad propuesto
+
+1. **Corto plazo:** rangos (reutilizando el sistema de roles ya planificado), canales temáticos (extensión del chat existente), reacciones a mensajes
+2. **Siguiente capa:** Catecismo como contenido semi-estático, Feed de actividad, Confesor-bot (módulo de IA)
+3. **Si el tiempo lo permite:** Confesión/excomunión simplificadas (sin votación), Muro de la Vergüenza, generador de plantillas de Makefile
+4. **Pulido final, solo con margen de sobra:** calendario litúrgico, exportar el "símbolo de fe" como imagen, modo "disputa con el hereje" contra el bot
+
 
 [VOLVER](../README.md)
 
