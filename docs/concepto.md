@@ -59,3 +59,80 @@ La imagen fuerte se sostiene en que nosotros:
 
 Primero el conocimiento, después la burla.  
 Si no, no somos más que la secta de gilipollas número 2, solo que con otra bandera.
+
+---
+
+## 1. Núcleo básico
+
+- Registro / login (JWT + refresh tokens)
+- Perfil de usuario con “rango” dentro de la Iglesia (Novicio, Adepto, Guardián del Relink, Arzobispo del Make, etc.)
+- Sistema de roles y permisos
+
+## 2. Núcleo social
+
+- Amigos / “hermanos en la fe”
+- Feed de actividad (quién ha convertido a quién, quién ha publicado una herejía, quién ha superado una prueba)
+- Sistema de reputación / “Gracia”
+- Posibilidad de “excomulgar” o imponer una “penitencia” (de forma humorística)
+
+## 3. Contenido y conocimiento
+
+- **Catecismo** — base de conocimiento:
+  - Qué es un verdadero relink
+  - Diferencia entre recompile y relink
+  - Patrones correctos e incorrectos de Makefile
+  - Análisis de las herejías típicas (`touch Makefile`, añadir manualmente los headers, etc.)
+- Artículos / homilías (con soporte markdown + resaltado de código)
+- Comentarios y discusiones bajo los materiales
+
+## 4. Pruebas y gamificación
+
+- **Pruebas de Fe** (quizzes):
+  - “¿Esto es un relink?”
+  - “¿Este Makefile es correcto?”
+  - Análisis de ejemplos reales (anonimizados)
+- Sistema de rangos y logros (badges):
+  - “Entendió la diferencia entre `-c` y el linkado”
+  - “No añadió el Makefile a las dependencias de los objetos”
+  - “Explicó la herejía a un hereje sin mandarlo a la mierda”, etc.
+- Pruebas diarias / semanales
+
+## 5. Mecánicas sociales temáticas
+
+- **Confesión** — formulario anónimo o semi-anónimo donde el usuario sube su Makefile pecaminoso y la comunidad (o el bot) señala las herejías
+- **Excomunión** — posibilidad de “excomulgar” a un usuario por una herejía especialmente grave (con temporizador o por votación)
+- **Conversión** — mecánica por la que traes a alguien nuevo y ganas Gracia
+- Ranking de “Los herejes más fervientes” y “Los más firmes en la fe”
+
+## 6. Comunicación
+
+- Chat general de la Iglesia
+- Mensajes privados
+- Canales temáticos (`#herejias`, `#makefiles-correctos`, `#confesiones`, `#homilias`)
+- Reacciones al estilo de la Iglesia (en lugar de likes: “amén”, “herejía”, “hágase el relink”, etc.)
+
+## 7. Parte LLM (encaja muy bien)
+
+- **Confesor-bot** — subes un trozo de Makefile y el bot te dice dónde está la herejía y dónde está lo correcto
+- **Predicador** — genera homilías sarcásticas sobre make/relink
+- **Examinador** — realiza un examen escrito sobre el tema
+- Modo “Disputa con el hereje” — el bot defiende deliberadamente la posición del `touch Makefile` y tú tienes que convencerlo
+
+## 8. Funcionalidades adicionales que pegarían muy bien
+
+- “Muro de la Vergüenza” público — ejemplos anonimizados (o no) de los Makefiles más delirantes
+- Generador de Makefiles “sagrados” (plantillas correctas para distintos proyectos de 42)
+- Comparador de dos Makefiles (diff + veredicto “herejía / no herejía”)
+- Calendario de fiestas litúrgicas (Día del Primer `all` Correcto, Fiesta de la Ausencia de Relink, etc.)
+- Tema oscuro / claro + tema gótico-terminal por defecto
+- Posibilidad de exportar tu “símbolo de fe” (texto corto + Makefile correcto) como imagen bonita
+
+## 9. Administración y moderación
+
+- Gestión de rangos
+- Moderación de confesiones y publicaciones
+- Gestión del contenido del Catecismo
+- Estadísticas (cuántos herejes se han convertido, errores más frecuentes, etc.)
+
+---
+
