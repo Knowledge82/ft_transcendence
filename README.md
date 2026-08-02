@@ -240,4 +240,4 @@ Todo el ciclo se probó manualmente con `curl` (con flags `-k` para el certifica
 
 ## 6. Estado actual y pendientes
 
-[Estado actualizado para 29-06-2026](./docs/estado-actualizado.md)
+[Estado actualizado para 02-07-2026](./docs/estado-actualizado.md)
