@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Footer } from '../components/Footer';
 
 const LOADER_MS = 1500;
 const PURE_IMAGE_MS = 2000;
@@ -197,6 +198,14 @@ export function LandingPage() {
             </>
           )}
         </div>
+      </div>
+
+      <div
+        className={`relative transition-opacity duration-700 ${
+          showBody ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        <Footer />
       </div>
     </div>
   );

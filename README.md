@@ -217,6 +217,11 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 ---
 
+[Politica de privacidad y Terminos de uso](./docs/docs-privacy-terms.md )
+
+---
+
+
 
 ## 5. Verificación end-to-end
 

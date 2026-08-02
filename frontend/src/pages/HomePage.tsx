@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
 import { listFriends } from '../api/friends';
+import { Footer } from '../components/Footer';
 
 interface Profile {
   id: number;
@@ -196,6 +197,7 @@ export function HomePage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
