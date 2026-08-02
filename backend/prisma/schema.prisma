@@ -17,12 +17,20 @@ enum ConversationType {
   CHANNEL
 }
 
+enum Role {
+  HERMANO
+  GUARDIAN
+  ARZOBISPO
+}
+
+// Modelo de usuario: datos base de autenticación y perfil
 model User {
   id           Int      @id @default(autoincrement())
   email        String   @unique
   passwordHash String
   displayName  String?
   avatarUrl    String?
+  role         Role     @default(HERMANO)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

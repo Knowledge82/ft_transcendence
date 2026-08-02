@@ -8,6 +8,7 @@ export declare class UsersService {
         displayName: string | null;
         id: number;
         avatarUrl: string | null;
+        role: import("@prisma/client").$Enums.Role;
         createdAt: Date;
     }>;
     updateProfile(userId: number, dto: UpdateProfileDto): Promise<{

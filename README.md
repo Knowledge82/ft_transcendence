@@ -189,6 +189,7 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [ChatModule](./docs/docs-chat-module.md)
 
+[AdminModule backend part](./docs/docs-roles-module-back.md)
 ---
 
 ## FRONTEND:
