@@ -179,7 +179,7 @@ export function ChatPage() {
       <div className="flex flex-1">
       <aside className="w-64 bg-ink-900 border-r border-ink-800 flex flex-col">
         <div className="p-4 border-b border-ink-800">
-          <Link to="/" className="text-sm text-gold-500 hover:text-gold-400">
+          <Link to="/altar" className="text-sm text-gold-500 hover:text-gold-400">
             ← Volver
           </Link>
         </div>
