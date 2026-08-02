@@ -208,17 +208,17 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [ChatModule Frontend part](./docs/docs-chat-frontend.md)
 
----
 
 [Online status](./docs/docs-online-status.md)
 
----
 
 [Update LandingPage](./docs/docs-landing-page.md)
 
----
 
 [Politica de privacidad y Terminos de uso](./docs/docs-privacy-terms.md )
+
+
+[AdminModule frontend part](./docs/docs-admin-frontend.md)
 
 ---
 

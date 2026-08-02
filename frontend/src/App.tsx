@@ -9,6 +9,7 @@ import { HomePage } from './pages/HomePage';
 import { ChatPage } from './pages/ChatPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
+import { AdminPage } from './pages/AdminPage';
 
 function App() {
   return (
@@ -34,6 +35,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ChatPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/santuario"
+              element={
+                <ProtectedRoute>
+                  <AdminPage />
                 </ProtectedRoute>
               }
             />

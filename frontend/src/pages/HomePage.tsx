@@ -10,6 +10,7 @@ interface Profile {
   email: string;
   displayName: string | null;
   avatarUrl: string | null;
+  role: 'HERMANO' | 'GUARDIAN' | 'ARZOBISPO';
 }
 
 export function HomePage() {
@@ -168,7 +169,10 @@ export function HomePage() {
             </h1>
           )}
 
-          <p className="text-sm text-cream-400 mb-6">{profile.email}</p>
+          <p className="text-sm text-cream-400 mb-2">{profile.email}</p>
+          <p className="text-xs text-gold-500 uppercase tracking-wide mb-6">
+            {profile.role}
+          </p>
 
           <div className="flex justify-center gap-8 mb-6">
             <div>
@@ -181,13 +185,21 @@ export function HomePage() {
             </div>
           </div>
 
-          <div className="flex gap-3 justify-center">
+          <div className="flex gap-3 justify-center flex-wrap">
             <Link
               to="/chat"
               className="bg-gold-500 text-gold-on font-medium px-4 py-2 rounded-md hover:bg-gold-400 transition-colors"
             >
               Ir al chat
             </Link>
+            {profile.role === 'ARZOBISPO' && (
+              <Link
+                to="/santuario"
+                className="bg-ink-800 text-gold-500 font-medium px-4 py-2 rounded-md hover:bg-ink-800/70 transition-colors"
+              >
+                Santuario
+              </Link>
+            )}
             <button
               onClick={() => logout()}
               className="bg-ink-800 text-cream-100 font-medium px-4 py-2 rounded-md hover:bg-ink-800/70 transition-colors"
