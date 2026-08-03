@@ -35,6 +35,10 @@ services:
       # dos ajustes para el hot-reload en entornos virtuales (Vim/Docker)
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
+      # Reenvía la clave de la API de Gemini desde el .env del host hacia el
+      # contenedor — sin esto, docker-compose no la pasa automáticamente, aunque
+      # esté definida en el archivo .env
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
     volumes:
       - ./backend:/app
       - /app/node_modules
