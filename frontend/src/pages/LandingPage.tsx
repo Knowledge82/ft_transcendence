@@ -49,57 +49,52 @@ export function LandingPage() {
   }, []);
 
   const bodyParagraphs = [
-    <p key="p1">
-      ¿Te ha pasado esto en una defensa de proyecto en 42 Barcelona? El
-      evaluador, con aire de suficiencia, abre tu terminal, escribe{' '}
-      <code className="text-gold-400 bg-ink-900 px-1.5 py-0.5 rounded">make</code>,
-      ve la línea sagrada
+    <p key="p1">¿Te ha pasado esto en una defensa en 42 Barcelona?</p>,
+    <p key="p2">
+      El evaluador, con su aire de suficiencia, ejecuta{' '}
+      <code className="text-gold-400 bg-ink-900 px-1.5 py-0.5 rounded">make</code>{' '}
+      después de buildear tu precioso, brillante y totalmente correcto
+      proyecto. Aparece la línea sagrada:
     </p>,
     <pre
-      key="p2"
+      key="p3"
       className="bg-ink-900 border border-ink-800 rounded-lg p-4 text-cream-400 text-sm overflow-x-auto"
     >
       make: Nothing to be done for 'all'.
     </pre>,
-    <p key="p3">
-      ...y aun así empieza a murmurar con desaprobación sobre un{' '}
-      <em className="text-gold-400">"unnecessary relinking"</em>,
-      exigiendo que añadas el Makefile y todas las cabeceras a las
-      dependencias.
-    </p>,
     <p key="p4">
-      Y tú te quedaste ahí. Callado. Mientras por dentro hervía la
-      indignación, la incredulidad, el puro estupor ante la profundidad de
-      una ignorancia disfrazada de autoridad.
+      Pero no le basta. Con una cara de gilipollas increíble, escribe{' '}
+      <code className="text-gold-400 bg-ink-900 px-1.5 py-0.5 rounded">
+        touch Makefile
+      </code>
+      , ejecuta <code className="text-gold-400 bg-ink-900 px-1.5 py-0.5 rounded">make</code>{' '}
+      otra vez y se queda esperando con superioridad moral, afirmando que tu
+      Makefile está mal porque «no has añadido el Makefile ni los headers
+      como dependencias».
     </p>,
-    <p key="p5" className="text-gold-500 font-medium">
+    <p key="p5">
+      Y tú te quedaste ahí. Callado. Mientras por dentro te hervía la sangre
+      ante semejante ignorancia disfrazada de autoridad.
+    </p>,
+    <p key="p6" className="text-gold-500 font-medium">
       Tú conocías la verdad.
     </p>,
-    <p key="p6">
+    <p key="p7">
       Tu <code className="text-gold-400 bg-ink-900 px-1.5 py-0.5 rounded">make</code>{' '}
-      se comportaba de forma perfectamente correcta. No había ningún
-      relinkado de más. El linker no se ejecutaba en vano. Todo estaba en
-      orden.
+      era impecable. El linker no se había ejecutado en vano. No había
+      ningún relinkado.
     </p>,
-    <p key="p7">Pero aun así intentaron avergonzarte.</p>,
     <p key="p8">
-      Porque en el Campus de 42 Barcelona, todavía hoy, muchos mezclan en un
-      mismo saco dos conceptos completamente distintos: la recompilación
-      —cuando el código fuente cambia y el objeto debe regenerarse— y el
-      relinkado —cuando el binario final se reconstruye aunque ningún objeto
-      haya cambiado en absoluto. Confundir ambos no es una opinión. Es una
-      herejía.
+      Confundir la recompilación con el relinkado no es una opinión. Es una
+      pura herejía.
     </p>,
     <p key="p9">
-      Aquí no estás solo. Aquí hay quien ha leído el mismo mensaje de error,
-      ha defendido el mismo Makefile impecable, y ha salido de esa sala con
-      la misma certeza silenciosa de tener razón. Aquí se estudia la
-      diferencia real entre recompilar y relinkar, se señalan las herejías
-      más comunes, y se confiesa —sin juicio, o con el juicio justo y
-      merecido— cada Makefile pecaminoso.
+      Aquí no estás solo. Aquí te revelamos toda la verdad de los
+      Makefiles, entendemos la diferencia, defendemos los Makefiles limpios
+      y señalamos a los falsos profetas.
     </p>,
     <p key="p10" className="text-cream-400">
-      Las puertas del Verdadero Relink están abiertas.
+      Las puertas del Verdadero Relink están abiertas. Entra.
     </p>,
   ];
 
@@ -171,7 +166,7 @@ export function LandingPage() {
           {isAuthenticated ? (
             <Link
               to="/altar"
-              className="bg-gold-500 text-gold-on font-medium px-6 py-3 rounded-md hover:bg-gold-400 transition-colors"
+              className="bg-gold-500 text-gold-on font-medium px-6 py-3 rounded-md hover:bg-gold-400 transition-colors animate-[pulse-glow_2.5s_ease-in-out_infinite]"
             >
               Entrar al Altar
             </Link>
@@ -179,7 +174,7 @@ export function LandingPage() {
             <>
               <Link
                 to="/register"
-                className="bg-gold-500 text-gold-on font-medium px-6 py-3 rounded-md hover:bg-gold-400 transition-colors"
+                className="bg-gold-500 text-gold-on font-medium px-6 py-3 rounded-md hover:bg-gold-400 transition-colors animate-[pulse-glow_2.5s_ease-in-out_infinite]"
               >
                 Únete a la Iglesia
               </Link>
