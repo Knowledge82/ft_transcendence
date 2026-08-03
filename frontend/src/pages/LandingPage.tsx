@@ -3,46 +3,47 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Footer } from '../components/Footer';
 
-const LOADER_MS = 1500;
+const TITLE = 'La Iglesia del Verdadero Relink';
+const LOADER_MS = 2000;
+const PAUSE_AFTER_TYPING_MS = 800;
 const PURE_IMAGE_MS = 2000;
-const GREETING_DELAY_MS = 600;
-const BODY_DELAY_MS = 600;
+const BODY_DELAY_MS = 700;
 
 export function LandingPage() {
   const { isAuthenticated } = useAuth();
 
   const [stage, setStage] = useState<'loading' | 'image' | 'text'>('loading');
-  const [progress, setProgress] = useState(0);
-  const [showTitle, setShowTitle] = useState(false);
+  const [visibleChars, setVisibleChars] = useState(0);
   const [showGreeting, setShowGreeting] = useState(false);
   const [showBody, setShowBody] = useState(false);
 
   useEffect(() => {
-    const raf = requestAnimationFrame(() => setProgress(100));
+    const msPerChar = LOADER_MS / TITLE.length;
+    const typeInterval = setInterval(() => {
+      setVisibleChars((prev) => {
+        if (prev >= TITLE.length) {
+          clearInterval(typeInterval);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, msPerChar);
 
-    const toImage = setTimeout(() => setStage('image'), LOADER_MS);
+    const imageStart = LOADER_MS + PAUSE_AFTER_TYPING_MS;
+    const toImage = setTimeout(() => setStage('image'), imageStart);
 
-    const textStart = LOADER_MS + PURE_IMAGE_MS;
+    const textStart = imageStart + PURE_IMAGE_MS;
     const toText = setTimeout(() => {
       setStage('text');
-      setShowTitle(true);
+      setShowGreeting(true);
     }, textStart);
 
-    const toGreeting = setTimeout(
-      () => setShowGreeting(true),
-      textStart + GREETING_DELAY_MS,
-    );
-
-    const toBody = setTimeout(
-      () => setShowBody(true),
-      textStart + GREETING_DELAY_MS + BODY_DELAY_MS,
-    );
+    const toBody = setTimeout(() => setShowBody(true), textStart + BODY_DELAY_MS);
 
     return () => {
-      cancelAnimationFrame(raf);
+      clearInterval(typeInterval);
       clearTimeout(toImage);
       clearTimeout(toText);
-      clearTimeout(toGreeting);
       clearTimeout(toBody);
     };
   }, []);
@@ -103,22 +104,21 @@ export function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-ink-950 relative overflow-hidden">
-      {/* Loader */}
+    <div className="min-h-screen bg-ink-950 relative overflow-hidden flex flex-col">
+      {/* Loader: typewriter title centered, "Cargando" pinned to the bottom */}
       <div
-        className={`fixed inset-0 flex flex-col items-center justify-center gap-4 bg-ink-950 transition-opacity duration-700 ${
+        className={`fixed inset-0 bg-ink-950 transition-opacity duration-700 ${
           stage === 'loading' ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        <p className="text-sm uppercase tracking-widest text-cream-400">
+        <div className="absolute inset-0 flex items-center justify-center px-6">
+          <h1 className="text-3xl md:text-4xl font-semibold text-gold-500 text-center leading-tight">
+            {TITLE.slice(0, visibleChars)}
+          </h1>
+        </div>
+        <p className="absolute bottom-12 left-0 right-0 text-center text-sm uppercase tracking-widest text-cream-400 animate-pulse">
           Cargando
         </p>
-        <div className="w-56 h-1 bg-ink-800 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gold-500 transition-all ease-linear"
-            style={{ width: `${progress}%`, transitionDuration: `${LOADER_MS}ms` }}
-          />
-        </div>
       </div>
 
       {/* Background image: fully bright during "image", dims once "text" begins */}
@@ -137,17 +137,8 @@ export function LandingPage() {
         }`}
       />
 
-      <div className="relative max-w-2xl mx-auto px-6 py-16">
-        {/* Layer 1: big title */}
-        <h1
-          className={`text-4xl md:text-5xl font-semibold text-gold-500 text-center mb-6 transition-opacity duration-1000 ${
-            showTitle ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          La Iglesia del Verdadero Relink
-        </h1>
-
-        {/* Layer 2: greeting */}
+      <div className="relative max-w-2xl mx-auto px-6 py-16 flex-1">
+        {/* Greeting (the big title already appeared during the loader, not repeated here) */}
         <p
           className={`text-xl text-cream-100 text-center mb-10 transition-opacity duration-1000 ${
             showGreeting ? 'opacity-100' : 'opacity-0'
@@ -156,7 +147,7 @@ export function LandingPage() {
           Hermano. Hermana.
         </p>
 
-        {/* Layer 3: body, cascading top to bottom via per-paragraph delay */}
+        {/* Body, cascading top to bottom via per-paragraph delay */}
         <div className="space-y-6 text-cream-100 leading-relaxed">
           {bodyParagraphs.map((paragraph, index) => (
             <div

@@ -71,6 +71,7 @@ Se repasaron las categorías de módulos del enunciado (Web, User Management, AI
 ### Estructura del repositorio
 ```
 ft_transcendence/
+├── Makefile
 ├── docker-compose.yml
 ├── .env / .env.example
 ├── backend/
@@ -85,17 +86,6 @@ ft_transcendence/
 ### docker-compose.yml — servicios
 `postgres`, `backend`, `frontend`, `nginx`, todos en la red `ft_network`.
 
-**Problemas encontrados y soluciones:**
-
-| Problema | Causa | Solución |
-|---|---|---|
-| `target frontend: failed to solve: failed to read dockerfile` | Faltaba `frontend/Dockerfile` | Se creó el Dockerfile del frontend |
-| Backend/frontend no accesibles desde nginx | Los servidores escuchaban solo en `localhost` dentro del contenedor | `app.listen(port, '0.0.0.0')` en NestJS, `--host 0.0.0.0` en Vite |
-| `database "ft_user" does not exist` | El healthcheck de Postgres (`pg_isready -U ${POSTGRES_USER}`) intenta conectar por defecto a una base con el mismo nombre que el usuario, no a la base real | `pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}` |
-| `cannot expose privileged port 80` | Docker rootless en las máquinas del campus (sin sudo) no puede enlazar puertos <1024 | Mapeo `8080:80` / `8443:443` en el host en vez de `80:80`/`443:443` |
-| `ft_frontend exited with code 0 (restarting)` | Faltaba `target: development` en el build del frontend — Docker construía el último stage, sin `CMD` de arranque | Se añadió `target: development` |
-| Postgres no aplicaba las variables de entorno tras varios reinicios | El volumen de datos ya existía de un arranque anterior; Postgres solo ejecuta la inicialización la primera vez que el volumen está vacío | `docker compose down --volumes` para reiniciar desde cero |
-
 ### HTTPS con certificado autofirmado
 - Nginx reescrito con **Dockerfile propio** (no imagen directa) para incluir un script de entrypoint
 - `entrypoint.sh`: genera el certificado (`openssl req -x509 ...`) solo si no existe ya en el volumen — así no se regenera en cada reinicio, pero sí automáticamente en cualquier máquina nueva del equipo
@@ -106,6 +96,8 @@ Tres bloques `location`:
 - `/api/` → `backend:3000`
 - `/socket.io/` → `backend:3000`, con cabeceras `Upgrade`/`Connection` (imprescindibles para que la conexión HTTP se transforme en WebSocket) y timeouts largos (86400s, ya que las conexiones WS son de larga duración)
 - `/` → `frontend:5173`, también con cabeceras de Upgrade — necesario para el Hot Module Replacement de Vite, que también usa WebSocket internamente
+
+[Update Makefile. El problema de docker-compose vs docker compose y la solucion](./docs/docs-makefile-update.md)
 
 ---
 
@@ -190,21 +182,22 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 [ChatModule](./docs/docs-chat-module.md)
 
 [AdminModule backend part](./docs/docs-roles-module-back.md)
+
 ---
 
 ## FRONTEND:
 
 [Notas de trabajo AUTH Frontend part](./docs/frontend-auth-notas.md)
 
-## Renovación automática del Access Token
+### Renovación automática del Access Token
 
 [El problema y la solucion](./docs/access-token-refresh.md)
 
-## TailwindCSS
+### TailwindCSS
 
 [TailwindCSS y paleta de colores principal](./docs/docs-tailwind-paleta.md)
 
-## Chat
+### Chat
 
 [ChatModule Frontend part](./docs/docs-chat-frontend.md)
 
