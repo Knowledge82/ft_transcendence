@@ -192,6 +192,12 @@ export function HomePage() {
             >
               Ir al chat
             </Link>
+            <Link
+              to="/confesionario"
+              className="bg-gold-500 text-gold-on font-medium px-4 py-2 rounded-md hover:bg-gold-400 transition-colors"
+            >
+              El Confesionario
+            </Link>
             {profile.role === 'ARZOBISPO' && (
               <Link
                 to="/santuario"

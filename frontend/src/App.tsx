@@ -10,7 +10,7 @@ import { ChatPage } from './pages/ChatPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import { AdminPage } from './pages/AdminPage';
-
+import { ConfesionarioPage } from './pages/ConfesionarioPage';
 function App() {
   return (
     <BrowserRouter>
@@ -43,6 +43,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AdminPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/confesionario"
+              element={
+                <ProtectedRoute>
+                  <ConfesionarioPage />
                 </ProtectedRoute>
               }
             />
