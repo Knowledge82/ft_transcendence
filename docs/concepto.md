@@ -2,8 +2,6 @@
 
 ## Imagen y posicionamiento
 
-Bien, vamos a desgranar la imagen sin generar todavía ninguna ilustración.
-
 ### Quiénes somos: la «Iglesia del Verdadero Relink»
 
 Esto no es simple troleo. Es una **contra-secta**.
@@ -11,13 +9,12 @@ Esto no es simple troleo. Es una **contra-secta**.
 Por un lado está el culto informal que ya existe en el campus:
 - Un Makefile «correcto» tiene que reaccionar a un `touch Makefile`
 - Meter el `Makefile` y todas las cabeceras en las dependencias de los `.o` es un ritual sagrado
-- Quien no lo hace es un hereje y el proyecto se considera «no funcional»
+- Quien no lo hace es un hereje y el Makefile se considera «no funcional»
 - El conocimiento se transmite de boca en boca, sin que nadie compruebe la fuente original
 
 Por otro lado estamos nosotros.  
 Cogemos **el mismo lenguaje** (secta, iglesia, verdadero/falso, herejes, conocimiento sagrado) y lo damos la vuelta. Nos convertimos en los que supuestamente custodian el *verdadero* conocimiento sobre qué es realmente un relink.
 
-Esto es importante: no renunciamos a la metáfora religiosa. La **secuestramos**.
 
 ### Qué imagen debe transmitir el portal
 
