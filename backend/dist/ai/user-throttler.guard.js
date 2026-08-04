@@ -13,6 +13,9 @@ let UserThrottlerGuard = class UserThrottlerGuard extends throttler_1.ThrottlerG
     async getTracker(req) {
         return req.user?.userId?.toString() ?? req.ip;
     }
+    async throwThrottlingException() {
+        throw new common_1.HttpException('Has confesado demasiadas veces seguidas. Espera un minuto antes de volver a intentarlo.', common_1.HttpStatus.TOO_MANY_REQUESTS);
+    }
 };
 exports.UserThrottlerGuard = UserThrottlerGuard;
 exports.UserThrottlerGuard = UserThrottlerGuard = __decorate([

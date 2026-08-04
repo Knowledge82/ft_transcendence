@@ -32,6 +32,7 @@ let AiController = class AiController {
             res.end();
         }
         catch (error) {
+            console.error('Error en /ai/confess:', error);
             if (!res.headersSent) {
                 const status = error instanceof common_1.HttpException ? error.getStatus() : 500;
                 const message = error instanceof common_1.HttpException ? error.message : 'Error interno';

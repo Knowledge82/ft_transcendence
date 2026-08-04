@@ -27,6 +27,7 @@ El usuario te mostrará un fragmento de Makefile. Tu trabajo:
    nunca solo lo etiquetes como "herejía" sin justificación real.
 4. Responde en español, en un párrafo o dos, no más.`;
 const MAX_INPUT_LENGTH = 4000;
+const MODEL_NAME = process.env.GEMINI_MODEL ?? 'gemini-2.0-flash';
 let AiService = class AiService {
     genAI;
     constructor() {
@@ -40,15 +41,24 @@ let AiService = class AiService {
             throw new common_1.BadRequestException(`El Makefile es demasiado largo (máximo ${MAX_INPUT_LENGTH} caracteres)`);
         }
         const model = this.genAI.getGenerativeModel({
-            model: 'gemini-flash-latest',
+            model: MODEL_NAME,
             systemInstruction: SYSTEM_PROMPT,
         });
-        const result = await model.generateContentStream(makefileContent);
-        for await (const chunk of result.stream) {
-            const text = chunk.text();
-            if (text) {
-                yield text;
+        try {
+            const result = await model.generateContentStream(makefileContent);
+            for await (const chunk of result.stream) {
+                const text = chunk.text();
+                if (text) {
+                    yield text;
+                }
             }
+        }
+        catch (error) {
+            const status = error?.status;
+            if (status === 429) {
+                throw new common_1.HttpException('El Confesor ha agotado su cuota diaria gratuita de consultas a la IA. Inténtalo de nuevo mañana.', common_1.HttpStatus.TOO_MANY_REQUESTS);
+            }
+            throw error;
         }
     }
 };

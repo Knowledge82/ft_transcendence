@@ -39,6 +39,7 @@ services:
       # contenedor — sin esto, docker-compose no la pasa automáticamente, aunque
       # esté definida en el archivo .env
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL: ${GEMINI_MODEL}
     volumes:
       - ./backend:/app
       - /app/node_modules

@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const SYSTEM_PROMPT = `Eres el Confesor de La Iglesia del Verdadero Relink, una comunidad
@@ -17,6 +17,11 @@ El usuario te mostrará un fragmento de Makefile. Tu trabajo:
 4. Responde en español, en un párrafo o dos, no más.`;
 
 const MAX_INPUT_LENGTH = 4000;
+// Configurable via .env so a model retirement/quota change never requires
+// touching code — just update GEMINI_MODEL and restart the container.
+// "gemini-2.0-flash" as default: not the newest (smaller free quota) nor
+// a retired version, a reasonable middle ground for a free-tier project.
+const MODEL_NAME = process.env.GEMINI_MODEL ?? 'gemini-2.0-flash';
 
 @Injectable()
 export class AiService {
@@ -26,9 +31,6 @@ export class AiService {
     this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '');
   }
 
-  // Returns an async generator that yields text chunks as they arrive from
-  // Gemini — the controller will forward each chunk to the client as it
-  // comes in, instead of waiting for the full response
   async *streamConfession(makefileContent: string): AsyncGenerator<string> {
     if (!makefileContent || !makefileContent.trim()) {
       throw new BadRequestException('Debes enviar el contenido del Makefile');
@@ -40,17 +42,30 @@ export class AiService {
     }
 
     const model = this.genAI.getGenerativeModel({
-      model: 'gemini-flash-latest',
+      model: MODEL_NAME,
       systemInstruction: SYSTEM_PROMPT,
     });
 
-    const result = await model.generateContentStream(makefileContent);
-
-    for await (const chunk of result.stream) {
-      const text = chunk.text();
-      if (text) {
-        yield text;
+    try {
+      const result = await model.generateContentStream(makefileContent);
+      for await (const chunk of result.stream) {
+        const text = chunk.text();
+        if (text) {
+          yield text;
+        }
       }
+    } catch (error) {
+      // Distinguish Google's own quota/rate-limit response from any other
+      // failure, so the controller (and the user) get a message that
+      // actually explains what happened instead of a generic "internal error"
+      const status = (error as { status?: number })?.status;
+      if (status === 429) {
+        throw new HttpException(
+          'El Confesor ha agotado su cuota diaria gratuita de consultas a la IA. Inténtalo de nuevo mañana.',
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+      throw error;
     }
   }
 }

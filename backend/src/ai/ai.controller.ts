@@ -21,6 +21,10 @@ export class AiController {
       }
       res.end();
     } catch (error) {
+      // Log the real error server-side — the client only ever sees a
+      // generic message, but we need to actually see what happened
+      console.error('Error en /ai/confess:', error);
+
       if (!res.headersSent) {
         const status = error instanceof HttpException ? error.getStatus() : 500;
         const message = error instanceof HttpException ? error.message : 'Error interno';
