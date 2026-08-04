@@ -34,6 +34,22 @@ let UsersService = class UsersService {
         }
         return user;
     }
+    async findPublicProfile(userId) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                displayName: true,
+                avatarUrl: true,
+                role: true,
+                createdAt: true,
+            },
+        });
+        if (!user) {
+            throw new common_1.NotFoundException('User not found');
+        }
+        return user;
+    }
     async updateProfile(userId, dto) {
         return this.prisma.user.update({
             where: { id: userId },
@@ -43,6 +59,7 @@ let UsersService = class UsersService {
                 email: true,
                 displayName: true,
                 avatarUrl: true,
+                role: true,
                 createdAt: true,
             },
         });
@@ -56,6 +73,7 @@ let UsersService = class UsersService {
                 email: true,
                 displayName: true,
                 avatarUrl: true,
+                role: true,
                 createdAt: true,
             },
         });

@@ -7,8 +7,6 @@ const GENERAL_CHANNEL_NAME = 'general';
 export class ChatService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // The general channel is created once, lazily, the first time anyone
-  // needs it — rather than requiring a separate seed script
   async getOrCreateGeneralChannel() {
     const existing = await this.prisma.conversation.findFirst({
       where: { type: 'CHANNEL', name: GENERAL_CHANNEL_NAME },
@@ -32,9 +30,6 @@ export class ChatService {
     return participants.map((p) => p.user);
   }
 
-  // Returns true only if this created a NEW participant row (i.e. this is
-  // genuinely the first time this user joined this conversation) — lets
-  // the caller decide whether it's worth broadcasting a "member joined" event
   async ensureParticipant(conversationId: number, userId: number): Promise<boolean> {
     const existing = await this.prisma.conversationParticipant.findUnique({
       where: { conversationId_userId: { conversationId, userId } },
@@ -55,8 +50,6 @@ export class ChatService {
     });
   }
 
-  // Finds the existing direct conversation between two users, or creates
-  // one (plus both participant rows) if it doesn't exist yet
   async findOrCreateDirectConversation(userIdA: number, userIdB: number) {
     const existing = await this.prisma.conversation.findFirst({
       where: {
@@ -81,14 +74,41 @@ export class ChatService {
     });
   }
 
-  // Every conversation a user belongs to — used on socket connection to
-  // know which rooms to join automatically
   async getUserConversationIds(userId: number): Promise<number[]> {
     const rows = await this.prisma.conversationParticipant.findMany({
       where: { userId },
       select: { conversationId: true },
     });
     return rows.map((r) => r.conversationId);
+  }
+
+  // DIRECT conversations only, with the OTHER participant's info attached,
+  // and only those that already have at least one message — an empty
+  // conversation (just created, nobody wrote yet) has no place in a
+  // sidebar of "ongoing conversations"
+  async getUserDirectConversations(userId: number) {
+    const conversations = await this.prisma.conversation.findMany({
+      where: {
+        type: 'DIRECT',
+        participants: { some: { userId } },
+        messages: { some: {} },
+      },
+      include: {
+        participants: {
+          include: {
+            user: { select: { id: true, displayName: true, avatarUrl: true } },
+          },
+        },
+      },
+    });
+
+    return conversations.map((c) => {
+      const otherParticipant = c.participants.find((p) => p.userId !== userId);
+      return {
+        id: c.id,
+        otherUser: otherParticipant?.user ?? null,
+      };
+    });
   }
 
   async isParticipant(conversationId: number, userId: number): Promise<boolean> {

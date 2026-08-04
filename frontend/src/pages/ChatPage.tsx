@@ -1,34 +1,39 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
-import { getGeneralChannel, startDirectConversation, getMessageHistory, getGeneralMembers } from '../api/chat';
-import type { Conversation, Message, Member } from '../api/chat';
-import { listFriends, sendFriendRequest, listPendingRequests, acceptFriendRequest } from '../api/friends';
+import { Link, useSearchParams, useLocation } from 'react-router-dom';
+import { getGeneralChannel, startDirectConversation, getMessageHistory, getGeneralMembers, getDirectConversations } from '../api/chat';
+import type { Conversation, Message, Member, DirectConversationSummary } from '../api/chat';
+import { listFriends, sendFriendRequest, listPendingRequests, acceptFriendRequest, removeFriend } from '../api/friends';
 import type { Friend, PendingRequest } from '../api/friends';
 import { apiClient } from '../api/client';
 import { useSocket } from '../context/SocketContext';
 
 export function ChatPage() {
   const { socket } = useSocket();
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
 
   const [generalChannel, setGeneralChannel] = useState<Conversation | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
-  // Tracks requests sent during this session (frontend-only, resets on
-  // reload) — enough to disable the button and give feedback without
-  // needing a dedicated endpoint just for "pending requests I sent"
+  const [directConversations, setDirectConversations] = useState<DirectConversationSummary[]>([]);
+  // Tracks who we're currently chatting with in a DM that might not have
+  // any messages yet — needed to promote it into `directConversations`
+  // the moment the first message actually gets sent or received
+  const [activeDmTarget, setActiveDmTarget] = useState<{
+    id: number;
+    displayName: string | null;
+    avatarUrl: string | null;
+  } | null>(null);
   const [sentRequests, setSentRequests] = useState<Set<number>>(new Set());
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
+  const [channelLabel, setChannelLabel] = useState('# general');
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState('');
   const [ownUserId, setOwnUserId] = useState<number | null>(null);
   const [ownDisplayName, setOwnDisplayName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // A ref to an invisible element placed right after the last message.
-  // Unlike useState, updating a ref does NOT trigger a re-render — we
-  // just need a stable handle to the real DOM node to call the browser's
-  // native scrollIntoView() on it.
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,16 +42,43 @@ export function ChatPage() {
       listFriends(),
       getGeneralMembers(),
       listPendingRequests(),
+      getDirectConversations(),
       apiClient.get<{ id: number; displayName: string | null }>('/users/me'),
     ])
-      .then(([general, friendsList, membersList, pending, me]) => {
+      .then(([general, friendsList, membersList, pending, directList, me]) => {
         setGeneralChannel(general);
         setFriends(friendsList);
         setMembers(membersList);
         setPendingRequests(pending);
+        setDirectConversations(directList);
         setOwnUserId(me.data.id);
         setOwnDisplayName(me.data.displayName);
-        setSelectedConversationId(general.id);
+
+        // If we arrived here via "Enviar mensaje" from a profile page
+        // (?dm=<conversationId>), open that conversation directly instead
+        // of defaulting to the general channel
+        const dmParam = searchParams.get('dm');
+        const dmId = dmParam ? Number(dmParam) : null;
+        const matchingDm = dmId ? directList.find((c) => c.id === dmId) : undefined;
+        const stateOtherUser = (location.state as { otherUser?: typeof activeDmTarget })
+          ?.otherUser;
+
+        if (matchingDm) {
+          // Already has messages — backend included it in the list
+          setSelectedConversationId(matchingDm.id);
+          setChannelLabel(matchingDm.otherUser?.displayName ?? `Usuario ${matchingDm.otherUser?.id}`);
+          setActiveDmTarget(matchingDm.otherUser);
+        } else if (dmId && stateOtherUser) {
+          // Brand new, empty conversation — not in the list yet, but we
+          // know who it's with from the navigation state set by the
+          // profile page
+          setSelectedConversationId(dmId);
+          setChannelLabel(stateOtherUser.displayName ?? `Usuario ${stateOtherUser.id}`);
+          setActiveDmTarget(stateOtherUser);
+        } else {
+          setSelectedConversationId(general.id);
+          setChannelLabel('# general');
+        }
       })
       .finally(() => setIsLoading(false));
   }, []);
@@ -69,6 +101,24 @@ export function ChatPage() {
       if (message.conversationId === selectedConversationId) {
         setMessages((prev) => [...prev, message]);
       }
+
+      // A message from someone else, in a DM we don't have in the sidebar
+      // yet — this is their first message to us, so add it now
+      const isFromSomeoneElse = message.senderId !== ownUserId;
+      const isGeneralChannel = generalChannel && message.conversationId === generalChannel.id;
+      if (isFromSomeoneElse && !isGeneralChannel) {
+        setDirectConversations((prev) =>
+          prev.some((c) => c.id === message.conversationId)
+            ? prev
+            : [
+                ...prev,
+                {
+                  id: message.conversationId,
+                  otherUser: { ...message.sender, isOnline: true },
+                },
+              ],
+        );
+      }
     }
 
     function handleStatusChanged({ userId, isOnline }: { userId: number; isOnline: boolean }) {
@@ -81,7 +131,6 @@ export function ChatPage() {
     }
 
     function handleMemberJoined(newMember: Member) {
-      // Guard against duplicates in case this event somehow arrives twice
       setMembers((prev) =>
         prev.some((m) => m.id === newMember.id) ? prev : [...prev, newMember],
       );
@@ -94,8 +143,6 @@ export function ChatPage() {
     }
 
     function handleFriendRequestAccepted(newFriend: Friend) {
-      // The other person just accepted our request — add them straight
-      // to our own friends list, no need to refetch anything
       setFriends((prev) =>
         prev.some((f) => f.id === newFriend.id) ? prev : [...prev, { ...newFriend, isOnline: true }],
       );
@@ -116,9 +163,11 @@ export function ChatPage() {
     };
   }, [socket, selectedConversationId]);
 
-  async function openDirectConversation(friendId: number) {
-    const conversation = await startDirectConversation(friendId);
+  async function openDirectConversation(friend: Friend) {
+    const conversation = await startDirectConversation(friend.id);
     setSelectedConversationId(conversation.id);
+    setChannelLabel(friend.displayName ?? `Usuario ${friend.id}`);
+    setActiveDmTarget({ id: friend.id, displayName: friend.displayName, avatarUrl: friend.avatarUrl });
   }
 
   async function handleAddFriend(userId: number) {
@@ -126,24 +175,25 @@ export function ChatPage() {
       await sendFriendRequest(userId);
       setSentRequests((prev) => new Set(prev).add(userId));
     } catch (err) {
-      // Most likely a 409 (already friends, or request already pending
-      // from a previous session) — nothing to recover from, just stop
       console.error('No se pudo enviar la solicitud:', err);
     }
   }
 
   async function handleAcceptRequest(requesterId: number) {
     await acceptFriendRequest(requesterId);
-    // Remove it from the pending list...
     setPendingRequests((prev) => prev.filter((r) => r.requesterId !== requesterId));
-    // ...and refresh the friends list so the new friend shows up
-    // immediately in the sidebar, including their current online status
     const updatedFriends = await listFriends();
     setFriends(updatedFriends);
   }
 
-  // Runs after every render where `messages` changed — including the
-  // very first load of history and every newly received message
+  async function handleRemoveFriend(userId: number) {
+    if (!confirm('¿Seguro que quieres quitar a este hermano de tu lista de amigos?')) {
+      return;
+    }
+    await removeFriend(userId);
+    setFriends((prev) => prev.filter((f) => f.id !== userId));
+  }
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView();
   }, [messages]);
@@ -158,6 +208,19 @@ export function ChatPage() {
       content: draft.trim(),
     });
     setDraft('');
+
+    // First message in a DM that wasn't in the sidebar yet — promote it now
+    if (
+      activeDmTarget &&
+      generalChannel &&
+      selectedConversationId !== generalChannel.id &&
+      !directConversations.some((c) => c.id === selectedConversationId)
+    ) {
+      setDirectConversations((prev) => [
+        ...prev,
+        { id: selectedConversationId, otherUser: { ...activeDmTarget, isOnline: false } },
+      ]);
+    }
   }
 
   if (isLoading) {
@@ -170,8 +233,10 @@ export function ChatPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-ink-950">
-      <header className="flex justify-end items-center px-4 py-2 bg-ink-900 border-b border-ink-800">
-        <span className="text-sm text-cream-400">
+      <header className="grid grid-cols-3 items-center px-4 py-2 bg-ink-900 border-b border-ink-800">
+        <div />
+        <span className="text-sm text-gold-500 font-medium text-center">{channelLabel}</span>
+        <span className="text-sm text-cream-400 text-right">
           Conectado como <span className="text-gold-500 font-medium">{ownDisplayName ?? `Usuario ${ownUserId}`}</span>
         </span>
       </header>
@@ -188,7 +253,11 @@ export function ChatPage() {
           <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">Canales</h2>
           {generalChannel && (
             <button
-              onClick={() => setSelectedConversationId(generalChannel.id)}
+              onClick={() => {
+                setSelectedConversationId(generalChannel.id);
+                setChannelLabel('# general');
+                setActiveDmTarget(null);
+              }}
               className={`w-full text-left px-3 py-2 rounded-md mb-1 transition-colors ${
                 selectedConversationId === generalChannel.id
                   ? 'bg-gold-500 text-gold-on'
@@ -200,6 +269,39 @@ export function ChatPage() {
           )}
         </div>
 
+        {directConversations.length > 0 && (
+          <div className="p-4 border-t border-ink-800">
+            <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">
+              Conversaciones
+            </h2>
+            {directConversations.map((conv) => {
+              const label = conv.otherUser?.displayName ?? `Usuario ${conv.otherUser?.id}`;
+              return (
+                <button
+                  key={conv.id}
+                  onClick={() => {
+                    setSelectedConversationId(conv.id);
+                    setChannelLabel(label);
+                    setActiveDmTarget(conv.otherUser);
+                  }}
+                  className={`w-full flex items-center gap-2 text-left px-3 py-2 rounded-md mb-1 transition-colors ${
+                    selectedConversationId === conv.id
+                      ? 'bg-gold-500 text-gold-on'
+                      : 'text-cream-100 hover:bg-ink-800'
+                  }`}
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                      conv.otherUser?.isOnline ? 'bg-green-500' : 'bg-ink-800'
+                    }`}
+                  />
+                  <span className="truncate">{label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {pendingRequests.length > 0 && (
           <div className="p-4 border-t border-ink-800">
             <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">
@@ -207,9 +309,12 @@ export function ChatPage() {
             </h2>
             {pendingRequests.map((request) => (
               <div key={request.id} className="flex items-center justify-between gap-2 mb-1">
-                <span className="text-sm text-cream-100 truncate">
+                <Link
+                  to={`/perfil/${request.requesterId}`}
+                  className="text-sm text-cream-100 truncate hover:underline"
+                >
                   {request.requester.displayName ?? `Usuario ${request.requesterId}`}
-                </span>
+                </Link>
                 <button
                   onClick={() => handleAcceptRequest(request.requesterId)}
                   className="text-xs text-gold-500 hover:text-gold-400 flex-shrink-0"
@@ -227,18 +332,36 @@ export function ChatPage() {
             <p className="text-sm text-cream-400">Todavía no tienes amigos añadidos.</p>
           )}
           {friends.map((friend) => (
-            <button
+            <div
               key={friend.id}
-              onClick={() => openDirectConversation(friend.id)}
-              className="w-full flex items-center gap-2 text-left px-3 py-2 rounded-md mb-1 text-cream-100 hover:bg-ink-800 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 rounded-md mb-1 hover:bg-ink-800 transition-colors"
             >
               <span
                 className={`w-2 h-2 rounded-full flex-shrink-0 ${
                   friend.isOnline ? 'bg-green-500' : 'bg-ink-800'
                 }`}
               />
-              {friend.displayName ?? `Usuario ${friend.id}`}
-            </button>
+              <Link
+                to={`/perfil/${friend.id}`}
+                className="flex-1 text-left text-sm text-cream-100 truncate hover:underline"
+              >
+                {friend.displayName ?? `Usuario ${friend.id}`}
+              </Link>
+              <button
+                onClick={() => openDirectConversation(friend)}
+                title="Enviar mensaje"
+                className="text-xs text-gold-500 hover:text-gold-400 flex-shrink-0"
+              >
+                ✉
+              </button>
+              <button
+                onClick={() => handleRemoveFriend(friend.id)}
+                title="Quitar amigo"
+                className="text-xs text-error-500 hover:text-red-400 flex-shrink-0"
+              >
+                ✕
+              </button>
+            </div>
           ))}
         </div>
       </aside>
@@ -258,9 +381,12 @@ export function ChatPage() {
                   }`}
                 >
                   {!isOwn && (
-                    <p className="text-xs text-cream-400 mb-1">
+                    <Link
+                      to={`/perfil/${message.senderId}`}
+                      className="text-xs text-cream-400 mb-1 block hover:underline w-fit"
+                    >
                       {message.sender.displayName ?? `Usuario ${message.senderId}`}
-                    </p>
+                    </Link>
                   )}
                   <p>{message.content}</p>
                 </div>
@@ -287,9 +413,6 @@ export function ChatPage() {
         </form>
       </main>
 
-      {/* Right panel: always-visible presence list — everyone in the
-          cult is a sibling, so the whole congregation's online status
-          is public, not just close friends' */}
       <aside className="w-56 bg-ink-900 border-l border-ink-800 p-4 overflow-y-auto">
         <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">
           Hermanos ({members.filter((m) => m.isOnline).length}/{members.length})
@@ -308,9 +431,12 @@ export function ChatPage() {
                     member.isOnline ? 'bg-green-500' : 'bg-ink-800'
                   }`}
                 />
-                <span className="text-sm text-cream-100 truncate flex-1">
+                <Link
+                  to={`/perfil/${member.id}`}
+                  className="text-sm text-cream-100 truncate flex-1 hover:underline"
+                >
                   {member.displayName ?? `Usuario ${member.id}`}
-                </span>
+                </Link>
                 {!isSelf && !isFriend && (
                   <button
                     onClick={() => handleAddFriend(member.id)}

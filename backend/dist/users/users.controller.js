@@ -20,12 +20,15 @@ const path_1 = require("path");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const users_service_1 = require("./users.service");
 const update_profile_dto_1 = require("./dto/update-profile.dto");
+const chat_gateway_1 = require("../chat/chat.gateway");
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_AVATAR_SIZE_BYTES = 2 * 1024 * 1024;
 let UsersController = class UsersController {
     usersService;
-    constructor(usersService) {
+    chatGateway;
+    constructor(usersService, chatGateway) {
         this.usersService = usersService;
+        this.chatGateway = chatGateway;
     }
     async getMe(req) {
         return this.usersService.findById(req.user.userId);
@@ -39,6 +42,13 @@ let UsersController = class UsersController {
         }
         const avatarUrl = `/api/uploads/avatars/${file.filename}`;
         return this.usersService.updateAvatar(req.user.userId, avatarUrl);
+    }
+    async getPublicProfile(id) {
+        const profile = await this.usersService.findPublicProfile(id);
+        return {
+            ...profile,
+            isOnline: this.chatGateway.isUserOnline(profile.id),
+        };
     }
 };
 exports.UsersController = UsersController;
@@ -88,9 +98,17 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "uploadAvatar", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getPublicProfile", null);
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __metadata("design:paramtypes", [users_service_1.UsersService])
+    __metadata("design:paramtypes", [users_service_1.UsersService,
+        chat_gateway_1.ChatGateway])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

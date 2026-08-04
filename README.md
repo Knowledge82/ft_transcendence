@@ -214,7 +214,9 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 [AiModule front part](./docs/docs-ai-frontend.md)
 
 ---
+---
 
+[+ Perfil, update friendlist, clicables nombres, coversaciones](./docs/docs-perfil-amigos-chat.md)
 
 
 ## 5. Verificación end-to-end

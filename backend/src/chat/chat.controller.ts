@@ -25,6 +25,20 @@ export class ChatController {
     }));
   }
 
+  // IMPORTANT: must be declared BEFORE ':conversationId/messages' — otherwise
+  // "conversations" would be captured by the :conversationId param and
+  // rejected by ParseIntPipe as not-a-number
+  @Get('conversations/direct')
+  async getDirectConversations(@Request() req) {
+    const conversations = await this.chatService.getUserDirectConversations(req.user.userId);
+    return conversations.map((c) => ({
+      ...c,
+      otherUser: c.otherUser
+        ? { ...c.otherUser, isOnline: this.chatGateway.isUserOnline(c.otherUser.id) }
+        : null,
+    }));
+  }
+
   @Post('dm/:userId')
   async startDirectConversation(
     @Request() req,

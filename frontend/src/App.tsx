@@ -11,6 +11,7 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import { AdminPage } from './pages/AdminPage';
 import { ConfesionarioPage } from './pages/ConfesionarioPage';
+import { UserProfilePage } from './pages/UserProfilePage';
 function App() {
   return (
     <BrowserRouter>
@@ -51,6 +52,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ConfesionarioPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/perfil/:id"
+              element={
+                <ProtectedRoute>
+                  <UserProfilePage />
                 </ProtectedRoute>
               }
             />

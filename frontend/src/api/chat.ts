@@ -26,6 +26,16 @@ export interface Member {
   isOnline: boolean;
 }
 
+export interface DirectConversationSummary {
+  id: number;
+  otherUser: {
+    id: number;
+    displayName: string | null;
+    avatarUrl: string | null;
+    isOnline: boolean;
+  } | null;
+}
+
 export async function getGeneralMembers(): Promise<Member[]> {
   const { data } = await apiClient.get<Member[]>('/chat/general/members');
   return data;
@@ -33,6 +43,11 @@ export async function getGeneralMembers(): Promise<Member[]> {
 
 export async function getGeneralChannel(): Promise<Conversation> {
   const { data } = await apiClient.get<Conversation>('/chat/general');
+  return data;
+}
+
+export async function getDirectConversations(): Promise<DirectConversationSummary[]> {
+  const { data } = await apiClient.get<DirectConversationSummary[]>('/chat/conversations/direct');
   return data;
 }
 

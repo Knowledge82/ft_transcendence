@@ -26,6 +26,27 @@ export class UsersService {
     return user;
   }
 
+  // Public profile view: no email, no other private fields — this is what
+  // OTHER users see when viewing someone's profile, not what you see of yourself
+  async findPublicProfile(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        displayName: true,
+        avatarUrl: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
   async updateProfile(userId: number, dto: UpdateProfileDto) {
     return this.prisma.user.update({
       where: { id: userId },
@@ -35,6 +56,7 @@ export class UsersService {
         email: true,
         displayName: true,
         avatarUrl: true,
+        role: true,
         createdAt: true,
       },
     });
@@ -49,6 +71,7 @@ export class UsersService {
         email: true,
         displayName: true,
         avatarUrl: true,
+        role: true,
         createdAt: true,
       },
     });

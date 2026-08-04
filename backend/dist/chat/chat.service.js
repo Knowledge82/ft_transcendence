@@ -86,6 +86,29 @@ let ChatService = class ChatService {
         });
         return rows.map((r) => r.conversationId);
     }
+    async getUserDirectConversations(userId) {
+        const conversations = await this.prisma.conversation.findMany({
+            where: {
+                type: 'DIRECT',
+                participants: { some: { userId } },
+                messages: { some: {} },
+            },
+            include: {
+                participants: {
+                    include: {
+                        user: { select: { id: true, displayName: true, avatarUrl: true } },
+                    },
+                },
+            },
+        });
+        return conversations.map((c) => {
+            const otherParticipant = c.participants.find((p) => p.userId !== userId);
+            return {
+                id: c.id,
+                otherUser: otherParticipant?.user ?? null,
+            };
+        });
+    }
     async isParticipant(conversationId, userId) {
         const row = await this.prisma.conversationParticipant.findUnique({
             where: { conversationId_userId: { conversationId, userId } },

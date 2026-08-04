@@ -34,6 +34,15 @@ let ChatController = class ChatController {
             isOnline: this.chatGateway.isUserOnline(member.id),
         }));
     }
+    async getDirectConversations(req) {
+        const conversations = await this.chatService.getUserDirectConversations(req.user.userId);
+        return conversations.map((c) => ({
+            ...c,
+            otherUser: c.otherUser
+                ? { ...c.otherUser, isOnline: this.chatGateway.isUserOnline(c.otherUser.id) }
+                : null,
+        }));
+    }
     async startDirectConversation(req, otherUserId) {
         return this.chatService.findOrCreateDirectConversation(req.user.userId, otherUserId);
     }
@@ -54,6 +63,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "getGeneralMembers", null);
+__decorate([
+    (0, common_1.Get)('conversations/direct'),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ChatController.prototype, "getDirectConversations", null);
 __decorate([
     (0, common_1.Post)('dm/:userId'),
     __param(0, (0, common_1.Request)()),
