@@ -2,6 +2,7 @@ import { Controller, Post, Body, Res, UseGuards, HttpException } from '@nestjs/c
 import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AiService } from './ai.service';
+import { UserThrottlerGuard } from './user-throttler.guard';
 
 @Controller('ai')
 @UseGuards(JwtAuthGuard)
@@ -9,6 +10,7 @@ export class AiController {
   constructor(private readonly aiService: AiService) {}
 
   @Post('confess')
+  @UseGuards(UserThrottlerGuard)
   async confess(@Body('makefile') makefile: string, @Res() res: Response) {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('X-Accel-Buffering', 'no');

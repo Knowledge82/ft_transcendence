@@ -16,6 +16,7 @@ exports.AiController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const ai_service_1 = require("./ai.service");
+const user_throttler_guard_1 = require("./user-throttler.guard");
 let AiController = class AiController {
     aiService;
     constructor(aiService) {
@@ -46,6 +47,7 @@ let AiController = class AiController {
 exports.AiController = AiController;
 __decorate([
     (0, common_1.Post)('confess'),
+    (0, common_1.UseGuards)(user_throttler_guard_1.UserThrottlerGuard),
     __param(0, (0, common_1.Body)('makefile')),
     __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),

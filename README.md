@@ -183,6 +183,8 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [AdminModule backend part](./docs/docs-roles-module-back.md)
 
+[AiModule](./docs/docs-ai-module.md)
+
 ---
 
 ## FRONTEND:

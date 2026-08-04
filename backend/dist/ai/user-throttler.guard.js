@@ -6,22 +6,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AiModule = void 0;
+exports.UserThrottlerGuard = void 0;
 const common_1 = require("@nestjs/common");
 const throttler_1 = require("@nestjs/throttler");
-const ai_controller_1 = require("./ai.controller");
-const ai_service_1 = require("./ai.service");
-const user_throttler_guard_1 = require("./user-throttler.guard");
-let AiModule = class AiModule {
+let UserThrottlerGuard = class UserThrottlerGuard extends throttler_1.ThrottlerGuard {
+    async getTracker(req) {
+        return req.user?.userId?.toString() ?? req.ip;
+    }
 };
-exports.AiModule = AiModule;
-exports.AiModule = AiModule = __decorate([
-    (0, common_1.Module)({
-        imports: [
-            throttler_1.ThrottlerModule.forRoot([{ ttl: 60000, limit: 5 }]),
-        ],
-        controllers: [ai_controller_1.AiController],
-        providers: [ai_service_1.AiService, user_throttler_guard_1.UserThrottlerGuard],
-    })
-], AiModule);
-//# sourceMappingURL=ai.module.js.map
+exports.UserThrottlerGuard = UserThrottlerGuard;
+exports.UserThrottlerGuard = UserThrottlerGuard = __decorate([
+    (0, common_1.Injectable)()
+], UserThrottlerGuard);
+//# sourceMappingURL=user-throttler.guard.js.map
