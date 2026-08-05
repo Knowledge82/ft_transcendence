@@ -235,6 +235,7 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [+ PWA Manifest](./docs/docs-pwa-manifest.md)
 
+[+ Migration to Groq, +slowdown out text in Confesor](./docs/docs-groq-migration.md)
 
 ## 5. Verificación end-to-end
 

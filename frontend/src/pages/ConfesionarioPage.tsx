@@ -1,15 +1,33 @@
-import { useState, useRef, FormEvent } from 'react';
+import { useState, useRef, useEffect, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { streamConfession } from '../api/ai';
 
 const MAX_LENGTH = 4000;
+// How slowly the text "speaks" on screen, independent of how fast the
+// real data actually arrives from Groq (which is nearly instant) — this
+// is purely cosmetic, for a more solemn, deliberate pace.
+const REVEAL_MS_PER_CHAR = 18;
 
 export function ConfesionarioPage() {
   const [makefile, setMakefile] = useState('');
-  const [response, setResponse] = useState('');
-  const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  const [fullText, setFullText] = useState('');
+  const [visibleLength, setVisibleLength] = useState(0);
+  const [isFetching, setIsFetching] = useState(false);
+
+  useEffect(() => {
+    if (visibleLength >= fullText.length) {
+      return;
+    }
+    const timeoutId = setTimeout(() => {
+      setVisibleLength((prev) => prev + 1);
+    }, REVEAL_MS_PER_CHAR);
+    return () => clearTimeout(timeoutId);
+  }, [visibleLength, fullText]);
+
+  const isStreaming = isFetching || visibleLength < fullText.length;
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -18,28 +36,31 @@ export function ConfesionarioPage() {
     }
 
     setError(null);
-    setResponse('');
-    setIsStreaming(true);
+    setFullText('');
+    setVisibleLength(0);
+    setIsFetching(true);
 
     const controller = new AbortController();
     abortRef.current = controller;
 
     try {
       for await (const chunk of streamConfession(makefile, controller.signal)) {
-        setResponse((prev) => prev + chunk);
+        setFullText((prev) => prev + chunk);
       }
     } catch (err) {
       if (err instanceof Error && err.name !== 'AbortError') {
         setError(err.message);
       }
     } finally {
-      setIsStreaming(false);
+      setIsFetching(false);
     }
   }
 
   function handleCancel() {
     abortRef.current?.abort();
   }
+
+  const visibleResponse = fullText.slice(0, visibleLength);
 
   return (
     <div className="min-h-screen bg-ink-950 px-4 py-10">
@@ -75,7 +96,7 @@ export function ConfesionarioPage() {
             >
               {isStreaming ? 'Confesando...' : 'Confesarme'}
             </button>
-            {isStreaming && (
+            {isFetching && (
               <button
                 type="button"
                 onClick={handleCancel}
@@ -93,13 +114,13 @@ export function ConfesionarioPage() {
           </div>
         )}
 
-        {response && (
+        {fullText && (
           <div className="mt-6 bg-ink-900 border border-ink-800 rounded-lg p-6">
             <p className="text-xs uppercase tracking-wide text-gold-500 mb-3">
               El Confesor dice:
             </p>
             <p className="text-cream-100 leading-relaxed whitespace-pre-wrap">
-              {response}
+              {visibleResponse}
               {isStreaming && <span className="animate-pulse">▌</span>}
             </p>
           </div>
