@@ -6,6 +6,7 @@ import { listFriends, sendFriendRequest, listPendingRequests, acceptFriendReques
 import type { Friend, PendingRequest } from '../api/friends';
 import { apiClient } from '../api/client';
 import { useSocket } from '../context/SocketContext';
+import { LoadingScreen, StatusDot, IconButton, Input, Button } from '../components/ui';
 
 export function ChatPage() {
   const { socket } = useSocket();
@@ -16,9 +17,6 @@ export function ChatPage() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [directConversations, setDirectConversations] = useState<DirectConversationSummary[]>([]);
-  // Tracks who we're currently chatting with in a DM that might not have
-  // any messages yet — needed to promote it into `directConversations`
-  // the moment the first message actually gets sent or received
   const [activeDmTarget, setActiveDmTarget] = useState<{
     id: number;
     displayName: string | null;
@@ -54,9 +52,6 @@ export function ChatPage() {
         setOwnUserId(me.data.id);
         setOwnDisplayName(me.data.displayName);
 
-        // If we arrived here via "Enviar mensaje" from a profile page
-        // (?dm=<conversationId>), open that conversation directly instead
-        // of defaulting to the general channel
         const dmParam = searchParams.get('dm');
         const dmId = dmParam ? Number(dmParam) : null;
         const matchingDm = dmId ? directList.find((c) => c.id === dmId) : undefined;
@@ -64,14 +59,10 @@ export function ChatPage() {
           ?.otherUser;
 
         if (matchingDm) {
-          // Already has messages — backend included it in the list
           setSelectedConversationId(matchingDm.id);
           setChannelLabel(matchingDm.otherUser?.displayName ?? `Usuario ${matchingDm.otherUser?.id}`);
           setActiveDmTarget(matchingDm.otherUser);
         } else if (dmId && stateOtherUser) {
-          // Brand new, empty conversation — not in the list yet, but we
-          // know who it's with from the navigation state set by the
-          // profile page
           setSelectedConversationId(dmId);
           setChannelLabel(stateOtherUser.displayName ?? `Usuario ${stateOtherUser.id}`);
           setActiveDmTarget(stateOtherUser);
@@ -102,8 +93,6 @@ export function ChatPage() {
         setMessages((prev) => [...prev, message]);
       }
 
-      // A message from someone else, in a DM we don't have in the sidebar
-      // yet — this is their first message to us, so add it now
       const isFromSomeoneElse = message.senderId !== ownUserId;
       const isGeneralChannel = generalChannel && message.conversationId === generalChannel.id;
       if (isFromSomeoneElse && !isGeneralChannel) {
@@ -209,7 +198,6 @@ export function ChatPage() {
     });
     setDraft('');
 
-    // First message in a DM that wasn't in the sidebar yet — promote it now
     if (
       activeDmTarget &&
       generalChannel &&
@@ -224,11 +212,7 @@ export function ChatPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-ink-950">
-        <p className="text-cream-400">Cargando...</p>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
@@ -290,11 +274,7 @@ export function ChatPage() {
                       : 'text-cream-100 hover:bg-ink-800'
                   }`}
                 >
-                  <span
-                    className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                      conv.otherUser?.isOnline ? 'bg-green-500' : 'bg-ink-800'
-                    }`}
-                  />
+                  <StatusDot isOnline={conv.otherUser?.isOnline ?? false} />
                   <span className="truncate">{label}</span>
                 </button>
               );
@@ -315,12 +295,9 @@ export function ChatPage() {
                 >
                   {request.requester.displayName ?? `Usuario ${request.requesterId}`}
                 </Link>
-                <button
-                  onClick={() => handleAcceptRequest(request.requesterId)}
-                  className="text-xs text-gold-500 hover:text-gold-400 flex-shrink-0"
-                >
+                <IconButton onClick={() => handleAcceptRequest(request.requesterId)}>
                   Aceptar
-                </button>
+                </IconButton>
               </div>
             ))}
           </div>
@@ -336,31 +313,23 @@ export function ChatPage() {
               key={friend.id}
               className="flex items-center gap-2 px-3 py-2 rounded-md mb-1 hover:bg-ink-800 transition-colors"
             >
-              <span
-                className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                  friend.isOnline ? 'bg-green-500' : 'bg-ink-800'
-                }`}
-              />
+              <StatusDot isOnline={friend.isOnline} />
               <Link
                 to={`/perfil/${friend.id}`}
                 className="flex-1 text-left text-sm text-cream-100 truncate hover:underline"
               >
                 {friend.displayName ?? `Usuario ${friend.id}`}
               </Link>
-              <button
-                onClick={() => openDirectConversation(friend)}
-                title="Enviar mensaje"
-                className="text-xs text-gold-500 hover:text-gold-400 flex-shrink-0"
-              >
+              <IconButton onClick={() => openDirectConversation(friend)} title="Enviar mensaje">
                 ✉
-              </button>
-              <button
+              </IconButton>
+              <IconButton
+                tone="danger"
                 onClick={() => handleRemoveFriend(friend.id)}
                 title="Quitar amigo"
-                className="text-xs text-error-500 hover:text-red-400 flex-shrink-0"
               >
                 ✕
-              </button>
+              </IconButton>
             </div>
           ))}
         </div>
@@ -397,19 +366,14 @@ export function ChatPage() {
         </div>
 
         <form onSubmit={handleSend} className="p-4 border-t border-ink-800 flex gap-2">
-          <input
+          <Input
             type="text"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Escribe un mensaje..."
-            className="flex-1 rounded-md bg-ink-900 border border-ink-800 px-3 py-2 text-cream-100 focus:outline-none focus:ring-2 focus:ring-gold-500"
+            className="flex-1"
           />
-          <button
-            type="submit"
-            className="bg-gold-500 text-gold-on font-medium px-4 py-2 rounded-md hover:bg-gold-400 transition-colors"
-          >
-            Enviar
-          </button>
+          <Button type="submit">Enviar</Button>
         </form>
       </main>
 
@@ -426,11 +390,7 @@ export function ChatPage() {
 
             return (
               <div key={member.id} className="flex items-center gap-2 px-1 py-1.5">
-                <span
-                  className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                    member.isOnline ? 'bg-green-500' : 'bg-ink-800'
-                  }`}
-                />
+                <StatusDot isOnline={member.isOnline} />
                 <Link
                   to={`/perfil/${member.id}`}
                   className="text-sm text-cream-100 truncate flex-1 hover:underline"
@@ -438,13 +398,9 @@ export function ChatPage() {
                   {member.displayName ?? `Usuario ${member.id}`}
                 </Link>
                 {!isSelf && !isFriend && (
-                  <button
-                    onClick={() => handleAddFriend(member.id)}
-                    disabled={alreadySent}
-                    className="text-xs text-gold-500 hover:text-gold-400 disabled:text-cream-400 disabled:cursor-not-allowed flex-shrink-0"
-                  >
+                  <IconButton onClick={() => handleAddFriend(member.id)} disabled={alreadySent}>
                     {alreadySent ? 'Enviada' : '+ Amigo'}
-                  </button>
+                  </IconButton>
                 )}
               </div>
             );

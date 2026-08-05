@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
 import { listFriends } from '../api/friends';
 import { Footer } from '../components/Footer';
+import { PageContainer, Card, LoadingScreen, Avatar, RoleBadge, Input, Button } from '../components/ui';
 
 interface Profile {
   id: number;
@@ -90,29 +91,15 @@ export function HomePage() {
   }
 
   if (isLoading || !profile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-ink-950">
-        <p className="text-cream-400">Cargando...</p>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
-    <div className="min-h-screen bg-ink-950 px-4 py-10">
+    <PageContainer className="px-4 py-10">
       <div className="max-w-md mx-auto">
-        <div className="bg-ink-900 border border-ink-800 rounded-xl p-8 text-center">
+        <Card className="text-center">
           <div className="relative w-24 h-24 mx-auto mb-4">
-            {profile.avatarUrl ? (
-              <img
-                src={profile.avatarUrl}
-                alt="Avatar"
-                className="w-24 h-24 rounded-full object-cover border-2 border-gold-500"
-              />
-            ) : (
-              <div className="w-24 h-24 rounded-full bg-ink-800 border-2 border-gold-500 flex items-center justify-center text-2xl text-cream-400">
-                {(profile.displayName ?? profile.email)[0].toUpperCase()}
-              </div>
-            )}
+            <Avatar avatarUrl={profile.avatarUrl} fallbackText={profile.displayName ?? profile.email} size={96} />
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingAvatar}
@@ -134,12 +121,12 @@ export function HomePage() {
 
           {isEditingName ? (
             <form onSubmit={handleSaveName} className="mb-2">
-              <input
+              <Input
                 type="text"
                 value={nameDraft}
                 onChange={(e) => setNameDraft(e.target.value)}
                 autoFocus
-                className="text-center bg-ink-950 border border-ink-800 rounded-md px-2 py-1 text-cream-100 focus:outline-none focus:ring-2 focus:ring-gold-500"
+                className="text-center"
               />
               <div className="flex justify-center gap-2 mt-2">
                 <button type="submit" className="text-xs text-gold-500 hover:text-gold-400">
@@ -170,9 +157,9 @@ export function HomePage() {
           )}
 
           <p className="text-sm text-cream-400 mb-2">{profile.email}</p>
-          <p className="text-xs text-gold-500 uppercase tracking-wide mb-6">
-            {profile.role}
-          </p>
+          <div className="mb-6">
+            <RoleBadge role={profile.role} />
+          </div>
 
           <div className="flex justify-center gap-8 mb-6">
             <div>
@@ -206,16 +193,13 @@ export function HomePage() {
                 Santuario
               </Link>
             )}
-            <button
-              onClick={() => logout()}
-              className="bg-ink-800 text-cream-100 font-medium px-4 py-2 rounded-md hover:bg-ink-800/70 transition-colors"
-            >
+            <Button variant="secondary" onClick={() => logout()}>
               Cerrar sesión
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       </div>
       <Footer />
-    </div>
+    </PageContainer>
   );
 }

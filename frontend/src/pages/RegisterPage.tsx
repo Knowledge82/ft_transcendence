@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { validateEmail, validatePassword, validateDisplayName } from '../utils/validation';
+import { PageContainer, Card, Input, Button, FieldError } from '../components/ui';
 
 interface FieldErrors {
   email?: string;
@@ -50,8 +51,8 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-ink-950 px-4">
-      <div className="w-full max-w-sm bg-ink-900 border border-ink-800 rounded-xl p-8">
+    <PageContainer className="flex items-center justify-center px-4">
+      <Card className="w-full max-w-sm">
         <h1 className="text-2xl font-semibold text-cream-100 mb-6 text-center">
           Registro
         </h1>
@@ -61,61 +62,48 @@ export function RegisterPage() {
             <label htmlFor="displayName" className="block text-sm font-medium text-cream-400 mb-1">
               Nombre
             </label>
-            <input
+            <Input
               id="displayName"
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full rounded-md bg-ink-950 border border-ink-800 px-3 py-2 text-cream-100 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
             />
-            {fieldErrors.displayName && (
-              <p className="mt-1 text-sm text-error-500">{fieldErrors.displayName}</p>
-            )}
+            <FieldError>{fieldErrors.displayName}</FieldError>
           </div>
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-cream-400 mb-1">
               Email
             </label>
-            <input
+            <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-md bg-ink-950 border border-ink-800 px-3 py-2 text-cream-100 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
             />
-            {fieldErrors.email && (
-              <p className="mt-1 text-sm text-error-500">{fieldErrors.email}</p>
-            )}
+            <FieldError>{fieldErrors.email}</FieldError>
           </div>
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-cream-400 mb-1">
               Contraseña
             </label>
-            <input
+            <Input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-md bg-ink-950 border border-ink-800 px-3 py-2 text-cream-100 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
             />
-            {fieldErrors.password && (
-              <p className="mt-1 text-sm text-error-500">{fieldErrors.password}</p>
-            )}
+            <FieldError>{fieldErrors.password}</FieldError>
           </div>
 
           {submitError && (
             <p className="text-sm text-error-500 text-center">{submitError}</p>
           )}
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-gold-500 text-gold-on font-medium py-2 rounded-md hover:bg-gold-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
+          <Button type="submit" disabled={isSubmitting} className="w-full">
             {isSubmitting ? 'Enviando...' : 'Registrarse'}
-          </button>
+          </Button>
         </form>
 
         <p className="mt-6 text-sm text-cream-400 text-center">
@@ -124,7 +112,7 @@ export function RegisterPage() {
             Inicia sesión
           </Link>
         </p>
-      </div>
-    </div>
+      </Card>
+    </PageContainer>
   );
 }
