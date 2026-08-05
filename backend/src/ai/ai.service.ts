@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 
 const SYSTEM_PROMPT = `Eres el Confesor de La Iglesia del Verdadero Relink, una comunidad
 satírica de estudiantes de 42 Barcelona. Tu tono es solemne, dramático y
@@ -17,18 +17,17 @@ El usuario te mostrará un fragmento de Makefile. Tu trabajo:
 4. Responde en español, en un párrafo o dos, no más.`;
 
 const MAX_INPUT_LENGTH = 4000;
-// Configurable via .env so a model retirement/quota change never requires
-// touching code — just update GEMINI_MODEL and restart the container.
-// "gemini-2.0-flash" as default: not the newest (smaller free quota) nor
-// a retired version, a reasonable middle ground for a free-tier project.
-const MODEL_NAME = process.env.GEMINI_MODEL ?? 'gemini-2.0-flash';
+// Configurable via .env — Groq retires specific model versions over time
+// too (it already happened once, in June 2026), so this avoids having to
+// touch code again when it happens next.
+const MODEL_NAME = process.env.GROQ_MODEL ?? 'openai/gpt-oss-20b';
 
 @Injectable()
 export class AiService {
-  private readonly genAI: GoogleGenerativeAI;
+  private readonly groq: Groq;
 
   constructor() {
-    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '');
+    this.groq = new Groq({ apiKey: process.env.GROQ_API_KEY ?? '' });
   }
 
   async *streamConfession(makefileContent: string): AsyncGenerator<string> {
@@ -41,27 +40,27 @@ export class AiService {
       );
     }
 
-    const model = this.genAI.getGenerativeModel({
-      model: MODEL_NAME,
-      systemInstruction: SYSTEM_PROMPT,
-    });
-
     try {
-      const result = await model.generateContentStream(makefileContent);
-      for await (const chunk of result.stream) {
-        const text = chunk.text();
+      const stream = await this.groq.chat.completions.create({
+        model: MODEL_NAME,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: makefileContent },
+        ],
+        stream: true,
+      });
+
+      for await (const chunk of stream) {
+        const text = chunk.choices[0]?.delta?.content;
         if (text) {
           yield text;
         }
       }
     } catch (error) {
-      // Distinguish Google's own quota/rate-limit response from any other
-      // failure, so the controller (and the user) get a message that
-      // actually explains what happened instead of a generic "internal error"
       const status = (error as { status?: number })?.status;
       if (status === 429) {
         throw new HttpException(
-          'El Confesor ha agotado su cuota diaria gratuita de consultas a la IA. Inténtalo de nuevo mañana.',
+          'El Confesor ha agotado su cuota gratuita de consultas a la IA por ahora. Inténtalo de nuevo en unos minutos.',
           HttpStatus.TOO_MANY_REQUESTS,
         );
       }

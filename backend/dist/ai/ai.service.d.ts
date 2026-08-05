@@ -1,5 +1,5 @@
 export declare class AiService {
-    private readonly genAI;
+    private readonly groq;
     constructor();
     streamConfession(makefileContent: string): AsyncGenerator<string>;
 }

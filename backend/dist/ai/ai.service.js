@@ -8,10 +8,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AiService = void 0;
 const common_1 = require("@nestjs/common");
-const generative_ai_1 = require("@google/generative-ai");
+const groq_sdk_1 = __importDefault(require("groq-sdk"));
 const SYSTEM_PROMPT = `Eres el Confesor de La Iglesia del Verdadero Relink, una comunidad
 satírica de estudiantes de 42 Barcelona. Tu tono es solemne, dramático y
 ligeramente sarcástico, como un sacerdote medieval hablando de pecados de
@@ -27,11 +30,11 @@ El usuario te mostrará un fragmento de Makefile. Tu trabajo:
    nunca solo lo etiquetes como "herejía" sin justificación real.
 4. Responde en español, en un párrafo o dos, no más.`;
 const MAX_INPUT_LENGTH = 4000;
-const MODEL_NAME = process.env.GEMINI_MODEL ?? 'gemini-2.0-flash';
+const MODEL_NAME = process.env.GROQ_MODEL ?? 'openai/gpt-oss-20b';
 let AiService = class AiService {
-    genAI;
+    groq;
     constructor() {
-        this.genAI = new generative_ai_1.GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '');
+        this.groq = new groq_sdk_1.default({ apiKey: process.env.GROQ_API_KEY ?? '' });
     }
     async *streamConfession(makefileContent) {
         if (!makefileContent || !makefileContent.trim()) {
@@ -40,14 +43,17 @@ let AiService = class AiService {
         if (makefileContent.length > MAX_INPUT_LENGTH) {
             throw new common_1.BadRequestException(`El Makefile es demasiado largo (máximo ${MAX_INPUT_LENGTH} caracteres)`);
         }
-        const model = this.genAI.getGenerativeModel({
-            model: MODEL_NAME,
-            systemInstruction: SYSTEM_PROMPT,
-        });
         try {
-            const result = await model.generateContentStream(makefileContent);
-            for await (const chunk of result.stream) {
-                const text = chunk.text();
+            const stream = await this.groq.chat.completions.create({
+                model: MODEL_NAME,
+                messages: [
+                    { role: 'system', content: SYSTEM_PROMPT },
+                    { role: 'user', content: makefileContent },
+                ],
+                stream: true,
+            });
+            for await (const chunk of stream) {
+                const text = chunk.choices[0]?.delta?.content;
                 if (text) {
                     yield text;
                 }
@@ -56,7 +62,7 @@ let AiService = class AiService {
         catch (error) {
             const status = error?.status;
             if (status === 429) {
-                throw new common_1.HttpException('El Confesor ha agotado su cuota diaria gratuita de consultas a la IA. Inténtalo de nuevo mañana.', common_1.HttpStatus.TOO_MANY_REQUESTS);
+                throw new common_1.HttpException('El Confesor ha agotado su cuota gratuita de consultas a la IA por ahora. Inténtalo de nuevo en unos minutos.', common_1.HttpStatus.TOO_MANY_REQUESTS);
             }
             throw error;
         }
