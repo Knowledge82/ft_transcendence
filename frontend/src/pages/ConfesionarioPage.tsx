@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { streamConfession } from '../api/ai';
+import { PageContainer, Card, Textarea, Button } from '../components/ui';
 
 const MAX_LENGTH = 4000;
 // How slowly the text "speaks" on screen, independent of how fast the
@@ -63,7 +64,7 @@ export function ConfesionarioPage() {
   const visibleResponse = fullText.slice(0, visibleLength);
 
   return (
-    <div className="min-h-screen bg-ink-950 px-4 py-10">
+    <PageContainer className="px-4 py-10">
       <div className="max-w-2xl mx-auto">
         <Link to="/altar" className="text-sm text-gold-500 hover:text-gold-400">
           ← Volver
@@ -77,25 +78,20 @@ export function ConfesionarioPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-3">
-          <textarea
+          <Textarea
             value={makefile}
             onChange={(e) => setMakefile(e.target.value.slice(0, MAX_LENGTH))}
-            placeholder="all:&#10;&#9;gcc main.c -o program"
+            placeholder={'all:\n\tgcc main.c -o program'}
             rows={10}
-            className="w-full rounded-md bg-ink-900 border border-ink-800 px-3 py-2 text-cream-100 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-gold-500 resize-y"
           />
           <div className="flex justify-between items-center text-xs text-cream-400">
             <span>{makefile.length}/{MAX_LENGTH}</span>
           </div>
 
           <div className="flex gap-3">
-            <button
-              type="submit"
-              disabled={isStreaming || !makefile.trim()}
-              className="bg-gold-500 text-gold-on font-medium px-6 py-2 rounded-md hover:bg-gold-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
+            <Button type="submit" disabled={isStreaming || !makefile.trim()}>
               {isStreaming ? 'Confesando...' : 'Confesarme'}
-            </button>
+            </Button>
             {isFetching && (
               <button
                 type="button"
@@ -115,7 +111,7 @@ export function ConfesionarioPage() {
         )}
 
         {fullText && (
-          <div className="mt-6 bg-ink-900 border border-ink-800 rounded-lg p-6">
+          <Card className="mt-6">
             <p className="text-xs uppercase tracking-wide text-gold-500 mb-3">
               El Confesor dice:
             </p>
@@ -123,9 +119,9 @@ export function ConfesionarioPage() {
               {visibleResponse}
               {isStreaming && <span className="animate-pulse">▌</span>}
             </p>
-          </div>
+          </Card>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }

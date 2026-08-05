@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { apiClient } from '../api/client';
 import { listAllUsers, changeUserRole, deleteUser } from '../api/admin';
 import type { AdminUser, Role } from '../api/admin';
+import { PageContainer, LoadingScreen, IconButton } from '../components/ui';
 
 const ROLES: Role[] = ['HERMANO', 'GUARDIAN', 'ARZOBISPO'];
 
@@ -36,26 +37,22 @@ export function AdminPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-ink-950">
-        <p className="text-cream-400">Cargando...</p>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (ownRole !== 'ARZOBISPO') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-ink-950 gap-4">
+      <PageContainer className="flex flex-col items-center justify-center gap-4">
         <p className="text-cream-100">No tienes el rango necesario para entrar aquí.</p>
         <Link to="/altar" className="text-gold-500 hover:text-gold-400">
           ← Volver al Altar
         </Link>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="min-h-screen bg-ink-950 px-4 py-10">
+    <PageContainer className="px-4 py-10">
       <div className="max-w-3xl mx-auto">
         <Link to="/altar" className="text-sm text-gold-500 hover:text-gold-400">
           ← Volver
@@ -96,12 +93,9 @@ export function AdminPage() {
                     </select>
                   </td>
                   <td className="px-4 py-3">
-                    <button
-                      onClick={() => handleDelete(user.id)}
-                      className="text-error-500 hover:text-red-400 text-xs"
-                    >
+                    <IconButton tone="danger" onClick={() => handleDelete(user.id)}>
                       Eliminar
-                    </button>
+                    </IconButton>
                   </td>
                 </tr>
               ))}
@@ -109,6 +103,6 @@ export function AdminPage() {
           </table>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

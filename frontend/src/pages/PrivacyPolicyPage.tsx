@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
+import { PageContainer } from '../components/ui';
 
 export function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-ink-950 px-4 py-16">
+    <PageContainer className="px-4 py-16">
       <div className="max-w-2xl mx-auto">
         <Link to="/" className="text-sm text-gold-500 hover:text-gold-400">
           ← Volver
@@ -96,6 +97,6 @@ export function PrivacyPolicyPage() {
           </section>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }
