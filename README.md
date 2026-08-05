@@ -10,11 +10,14 @@ Clona el proyecto en tu máquina local y accede a la carpeta raíz:
 git clone <URL_DE_TU_REPOSITORIO>
 cd <NOMBRE_DE_LA_CARPETA>
 ```
+
 ### B. Configurar las variables de entorno
+
 Cada desarrollador debe tener su propio archivo de configuración local. Copia el archivo de plantilla .env.example y renómbralo a .env:
 ```bash
 cp .env.example .env
 ```
+
 ⚠️ **Importante**: Abre el archivo .env recién creado y define tus propias contraseñas, credenciales de la base de datos y la clave secreta para los tokens (JWT_SECRET). Nunca subas tu archivo .env personal al repositorio.
 
 #### 📝 Configuración del archivo `.env`
@@ -30,18 +33,30 @@ Cuando copies el archivo `.env.example` a `.env`, verás las siguientes variable
 | `JWT_REFRESH_SECRET` | `change_me_refresh_secret` | **¡CÁMBIALO!** Genera otra cadena de texto aleatoria distinta a la anterior. Se usa para firmar los Refresh Tokens (7 días). |
 | `NODE_ENV` | `development` | Déjalo en `development` para habilitar los logs detallados y el modo de recarga rápida (watch mode) en NestJS. |
 | `VITE_API_URL` | `https://localhost/api` | Déjalo así. Es la URL que usará el Frontend (Vite) para comunicarse con el Backend a través del puerto seguro de Nginx. |
+| `GEMINI_API_KEY` | *(vacío)* | **¡OBLIGATORIO Y PERSONAL!** Cada desarrollador debe generar su propia clave gratuita — ver instrucciones abajo. Nunca la compartas ni la subas al repositorio. |
+| `GEMINI_MODEL` | `gemini-2.0-flash` | Puedes dejarlo por defecto. Si esta versión queda retirada por Google en el futuro, cámbiala aquí sin tocar el código — ver la lista de modelos disponibles en `GET /ai/models`. |
 
-> 🔑 **Pro Tip para generar secretos seguros:**  
+> 🔑 **Tip para generar secretos seguros:**
 Puedes generar claves aleatorias fuertes rápidamente desde tu terminal ejecutando:
 ```bash
 openssl rand -base64 32
 ```
 Copia el resultado y pégalo en tu `JWT_SECRET` y `JWT_REFRESH_SECRET`.
 
-**Proyecto:** "La Iglesia del Verdadero Relink" — red social satírica sobre la cultura del cargo cult en 42
-**Periodo cubierto:** primera semana de desarrollo (infraestructura + módulo de autenticación)
+#### 🤖 Obtener tu propia clave de Gemini API
+
+**Por qué cada uno necesita su propia clave, y no una compartida:**
+- **Cuota diaria limitada por clave**: el nivel gratuito de Gemini tiene un límite de peticiones por día. Si todo el equipo usa la misma clave, esa cuota se agota mucho más rápido y unos bloquean el trabajo de otros.
+- **Seguridad**: una clave compartida por chat/Slack/lo que sea es una clave que tarde o temprano se filtra por accidente. Cada clave está vinculada a la cuenta de Google de quien la crea — mejor que sea tu propia responsabilidad, no la de otro.
+
+**Cómo conseguirla (gratis, sin tarjeta, 2 minutos):**
+1. Entra en [aistudio.google.com](https://aistudio.google.com) con cualquier cuenta de Google
+2. En el menú lateral, "Get API key" → "Create API key"
+3. Copia la clave generada y pégala en tu `.env` local como `GEMINI_API_KEY`
+
 
 ---
+
 
 ## 1. Idea y planificación
 
@@ -217,6 +232,8 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 ---
 
 [+ Perfil, update friendlist, clicables nombres, coversaciones](./docs/docs-perfil-amigos-chat.md)
+
+[+ PWA Manifest](./docs/docs-pwa-manifest.md)
 
 
 ## 5. Verificación end-to-end
