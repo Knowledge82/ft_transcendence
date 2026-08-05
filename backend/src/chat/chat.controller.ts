@@ -44,7 +44,16 @@ export class ChatController {
     @Request() req,
     @Param('userId', ParseIntPipe) otherUserId: number,
   ) {
-    return this.chatService.findOrCreateDirectConversation(req.user.userId, otherUserId);
+    const conversation = await this.chatService.findOrCreateDirectConversation(
+      req.user.userId,
+      otherUserId,
+    );
+    // Make sure both people's currently-open sockets actually join the
+    // room immediately — otherwise a message sent right after creating
+    // this conversation wouldn't reach either of them live
+    this.chatGateway.joinConversationRoom(req.user.userId, conversation.id);
+    this.chatGateway.joinConversationRoom(otherUserId, conversation.id);
+    return conversation;
   }
 
   @Get(':conversationId/messages')

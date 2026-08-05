@@ -6,14 +6,14 @@ export declare class FriendsController {
     constructor(friendsService: FriendsService, chatGateway: ChatGateway);
     listFriends(req: any): Promise<{
         isOnline: boolean;
-        displayName: string | null;
         id: number;
+        displayName: string | null;
         avatarUrl: string | null;
     }[]>;
     listPendingRequests(req: any): Promise<({
         requester: {
-            displayName: string | null;
             id: number;
+            displayName: string | null;
             avatarUrl: string | null;
         };
     } & {
@@ -25,8 +25,8 @@ export declare class FriendsController {
     })[]>;
     sendRequest(req: any, addresseeId: number): Promise<{
         requester: {
-            displayName: string | null;
             id: number;
+            displayName: string | null;
             avatarUrl: string | null;
         };
     } & {

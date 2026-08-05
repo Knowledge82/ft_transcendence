@@ -89,6 +89,15 @@ let ChatGateway = class ChatGateway {
             this.server.to(socketId).emit(event, payload);
         }
     }
+    joinConversationRoom(userId, conversationId) {
+        const socketIds = this.onlineUsers.get(userId);
+        if (!socketIds) {
+            return;
+        }
+        for (const socketId of socketIds) {
+            this.server.sockets.sockets.get(socketId)?.join(roomName(conversationId));
+        }
+    }
     async handleSendMessage(client, payload) {
         const senderId = client.data.userId;
         let message;

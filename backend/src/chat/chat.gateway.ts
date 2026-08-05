@@ -22,9 +22,6 @@ interface SendMessagePayload {
   content: string;
 }
 
-// Room naming convention: every conversation gets its own Socket.IO room,
-// named "conversation:<id>". Joining a room lets us broadcast to exactly
-// the people in that chat, instead of everyone connected to the server.
 const roomName = (conversationId: number) => `conversation:${conversationId}`;
 
 @WebSocketGateway({ cors: true })
@@ -63,17 +60,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     existing.add(client.id);
     this.onlineUsers.set(payload.sub, existing);
 
-    // Only broadcast when this is the user's FIRST active connection —
-    // if they already had another tab open, they were already online,
-    // no need to notify anyone again
     if (isFirstConnection) {
       this.server.emit('userStatusChanged', { userId: payload.sub, isOnline: true });
     }
 
-    // Auto-join every room this user is part of: the general channel,
-    // plus every existing direct conversation. This means as soon as
-    // someone connects, they're ready to receive messages broadcast to
-    // any of their chats, without having to manually subscribe to each one.
     const general = await this.chatService.getOrCreateGeneralChannel();
     const isNewMember = await this.chatService.ensureParticipant(general.id, payload.sub);
     if (isNewMember) {
@@ -110,9 +100,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return this.onlineUsers.has(userId);
   }
 
-  // Sends an event only to a specific user's active connections (all of
-  // their open tabs, not everyone else) — used for things that shouldn't
-  // be broadcast globally, like "you received a friend request"
   notifyUser(userId: number, event: string, payload: unknown) {
     const sockets = this.onlineUsers.get(userId);
     if (!sockets) {
@@ -120,6 +107,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     for (const socketId of sockets) {
       this.server.to(socketId).emit(event, payload);
+    }
+  }
+
+  // Joins ALL of a user's currently active sockets (every open tab) to a
+  // conversation room, right when that conversation is created — without
+  // this, a DM created after the socket already connected would never be
+  // joined, and messages sent in it wouldn't reach the sender's own live
+  // view until the page (and socket) reload
+  joinConversationRoom(userId: number, conversationId: number) {
+    const socketIds = this.onlineUsers.get(userId);
+    if (!socketIds) {
+      return;
+    }
+    for (const socketId of socketIds) {
+      this.server.sockets.sockets.get(socketId)?.join(roomName(conversationId));
     }
   }
 
@@ -138,9 +140,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         payload.content,
       );
     } catch (error) {
-      // HTTP-style exceptions (ForbiddenException, etc.) don't serialize
-      // cleanly over WebSocket — WsException is what the Gateway's
-      // exception layer knows how to turn into a proper 'exception' event
       throw new WsException(error.message ?? 'Could not send message');
     }
 

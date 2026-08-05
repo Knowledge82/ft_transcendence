@@ -44,7 +44,10 @@ let ChatController = class ChatController {
         }));
     }
     async startDirectConversation(req, otherUserId) {
-        return this.chatService.findOrCreateDirectConversation(req.user.userId, otherUserId);
+        const conversation = await this.chatService.findOrCreateDirectConversation(req.user.userId, otherUserId);
+        this.chatGateway.joinConversationRoom(req.user.userId, conversation.id);
+        this.chatGateway.joinConversationRoom(otherUserId, conversation.id);
+        return conversation;
     }
     async getHistory(req, conversationId) {
         return this.chatService.getMessageHistory(conversationId, req.user.userId);
