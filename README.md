@@ -259,6 +259,8 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [+ Design System — componentes reutilizables](./docs/docs-design-system.md)
 
+[+ Varias mejoras: roles en vivo, amistad como privilegio y nombres temáticos](./docs/docs-mejoras-coherencia.md)
+
 ## 5. Verificación end-to-end
 
 Todo el ciclo se probó manualmente con `curl` (con flags `-k` para el certificado autofirmado, `-c`/`-b` para gestionar cookies) y posteriormente también con Insomnia:

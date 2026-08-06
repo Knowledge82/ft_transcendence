@@ -58,6 +58,18 @@ let ChatService = class ChatService {
         });
     }
     async findOrCreateDirectConversation(userIdA, userIdB) {
+        const friendship = await this.prisma.friendship.findFirst({
+            where: {
+                status: 'ACCEPTED',
+                OR: [
+                    { requesterId: userIdA, addresseeId: userIdB },
+                    { requesterId: userIdB, addresseeId: userIdA },
+                ],
+            },
+        });
+        if (!friendship) {
+            throw new common_1.ForbiddenException('Solo puedes escribir en privado a tus hermanos');
+        }
         const existing = await this.prisma.conversation.findFirst({
             where: {
                 type: 'DIRECT',

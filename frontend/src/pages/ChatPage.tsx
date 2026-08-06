@@ -25,7 +25,7 @@ export function ChatPage() {
   const [sentRequests, setSentRequests] = useState<Set<number>>(new Set());
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
-  const [channelLabel, setChannelLabel] = useState('# general');
+  const [channelLabel, setChannelLabel] = useState('Capítulo');
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState('');
   const [ownUserId, setOwnUserId] = useState<number | null>(null);
@@ -68,7 +68,7 @@ export function ChatPage() {
           setActiveDmTarget(stateOtherUser);
         } else {
           setSelectedConversationId(general.id);
-          setChannelLabel('# general');
+          setChannelLabel('Capítulo');
         }
       })
       .finally(() => setIsLoading(false));
@@ -175,6 +175,11 @@ export function ChatPage() {
     setFriends(updatedFriends);
   }
 
+  async function handleRejectRequest(requesterId: number) {
+    await removeFriend(requesterId);
+    setPendingRequests((prev) => prev.filter((r) => r.requesterId !== requesterId));
+  }
+
   async function handleRemoveFriend(userId: number) {
     if (!confirm('¿Seguro que quieres quitar a este hermano de tu lista de amigos?')) {
       return;
@@ -228,7 +233,7 @@ export function ChatPage() {
       <div className="flex flex-1">
       <aside className="w-64 bg-ink-900 border-r border-ink-800 flex flex-col">
         <div className="p-4 border-b border-ink-800">
-          <Link to="/celda" className="text-sm text-gold-500 hover:text-gold-400">
+          <Link to="/altar" className="text-sm text-gold-500 hover:text-gold-400">
             ← Volver
           </Link>
         </div>
@@ -239,7 +244,7 @@ export function ChatPage() {
             <button
               onClick={() => {
                 setSelectedConversationId(generalChannel.id);
-                setChannelLabel('# general');
+                setChannelLabel('Capítulo');
                 setActiveDmTarget(null);
               }}
               className={`w-full text-left px-3 py-2 rounded-md mb-1 transition-colors ${
@@ -248,7 +253,7 @@ export function ChatPage() {
                   : 'text-cream-100 hover:bg-ink-800'
               }`}
             >
-              # general
+              Capítulo
             </button>
           )}
         </div>
@@ -295,9 +300,17 @@ export function ChatPage() {
                 >
                   {request.requester.displayName ?? `Usuario ${request.requesterId}`}
                 </Link>
-                <IconButton onClick={() => handleAcceptRequest(request.requesterId)}>
-                  Aceptar
-                </IconButton>
+                <div className="flex gap-1 flex-shrink-0">
+                  <IconButton onClick={() => handleAcceptRequest(request.requesterId)}>
+                    Aceptar
+                  </IconButton>
+                  <IconButton
+                    tone="danger"
+                    onClick={() => handleRejectRequest(request.requesterId)}
+                  >
+                    Rechazar
+                  </IconButton>
+                </div>
               </div>
             ))}
           </div>

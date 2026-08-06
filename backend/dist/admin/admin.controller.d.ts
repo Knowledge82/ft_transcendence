@@ -6,11 +6,11 @@ export declare class AdminController {
     constructor(adminService: AdminService, chatGateway: ChatGateway);
     listUsers(): Promise<{
         id: number;
+        createdAt: Date;
         email: string;
         displayName: string | null;
         avatarUrl: string | null;
         role: import("@prisma/client").$Enums.Role;
-        createdAt: Date;
     }[]>;
     changeRole(id: number, role: string): Promise<{
         id: number;

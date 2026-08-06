@@ -50,7 +50,23 @@ export class ChatService {
     });
   }
 
+  // Direct messages are a privilege of friendship in this community —
+  // everyone can talk in the general channel regardless, but private
+  // conversations are reserved for people who've actually become "hermanos"
   async findOrCreateDirectConversation(userIdA: number, userIdB: number) {
+    const friendship = await this.prisma.friendship.findFirst({
+      where: {
+        status: 'ACCEPTED',
+        OR: [
+          { requesterId: userIdA, addresseeId: userIdB },
+          { requesterId: userIdB, addresseeId: userIdA },
+        ],
+      },
+    });
+    if (!friendship) {
+      throw new ForbiddenException('Solo puedes escribir en privado a tus hermanos');
+    }
+
     const existing = await this.prisma.conversation.findFirst({
       where: {
         type: 'DIRECT',
