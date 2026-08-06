@@ -42,7 +42,7 @@ export function RegisterPage() {
     setIsSubmitting(true);
     try {
       await register(email, password, displayName);
-      navigate('/altar');
+      navigate('/celda');
     } catch (err) {
       setSubmitError('No se pudo completar el registro. Comprueba los datos.');
     } finally {

@@ -18,16 +18,21 @@ const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("../auth/guards/roles.guard");
 const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 const admin_service_1 = require("./admin.service");
+const chat_gateway_1 = require("../chat/chat.gateway");
 let AdminController = class AdminController {
     adminService;
-    constructor(adminService) {
+    chatGateway;
+    constructor(adminService, chatGateway) {
         this.adminService = adminService;
+        this.chatGateway = chatGateway;
     }
     async listUsers() {
         return this.adminService.listUsers();
     }
     async changeRole(id, role) {
-        return this.adminService.changeRole(id, role);
+        const updated = await this.adminService.changeRole(id, role);
+        this.chatGateway.notifyUser(id, 'roleChanged', { role: updated.role });
+        return updated;
     }
     async deleteUser(id) {
         await this.adminService.deleteUser(id);
@@ -59,6 +64,7 @@ exports.AdminController = AdminController = __decorate([
     (0, common_1.Controller)('admin'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('ARZOBISPO'),
-    __metadata("design:paramtypes", [admin_service_1.AdminService])
+    __metadata("design:paramtypes", [admin_service_1.AdminService,
+        chat_gateway_1.ChatGateway])
 ], AdminController);
 //# sourceMappingURL=admin.controller.js.map

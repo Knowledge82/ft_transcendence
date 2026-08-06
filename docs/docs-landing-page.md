@@ -5,9 +5,9 @@
 Antes, `/` era la ruta protegida con el panel de perfil (`HomePage`) — un visitante sin sesión llegaba directamente a un formulario de login vacío, sin ningún contexto sobre qué es la aplicación. Se separaron ambas responsabilidades:
 
 - **`/`** — nueva página pública (`LandingPage`), accesible sin sesión, con el manifiesto de la Iglesia
-- **`/altar`** — el antiguo panel de perfil (`HomePage`), ahora protegido con `ProtectedRoute`
+- **`/celda`** — el antiguo panel de perfil (`HomePage`), ahora protegido con `ProtectedRoute`
 
-Los redirects tras login y registro (`navigate(...)`) se actualizaron para apuntar a `/altar` en vez de `/`.
+Los redirects tras login y registro (`navigate(...)`) se actualizaron para apuntar a `/celda` en vez de `/`.
 
 ## Revelado en tres fases
 

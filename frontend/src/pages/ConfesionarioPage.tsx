@@ -66,7 +66,7 @@ export function ConfesionarioPage() {
   return (
     <PageContainer className="px-4 py-10">
       <div className="max-w-2xl mx-auto">
-        <Link to="/altar" className="text-sm text-gold-500 hover:text-gold-400">
+        <Link to="/celda" className="text-sm text-gold-500 hover:text-gold-400">
           ← Volver
         </Link>
 

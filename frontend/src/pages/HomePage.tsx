@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useSocket } from '../context/SocketContext';
 import { apiClient } from '../api/client';
 import { listFriends } from '../api/friends';
 import { Footer } from '../components/Footer';
@@ -16,11 +17,13 @@ interface Profile {
 
 export function HomePage() {
   const { logout } = useAuth();
+  const { socket } = useSocket();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [friendCount, setFriendCount] = useState(0);
   const [onlineCount, setOnlineCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [justChangedRole, setJustChangedRole] = useState(false);
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
@@ -42,6 +45,23 @@ export function HomePage() {
       setIsLoading(false);
     });
   }, []);
+
+  useEffect(() => {
+    if (!socket) {
+      return;
+    }
+
+    function handleRoleChanged({ role }: { role: Profile['role'] }) {
+      setProfile((prev) => (prev ? { ...prev, role } : prev));
+      setJustChangedRole(true);
+      setTimeout(() => setJustChangedRole(false), 2500);
+    }
+
+    socket.on('roleChanged', handleRoleChanged);
+    return () => {
+      socket.off('roleChanged', handleRoleChanged);
+    };
+  }, [socket]);
 
   async function handleSaveName(event: FormEvent) {
     event.preventDefault();
@@ -157,7 +177,11 @@ export function HomePage() {
           )}
 
           <p className="text-sm text-cream-400 mb-2">{profile.email}</p>
-          <div className="mb-6">
+          <div
+            className={`mb-6 inline-block rounded transition-shadow ${
+              justChangedRole ? 'animate-[pulse-glow_0.8s_ease-in-out_2]' : ''
+            }`}
+          >
             <RoleBadge role={profile.role} />
           </div>
 

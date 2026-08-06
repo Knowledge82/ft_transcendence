@@ -44,8 +44,8 @@ export function AdminPage() {
     return (
       <PageContainer className="flex flex-col items-center justify-center gap-4">
         <p className="text-cream-100">No tienes el rango necesario para entrar aquí.</p>
-        <Link to="/altar" className="text-gold-500 hover:text-gold-400">
-          ← Volver al Altar
+        <Link to="/celda" className="text-gold-500 hover:text-gold-400">
+          ← Volver a la celda
         </Link>
       </PageContainer>
     );
@@ -54,7 +54,7 @@ export function AdminPage() {
   return (
     <PageContainer className="px-4 py-10">
       <div className="max-w-3xl mx-auto">
-        <Link to="/altar" className="text-sm text-gold-500 hover:text-gold-400">
+        <Link to="/celda" className="text-sm text-gold-500 hover:text-gold-400">
           ← Volver
         </Link>
 

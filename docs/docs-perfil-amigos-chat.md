@@ -4,7 +4,7 @@ Este bloque cierra por completo el módulo Major "Allow users to interact with o
 
 ## Perfil público de otros usuarios
 
-Hasta ahora `/altar` solo mostraba el propio perfil. Se añadió `GET /users/:id`, un endpoint separado de `GET /users/me` que devuelve únicamente datos públicos (id, nombre, avatar, rango, estado online) — **sin el email**, que se considera privado y solo se expone a su propio dueño.
+Hasta ahora `/celda` solo mostraba el propio perfil. Se añadió `GET /users/:id`, un endpoint separado de `GET /users/me` que devuelve únicamente datos públicos (id, nombre, avatar, rango, estado online) — **sin el email**, que se considera privado y solo se expone a su propio dueño.
 
 **Detalle de implementación:** la ruta `:id` debe declararse en el controlador **después** de `me` y `me/avatar` — de lo contrario, una petición a `/users/me` podría acabar siendo interpretada como si `"me"` fuera el valor de `:id`, y `ParseIntPipe` la rechazaría por no ser un número.
 

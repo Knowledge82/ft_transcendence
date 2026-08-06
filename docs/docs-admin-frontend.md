@@ -2,7 +2,7 @@
 
 ## Qué se construyó
 
-La interfaz para el sistema de rangos implementado en el backend: una página (`/santuario`) donde un usuario con rango `ARZOBISPO` puede ver todos los usuarios registrados, cambiar el rango de cualquiera, y eliminar cuentas. Además, el panel de perfil (`/altar`) ahora muestra el propio rango del usuario, y solo enseña el enlace al Santuario si corresponde.
+La interfaz para el sistema de rangos implementado en el backend: una página (`/santuario`) donde un usuario con rango `ARZOBISPO` puede ver todos los usuarios registrados, cambiar el rango de cualquiera, y eliminar cuentas. Además, el panel de perfil (`/celda`) ahora muestra el propio rango del usuario, y solo enseña el enlace al Santuario si corresponde.
 
 ## Protección en dos capas
 

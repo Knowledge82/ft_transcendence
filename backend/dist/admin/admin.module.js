@@ -11,11 +11,13 @@ const common_1 = require("@nestjs/common");
 const admin_controller_1 = require("./admin.controller");
 const admin_service_1 = require("./admin.service");
 const roles_guard_1 = require("../auth/guards/roles.guard");
+const chat_module_1 = require("../chat/chat.module");
 let AdminModule = class AdminModule {
 };
 exports.AdminModule = AdminModule;
 exports.AdminModule = AdminModule = __decorate([
     (0, common_1.Module)({
+        imports: [chat_module_1.ChatModule],
         controllers: [admin_controller_1.AdminController],
         providers: [admin_service_1.AdminService, roles_guard_1.RolesGuard],
     })
