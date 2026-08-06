@@ -4,9 +4,9 @@ export declare class ChatService {
     constructor(prisma: PrismaService);
     getOrCreateGeneralChannel(): Promise<{
         id: number;
-        type: import("@prisma/client").$Enums.ConversationType;
-        name: string | null;
         createdAt: Date;
+        name: string | null;
+        type: import("@prisma/client").$Enums.ConversationType;
     }>;
     getGeneralChannelMembers(): Promise<{
         id: number;
@@ -21,9 +21,9 @@ export declare class ChatService {
     } | null>;
     findOrCreateDirectConversation(userIdA: number, userIdB: number): Promise<{
         id: number;
-        type: import("@prisma/client").$Enums.ConversationType;
-        name: string | null;
         createdAt: Date;
+        name: string | null;
+        type: import("@prisma/client").$Enums.ConversationType;
     }>;
     getUserConversationIds(userId: number): Promise<number[]>;
     getUserDirectConversations(userId: number): Promise<{

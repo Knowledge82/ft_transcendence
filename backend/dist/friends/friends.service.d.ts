@@ -3,14 +3,14 @@ export declare class FriendsService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     getBasicInfo(userId: number): Promise<{
-        displayName: string | null;
         id: number;
+        displayName: string | null;
         avatarUrl: string | null;
     } | null>;
     sendRequest(requesterId: number, addresseeId: number): Promise<{
         requester: {
-            displayName: string | null;
             id: number;
+            displayName: string | null;
             avatarUrl: string | null;
         };
     } & {
@@ -29,14 +29,14 @@ export declare class FriendsService {
     }>;
     removeFriendship(userId: number, otherUserId: number): Promise<void>;
     listFriends(userId: number): Promise<{
-        displayName: string | null;
         id: number;
+        displayName: string | null;
         avatarUrl: string | null;
     }[]>;
     listPendingRequests(userId: number): Promise<({
         requester: {
-            displayName: string | null;
             id: number;
+            displayName: string | null;
             avatarUrl: string | null;
         };
     } & {

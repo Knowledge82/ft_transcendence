@@ -17,12 +17,15 @@ const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const friends_service_1 = require("./friends.service");
 const chat_gateway_1 = require("../chat/chat.gateway");
+const community_service_1 = require("../community/community.service");
 let FriendsController = class FriendsController {
     friendsService;
     chatGateway;
-    constructor(friendsService, chatGateway) {
+    communityService;
+    constructor(friendsService, chatGateway, communityService) {
         this.friendsService = friendsService;
         this.chatGateway = chatGateway;
+        this.communityService = communityService;
     }
     async listFriends(req) {
         const friends = await this.friendsService.listFriends(req.user.userId);
@@ -43,6 +46,10 @@ let FriendsController = class FriendsController {
         const friendship = await this.friendsService.acceptRequest(req.user.userId, requesterId);
         const accepter = await this.friendsService.getBasicInfo(req.user.userId);
         this.chatGateway.notifyUser(requesterId, 'friendRequestAccepted', accepter);
+        const requester = await this.friendsService.getBasicInfo(requesterId);
+        const accepterName = accepter?.displayName ?? `Usuario ${accepter?.id}`;
+        const requesterName = requester?.displayName ?? `Usuario ${requester?.id}`;
+        await this.communityService.createEvent('FRIENDSHIP_ACCEPTED', `${requesterName} y ${accepterName} han jurado hermandad ante el Verdadero Relink.`);
         return friendship;
     }
     async removeFriendship(req, otherUserId) {
@@ -92,6 +99,7 @@ exports.FriendsController = FriendsController = __decorate([
     (0, common_1.Controller)('friends'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [friends_service_1.FriendsService,
-        chat_gateway_1.ChatGateway])
+        chat_gateway_1.ChatGateway,
+        community_service_1.CommunityService])
 ], FriendsController);
 //# sourceMappingURL=friends.controller.js.map

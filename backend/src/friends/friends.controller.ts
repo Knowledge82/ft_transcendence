@@ -11,6 +11,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FriendsService } from './friends.service';
 import { ChatGateway } from '../chat/chat.gateway';
+import { CommunityService } from '../community/community.service';
 
 @Controller('friends')
 @UseGuards(JwtAuthGuard)
@@ -18,6 +19,7 @@ export class FriendsController {
   constructor(
     private readonly friendsService: FriendsService,
     private readonly chatGateway: ChatGateway,
+    private readonly communityService: CommunityService,
   ) {}
 
   @Get()
@@ -50,10 +52,17 @@ export class FriendsController {
     @Param('userId', ParseIntPipe) requesterId: number,
   ) {
     const friendship = await this.friendsService.acceptRequest(req.user.userId, requesterId);
-    // Notify the original requester too — otherwise their friends list
-    // only shows the new friend after a manual reload
     const accepter = await this.friendsService.getBasicInfo(req.user.userId);
     this.chatGateway.notifyUser(requesterId, 'friendRequestAccepted', accepter);
+
+    const requester = await this.friendsService.getBasicInfo(requesterId);
+    const accepterName = accepter?.displayName ?? `Usuario ${accepter?.id}`;
+    const requesterName = requester?.displayName ?? `Usuario ${requester?.id}`;
+    await this.communityService.createEvent(
+      'FRIENDSHIP_ACCEPTED',
+      `${requesterName} y ${accepterName} han jurado hermandad ante el Verdadero Relink.`,
+    );
+
     return friendship;
   }
 

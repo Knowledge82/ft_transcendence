@@ -48,15 +48,18 @@ const jwt_1 = require("@nestjs/jwt");
 const bcrypt = __importStar(require("bcrypt"));
 const crypto = __importStar(require("crypto"));
 const prisma_service_1 = require("../prisma/prisma.service");
+const community_service_1 = require("../community/community.service");
 const SALT_ROUNDS = 12;
 const ACCESS_TOKEN_TTL = '15m';
 const REFRESH_TOKEN_TTL_DAYS = 7;
 let AuthService = class AuthService {
     prisma;
     jwtService;
-    constructor(prisma, jwtService) {
+    communityService;
+    constructor(prisma, jwtService, communityService) {
         this.prisma = prisma;
         this.jwtService = jwtService;
+        this.communityService = communityService;
     }
     async register(dto) {
         const existingUser = await this.prisma.user.findUnique({
@@ -73,6 +76,8 @@ let AuthService = class AuthService {
                 displayName: dto.displayName,
             },
         });
+        const name = user.displayName ?? `Usuario ${user.id}`;
+        await this.communityService.createEvent('USER_REGISTERED', `${name} ha llamado a las puertas del Verdadero Relink y ha sido recibido como novicio.`);
         return this.issueTokens(user.id, user.email);
     }
     async login(dto) {
@@ -140,6 +145,7 @@ exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        community_service_1.CommunityService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

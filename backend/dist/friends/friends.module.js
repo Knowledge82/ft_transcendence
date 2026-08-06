@@ -11,12 +11,13 @@ const common_1 = require("@nestjs/common");
 const friends_controller_1 = require("./friends.controller");
 const friends_service_1 = require("./friends.service");
 const chat_module_1 = require("../chat/chat.module");
+const community_module_1 = require("../community/community.module");
 let FriendsModule = class FriendsModule {
 };
 exports.FriendsModule = FriendsModule;
 exports.FriendsModule = FriendsModule = __decorate([
     (0, common_1.Module)({
-        imports: [chat_module_1.ChatModule],
+        imports: [chat_module_1.ChatModule, community_module_1.CommunityModule],
         controllers: [friends_controller_1.FriendsController],
         providers: [friends_service_1.FriendsService],
     })

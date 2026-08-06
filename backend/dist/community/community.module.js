@@ -6,21 +6,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AdminModule = void 0;
+exports.CommunityModule = void 0;
 const common_1 = require("@nestjs/common");
-const admin_controller_1 = require("./admin.controller");
-const admin_service_1 = require("./admin.service");
-const roles_guard_1 = require("../auth/guards/roles.guard");
-const chat_module_1 = require("../chat/chat.module");
-const community_module_1 = require("../community/community.module");
-let AdminModule = class AdminModule {
+const community_controller_1 = require("./community.controller");
+const community_service_1 = require("./community.service");
+let CommunityModule = class CommunityModule {
 };
-exports.AdminModule = AdminModule;
-exports.AdminModule = AdminModule = __decorate([
+exports.CommunityModule = CommunityModule;
+exports.CommunityModule = CommunityModule = __decorate([
     (0, common_1.Module)({
-        imports: [chat_module_1.ChatModule, community_module_1.CommunityModule],
-        controllers: [admin_controller_1.AdminController],
-        providers: [admin_service_1.AdminService, roles_guard_1.RolesGuard],
+        controllers: [community_controller_1.CommunityController],
+        providers: [community_service_1.CommunityService],
+        exports: [community_service_1.CommunityService],
     })
-], AdminModule);
-//# sourceMappingURL=admin.module.js.map
+], CommunityModule);
+//# sourceMappingURL=community.module.js.map

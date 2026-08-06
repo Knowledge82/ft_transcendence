@@ -19,12 +19,15 @@ const roles_guard_1 = require("../auth/guards/roles.guard");
 const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 const admin_service_1 = require("./admin.service");
 const chat_gateway_1 = require("../chat/chat.gateway");
+const community_service_1 = require("../community/community.service");
 let AdminController = class AdminController {
     adminService;
     chatGateway;
-    constructor(adminService, chatGateway) {
+    communityService;
+    constructor(adminService, chatGateway, communityService) {
         this.adminService = adminService;
         this.chatGateway = chatGateway;
+        this.communityService = communityService;
     }
     async listUsers() {
         return this.adminService.listUsers();
@@ -32,6 +35,8 @@ let AdminController = class AdminController {
     async changeRole(id, role) {
         const updated = await this.adminService.changeRole(id, role);
         this.chatGateway.notifyUser(id, 'roleChanged', { role: updated.role });
+        const name = updated.displayName ?? `Usuario ${updated.id}`;
+        await this.communityService.createEvent('ROLE_CHANGED', `${name} ha alcanzado el rango de ${updated.role}.`);
         return updated;
     }
     async deleteUser(id) {
@@ -65,6 +70,7 @@ exports.AdminController = AdminController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('ARZOBISPO'),
     __metadata("design:paramtypes", [admin_service_1.AdminService,
-        chat_gateway_1.ChatGateway])
+        chat_gateway_1.ChatGateway,
+        community_service_1.CommunityService])
 ], AdminController);
 //# sourceMappingURL=admin.controller.js.map

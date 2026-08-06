@@ -218,6 +218,8 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [AiModule](./docs/docs-ai-module.md)
 
+[CommunityModule](./docs/docs-community-events.md)
+
 ---
 
 ## FRONTEND:
@@ -245,6 +247,7 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 [AdminModule frontend part](./docs/docs-admin-frontend.md)
 
 [AiModule front part](./docs/docs-ai-frontend.md)
+
 
 ---
 ---
