@@ -21,6 +21,9 @@ let CommunityController = class CommunityController {
     async getFeed() {
         return this.communityService.getRecentEvents();
     }
+    async getTodayFeed() {
+        return this.communityService.getTodayEvents();
+    }
 };
 exports.CommunityController = CommunityController;
 __decorate([
@@ -29,6 +32,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], CommunityController.prototype, "getFeed", null);
+__decorate([
+    (0, common_1.Get)('feed/today'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CommunityController.prototype, "getTodayFeed", null);
 exports.CommunityController = CommunityController = __decorate([
     (0, common_1.Controller)('community'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

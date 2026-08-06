@@ -11,4 +11,9 @@ export class CommunityController {
   async getFeed() {
     return this.communityService.getRecentEvents();
   }
+
+  @Get('feed/today')
+  async getTodayFeed() {
+    return this.communityService.getTodayEvents();
+  }
 }

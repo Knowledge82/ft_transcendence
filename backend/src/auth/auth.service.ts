@@ -43,10 +43,7 @@ export class AuthService {
     });
 
     const name = user.displayName ?? `Usuario ${user.id}`;
-    await this.communityService.createEvent(
-      'USER_REGISTERED',
-      `${name} ha llamado a las puertas del Verdadero Relink y ha sido recibido como novicio.`,
-    );
+    await this.communityService.createUserRegisteredEvent(name);
 
     return this.issueTokens(user.id, user.email);
   }

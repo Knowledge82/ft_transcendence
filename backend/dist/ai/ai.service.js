@@ -28,8 +28,12 @@ El usuario te mostrará un fragmento de Makefile. Tu trabajo:
    problemas que no existen.
 3. Explica siempre técnicamente POR QUÉ algo es correcto o incorrecto —
    nunca solo lo etiquetes como "herejía" sin justificación real.
-4. Responde en español, en un párrafo o dos, no más.`;
-const MAX_INPUT_LENGTH = 4000;
+4. Responde en español. Tu respuesta completa debe tener como máximo 90
+   palabras, repartidas en uno o dos párrafos cortos. Termina siempre con
+   una frase completa — nunca dejes una idea a medias. Sé conciso desde
+   la primera frase, no te extiendas antes de llegar al punto.`;
+const MAX_INPUT_LENGTH = 1000;
+const MAX_OUTPUT_TOKENS = 700;
 const MODEL_NAME = process.env.GROQ_MODEL ?? 'openai/gpt-oss-20b';
 let AiService = class AiService {
     groq;
@@ -50,6 +54,7 @@ let AiService = class AiService {
                     { role: 'system', content: SYSTEM_PROMPT },
                     { role: 'user', content: makefileContent },
                 ],
+                max_tokens: MAX_OUTPUT_TOKENS,
                 stream: true,
             });
             for await (const chunk of stream) {
@@ -61,9 +66,11 @@ let AiService = class AiService {
         }
         catch (error) {
             const status = error?.status;
+            const errorMessage = error?.message ?? 'unknown';
             if (status === 429) {
-                throw new common_1.HttpException('El Confesor ha agotado su cuota gratuita de consultas a la IA por ahora. Inténtalo de nuevo en unos minutos.', common_1.HttpStatus.TOO_MANY_REQUESTS);
+                throw new common_1.HttpException('El Confesor ha agotado su paciencia  por ahora. Inténtalo de nuevo en unos minutos.', common_1.HttpStatus.TOO_MANY_REQUESTS);
             }
+            console.error(`Groq error (status: ${status}):`, errorMessage);
             throw error;
         }
     }

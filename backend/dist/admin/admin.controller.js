@@ -36,7 +36,7 @@ let AdminController = class AdminController {
         const updated = await this.adminService.changeRole(id, role);
         this.chatGateway.notifyUser(id, 'roleChanged', { role: updated.role });
         const name = updated.displayName ?? `Usuario ${updated.id}`;
-        await this.communityService.createEvent('ROLE_CHANGED', `${name} ha alcanzado el rango de ${updated.role}.`);
+        await this.communityService.createRoleChangedEvent(name, updated.role);
         return updated;
     }
     async deleteUser(id) {

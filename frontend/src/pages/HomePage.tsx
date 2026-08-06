@@ -6,6 +6,7 @@ import { apiClient } from '../api/client';
 import { listFriends } from '../api/friends';
 import { Footer } from '../components/Footer';
 import { PageContainer, Card, LoadingScreen, Avatar, RoleBadge, Input, Button } from '../components/ui';
+import { ActivityTicker } from '../components/ActivityTicker';
 
 interface Profile {
   id: number;
@@ -115,9 +116,11 @@ export function HomePage() {
   }
 
   return (
-    <PageContainer className="px-4 py-10">
-      <div className="max-w-md mx-auto">
-        <Card className="text-center">
+    <PageContainer className="flex flex-col">
+      <div className="flex-1 px-4 py-10">
+        <div className="max-w-md mx-auto">
+          <ActivityTicker />
+          <Card className="text-center">
           <div className="relative w-24 h-24 mx-auto mb-4">
             <Avatar avatarUrl={profile.avatarUrl} fallbackText={profile.displayName ?? profile.email} size={96} />
             <button
@@ -222,6 +225,7 @@ export function HomePage() {
             </Button>
           </div>
         </Card>
+        </div>
       </div>
       <Footer />
     </PageContainer>

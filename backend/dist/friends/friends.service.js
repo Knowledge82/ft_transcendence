@@ -80,6 +80,7 @@ let FriendsService = class FriendsService {
             throw new common_1.NotFoundException('Friendship not found');
         }
         await this.prisma.friendship.delete({ where: { id: friendship.id } });
+        return friendship;
     }
     async listFriends(userId) {
         const friendships = await this.prisma.friendship.findMany({

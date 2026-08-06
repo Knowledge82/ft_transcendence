@@ -15,6 +15,7 @@ export declare class ChatGateway implements OnGatewayConnection, OnGatewayDiscon
     handleConnection(client: Socket): Promise<void>;
     handleDisconnect(client: Socket): void;
     isUserOnline(userId: number): boolean;
+    broadcastToAll(event: string, payload: unknown): void;
     notifyUser(userId: number, event: string, payload: unknown): void;
     joinConversationRoom(userId: number, conversationId: number): void;
     handleSendMessage(client: Socket, payload: SendMessagePayload): Promise<any>;

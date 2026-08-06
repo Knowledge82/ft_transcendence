@@ -19,11 +19,11 @@ export declare class FriendsController {
             avatarUrl: string | null;
         };
     } & {
+        createdAt: Date;
         id: number;
         requesterId: number;
         addresseeId: number;
         status: import("@prisma/client").$Enums.FriendshipStatus;
-        createdAt: Date;
     })[]>;
     sendRequest(req: any, addresseeId: number): Promise<{
         requester: {
@@ -32,18 +32,18 @@ export declare class FriendsController {
             avatarUrl: string | null;
         };
     } & {
+        createdAt: Date;
         id: number;
         requesterId: number;
         addresseeId: number;
         status: import("@prisma/client").$Enums.FriendshipStatus;
-        createdAt: Date;
     }>;
     acceptRequest(req: any, requesterId: number): Promise<{
+        createdAt: Date;
         id: number;
         requesterId: number;
         addresseeId: number;
         status: import("@prisma/client").$Enums.FriendshipStatus;
-        createdAt: Date;
     }>;
     removeFriendship(req: any, otherUserId: number): Promise<void>;
 }

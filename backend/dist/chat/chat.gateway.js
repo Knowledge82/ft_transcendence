@@ -80,6 +80,9 @@ let ChatGateway = class ChatGateway {
     isUserOnline(userId) {
         return this.onlineUsers.has(userId);
     }
+    broadcastToAll(event, payload) {
+        this.server.emit(event, payload);
+    }
     notifyUser(userId, event, payload) {
         const sockets = this.onlineUsers.get(userId);
         if (!sockets) {

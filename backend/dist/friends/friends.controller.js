@@ -49,11 +49,18 @@ let FriendsController = class FriendsController {
         const requester = await this.friendsService.getBasicInfo(requesterId);
         const accepterName = accepter?.displayName ?? `Usuario ${accepter?.id}`;
         const requesterName = requester?.displayName ?? `Usuario ${requester?.id}`;
-        await this.communityService.createEvent('FRIENDSHIP_ACCEPTED', `${requesterName} y ${accepterName} han jurado hermandad ante el Verdadero Relink.`);
+        await this.communityService.createFriendshipAcceptedEvent(requesterName, accepterName);
         return friendship;
     }
     async removeFriendship(req, otherUserId) {
-        await this.friendsService.removeFriendship(req.user.userId, otherUserId);
+        const removed = await this.friendsService.removeFriendship(req.user.userId, otherUserId);
+        if (removed.status === 'ACCEPTED') {
+            const userA = await this.friendsService.getBasicInfo(req.user.userId);
+            const userB = await this.friendsService.getBasicInfo(otherUserId);
+            const nameA = userA?.displayName ?? `Usuario ${userA?.id}`;
+            const nameB = userB?.displayName ?? `Usuario ${userB?.id}`;
+            await this.communityService.createFriendshipBrokenEvent(nameA, nameB);
+        }
     }
 };
 exports.FriendsController = FriendsController;

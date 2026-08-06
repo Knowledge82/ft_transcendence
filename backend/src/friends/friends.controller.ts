@@ -58,10 +58,7 @@ export class FriendsController {
     const requester = await this.friendsService.getBasicInfo(requesterId);
     const accepterName = accepter?.displayName ?? `Usuario ${accepter?.id}`;
     const requesterName = requester?.displayName ?? `Usuario ${requester?.id}`;
-    await this.communityService.createEvent(
-      'FRIENDSHIP_ACCEPTED',
-      `${requesterName} y ${accepterName} han jurado hermandad ante el Verdadero Relink.`,
-    );
+    await this.communityService.createFriendshipAcceptedEvent(requesterName, accepterName);
 
     return friendship;
   }
@@ -71,6 +68,17 @@ export class FriendsController {
     @Request() req,
     @Param('userId', ParseIntPipe) otherUserId: number,
   ) {
-    await this.friendsService.removeFriendship(req.user.userId, otherUserId);
+    const removed = await this.friendsService.removeFriendship(req.user.userId, otherUserId);
+
+    // Only log a "breakup" event if this was an actual, accepted
+    // friendship — rejecting a request that was never accepted isn't a
+    // dramatic enough moment to announce to the whole community
+    if (removed.status === 'ACCEPTED') {
+      const userA = await this.friendsService.getBasicInfo(req.user.userId);
+      const userB = await this.friendsService.getBasicInfo(otherUserId);
+      const nameA = userA?.displayName ?? `Usuario ${userA?.id}`;
+      const nameB = userB?.displayName ?? `Usuario ${userB?.id}`;
+      await this.communityService.createFriendshipBrokenEvent(nameA, nameB);
+    }
   }
 }

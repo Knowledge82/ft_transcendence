@@ -7,12 +7,12 @@ export declare class AdminController {
     private readonly communityService;
     constructor(adminService: AdminService, chatGateway: ChatGateway, communityService: CommunityService);
     listUsers(): Promise<{
+        createdAt: Date;
         id: number;
         email: string;
         displayName: string | null;
         avatarUrl: string | null;
         role: import("@prisma/client").$Enums.Role;
-        createdAt: Date;
     }[]>;
     changeRole(id: number, role: string): Promise<{
         id: number;
