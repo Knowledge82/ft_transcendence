@@ -4,9 +4,10 @@ import { AdminService } from './admin.service';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { ChatModule } from '../chat/chat.module';
 import { CommunityModule } from '../community/community.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [ChatModule, CommunityModule],
+  imports: [ChatModule, CommunityModule, NotificationsModule],
   controllers: [AdminController],
   providers: [AdminService, RolesGuard],
 })

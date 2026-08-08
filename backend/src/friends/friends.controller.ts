@@ -12,6 +12,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FriendsService } from './friends.service';
 import { ChatGateway } from '../chat/chat.gateway';
 import { CommunityService } from '../community/community.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Controller('friends')
 @UseGuards(JwtAuthGuard)
@@ -20,6 +21,7 @@ export class FriendsController {
     private readonly friendsService: FriendsService,
     private readonly chatGateway: ChatGateway,
     private readonly communityService: CommunityService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   @Get()
@@ -43,6 +45,14 @@ export class FriendsController {
   ) {
     const friendship = await this.friendsService.sendRequest(req.user.userId, addresseeId);
     this.chatGateway.notifyUser(addresseeId, 'friendRequestReceived', friendship);
+
+    const requesterName = friendship.requester.displayName ?? `Usuario ${friendship.requesterId}`;
+    await this.notificationsService.createNotification(
+      addresseeId,
+      'FRIEND_REQUEST_RECEIVED',
+      `${requesterName} te ha enviado una solicitud de hermandad.`,
+    );
+
     return friendship;
   }
 
@@ -58,7 +68,13 @@ export class FriendsController {
     const requester = await this.friendsService.getBasicInfo(requesterId);
     const accepterName = accepter?.displayName ?? `Usuario ${accepter?.id}`;
     const requesterName = requester?.displayName ?? `Usuario ${requester?.id}`;
+
     await this.communityService.createFriendshipAcceptedEvent(requesterName, accepterName);
+    await this.notificationsService.createNotification(
+      requesterId,
+      'FRIEND_REQUEST_ACCEPTED',
+      `${accepterName} ha aceptado tu solicitud de hermandad.`,
+    );
 
     return friendship;
   }
@@ -70,15 +86,18 @@ export class FriendsController {
   ) {
     const removed = await this.friendsService.removeFriendship(req.user.userId, otherUserId);
 
-    // Only log a "breakup" event if this was an actual, accepted
-    // friendship — rejecting a request that was never accepted isn't a
-    // dramatic enough moment to announce to the whole community
     if (removed.status === 'ACCEPTED') {
       const userA = await this.friendsService.getBasicInfo(req.user.userId);
       const userB = await this.friendsService.getBasicInfo(otherUserId);
       const nameA = userA?.displayName ?? `Usuario ${userA?.id}`;
       const nameB = userB?.displayName ?? `Usuario ${userB?.id}`;
+
       await this.communityService.createFriendshipBrokenEvent(nameA, nameB);
+      await this.notificationsService.createNotification(
+        otherUserId,
+        'FRIENDSHIP_BROKEN',
+        `${nameA} ha puesto fin a vuestra hermandad.`,
+      );
     }
   }
 }

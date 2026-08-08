@@ -14,6 +14,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { AdminService } from './admin.service';
 import { ChatGateway } from '../chat/chat.gateway';
 import { CommunityService } from '../community/community.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -23,6 +24,7 @@ export class AdminController {
     private readonly adminService: AdminService,
     private readonly chatGateway: ChatGateway,
     private readonly communityService: CommunityService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   @Get('users')
@@ -37,6 +39,11 @@ export class AdminController {
 
     const name = updated.displayName ?? `Usuario ${updated.id}`;
     await this.communityService.createRoleChangedEvent(name, updated.role);
+    await this.notificationsService.createNotification(
+      id,
+      'ROLE_CHANGED',
+      `Tu rango ha cambiado a ${updated.role}.`,
+    );
 
     return updated;
   }

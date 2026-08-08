@@ -7,6 +7,7 @@ import { listFriends } from '../api/friends';
 import { Footer } from '../components/Footer';
 import { PageContainer, Card, LoadingScreen, Avatar, RoleBadge, Input, Button } from '../components/ui';
 import { ActivityTicker } from '../components/ActivityTicker';
+import { NotificationBell } from '../components/NotificationBell';
 
 interface Profile {
   id: number;
@@ -119,6 +120,9 @@ export function HomePage() {
     <PageContainer className="flex flex-col">
       <div className="flex-1 px-4 py-10">
         <div className="max-w-md mx-auto">
+          <div className="flex justify-end mb-2">
+            <NotificationBell />
+          </div>
           <ActivityTicker />
           <Card className="text-center">
           <div className="relative w-24 h-24 mx-auto mb-4">
