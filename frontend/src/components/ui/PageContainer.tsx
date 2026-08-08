@@ -18,13 +18,15 @@ export function PageContainer({ children, className = '', showFrame = true }: Pa
             src="/frame-left.png"
             alt=""
             aria-hidden="true"
-            className="hidden lg:block fixed left-0 top-0 h-screen w-auto max-w-[18vw] object-cover pointer-events-none select-none z-0"
+            className="hidden lg:block fixed left-0 top-0 h-screen object-cover pointer-events-none select-none z-0"
+            style={{ width: '18vw' }}
           />
           <img
             src="/frame-right.png"
             alt=""
             aria-hidden="true"
-            className="hidden lg:block fixed right-0 top-0 h-screen w-auto max-w-[18vw] object-cover pointer-events-none select-none z-0"
+            className="hidden lg:block fixed right-0 top-0 h-screen object-cover pointer-events-none select-none z-0"
+            style={{ width: '18vw' }}
           />
         </>
       )}
