@@ -6,7 +6,7 @@ import { listFriends, sendFriendRequest, listPendingRequests, acceptFriendReques
 import type { Friend, PendingRequest } from '../api/friends';
 import { apiClient } from '../api/client';
 import { useSocket } from '../context/SocketContext';
-import { LoadingScreen, StatusDot, IconButton, Input, Button } from '../components/ui';
+import { LoadingScreen, StatusDot, IconButton, Input, Button, PageContainer } from '../components/ui';
 
 export function ChatPage() {
   const { socket } = useSocket();
@@ -221,7 +221,7 @@ export function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-ink-950">
+    <PageContainer className="flex flex-col" showFrame={false}>
       <header className="grid grid-cols-3 items-center px-4 py-2 bg-ink-900 border-b border-ink-800">
         <div />
         <span className="text-sm text-gold-500 font-medium text-center">{channelLabel}</span>
@@ -233,7 +233,7 @@ export function ChatPage() {
       <div className="flex flex-1">
       <aside className="w-64 bg-ink-900 border-r border-ink-800 flex flex-col">
         <div className="p-4 border-b border-ink-800">
-          <Link to="/celda" className="text-sm text-gold-500 hover:text-gold-400">
+          <Link to="/altar" className="text-sm text-gold-500 hover:text-gold-400">
             ← Volver
           </Link>
         </div>
@@ -420,6 +420,6 @@ export function ChatPage() {
           })}
       </aside>
       </div>
-    </div>
+    </PageContainer>
   );
 }
