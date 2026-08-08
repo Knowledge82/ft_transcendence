@@ -1,29 +1,30 @@
 # ft_transcendence — Notas de progreso 
 
 ## 🚀 Como comenzar a trabajar (Quick Start)
-
+ 
 Sigue estos sencillos pasos para clonar el repositorio, configurar tu entorno y levantar el proyecto en local:
-
+ 
 ### A. Clonar el repositorio
+ 
 Clona el proyecto en tu máquina local y accede a la carpeta raíz:
 ```bash
 git clone <URL_DE_TU_REPOSITORIO>
 cd <NOMBRE_DE_LA_CARPETA>
 ```
-
+ 
 ### B. Configurar las variables de entorno
-
+ 
 Cada desarrollador debe tener su propio archivo de configuración local. Copia el archivo de plantilla .env.example y renómbralo a .env:
 ```bash
 cp .env.example .env
 ```
-
+ 
 ⚠️ **Importante**: Abre el archivo .env recién creado y define tus propias contraseñas, credenciales de la base de datos y la clave secreta para los tokens (JWT_SECRET). Nunca subas tu archivo .env personal al repositorio.
-
+ 
 #### 📝 Configuración del archivo `.env`
-
+ 
 Cuando copies el archivo `.env.example` a `.env`, verás las siguientes variables. Aquí tienes qué significa cada una y qué debes cambiar:
-
+ 
 | Variable | Valor por defecto | ¿Qué debes hacer? |
 | :--- | :--- | :--- |
 | `POSTGRES_USER` | `ft_user` | Puedes dejarlo por defecto para desarrollo local. |
@@ -33,27 +34,44 @@ Cuando copies el archivo `.env.example` a `.env`, verás las siguientes variable
 | `JWT_REFRESH_SECRET` | `change_me_refresh_secret` | **¡CÁMBIALO!** Genera otra cadena de texto aleatoria distinta a la anterior. Se usa para firmar los Refresh Tokens (7 días). |
 | `NODE_ENV` | `development` | Déjalo en `development` para habilitar los logs detallados y el modo de recarga rápida (watch mode) en NestJS. |
 | `VITE_API_URL` | `https://localhost/api` | Déjalo así. Es la URL que usará el Frontend (Vite) para comunicarse con el Backend a través del puerto seguro de Nginx. |
-| `GEMINI_API_KEY` | *(vacío)* | **¡OBLIGATORIO Y PERSONAL!** Cada desarrollador debe generar su propia clave gratuita — ver instrucciones abajo. Nunca la compartas ni la subas al repositorio. |
-| `GEMINI_MODEL` | `gemini-2.0-flash` | Puedes dejarlo por defecto. Si esta versión queda retirada por Google en el futuro, cámbiala aquí sin tocar el código — ver la lista de modelos disponibles en `GET /ai/models`. |
-
+| `GROQ_API_KEY` | *(vacío)* | **¡OBLIGATORIO Y PERSONAL!** Cada desarrollador debe generar su propia clave gratuita — ver instrucciones abajo. Nunca la compartas ni la subas al repositorio. |
+| `GROQ_MODEL` | `openai/gpt-oss-20b` | Puedes dejarlo por defecto. Si este modelo queda retirado por Groq en el futuro, cámbialo aquí sin tocar el código — consulta los modelos disponibles en console.groq.com. |
+ 
 > 🔑 **Tip para generar secretos seguros:**
 Puedes generar claves aleatorias fuertes rápidamente desde tu terminal ejecutando:
 ```bash
 openssl rand -base64 32
 ```
 Copia el resultado y pégalo en tu `JWT_SECRET` y `JWT_REFRESH_SECRET`.
-
-#### 🤖 Obtener tu propia clave de Gemini API
-
+ 
+#### 🤖 Obtener tu propia clave de Groq API
+ 
 **Por qué cada uno necesita su propia clave, y no una compartida:**
-- **Cuota diaria limitada por clave**: el nivel gratuito de Gemini tiene un límite de peticiones por día. Si todo el equipo usa la misma clave, esa cuota se agota mucho más rápido y unos bloquean el trabajo de otros.
-- **Seguridad**: una clave compartida por chat/Slack/lo que sea es una clave que tarde o temprano se filtra por accidente. Cada clave está vinculada a la cuenta de Google de quien la crea — mejor que sea tu propia responsabilidad, no la de otro.
-
+- **Cuota limitada por clave**: el nivel gratuito de Groq tiene un límite de peticiones. Si todo el equipo usa la misma clave, esa cuota se agota mucho más rápido y unos bloquean el trabajo de otros.
+- **Seguridad**: una clave compartida por chat/Slack/lo que sea es una clave que tarde o temprano se filtra por accidente. Cada clave está vinculada a la cuenta de quien la crea — mejor que sea tu propia responsabilidad, no la de otro.
 **Cómo conseguirla (gratis, sin tarjeta, 2 minutos):**
-1. Entra en [aistudio.google.com](https://aistudio.google.com) con cualquier cuenta de Google
-2. En el menú lateral, "Get API key" → "Create API key"
-3. Copia la clave generada y pégala en tu `.env` local como `GEMINI_API_KEY`
+1. Entra en console.groq.com y crea una cuenta o inicia sesión
+2. Crea una API key nueva
+3. Copia la clave generada y pégala en tu `.env` local como `GROQ_API_KEY`
 
+### C. Levantar el proyecto
+ 
+El `Makefile` detecta automáticamente si tu sistema usa `docker-compose` (el binario clásico, con guion) o `docker compose` (el plugin moderno, con espacio) — no hace falta configurar nada a mano para eso. También comprueba, antes de ejecutar cualquier otra cosa, que Docker esté instalado y que tu usuario tenga permiso para hablar con el daemon; si algo falla en cualquiera de esos dos puntos, verás un mensaje explicando exactamente qué hacer, en vez de un error críptico.
+ 
+**Primera vez que levantas el proyecto en un ordenador nuevo:**
+```bash
+make first-run
+```
+Este comando fuerza una reconstrucción completa sin caché. Es importante usarlo (en vez de `make up`) la primera vez en cada máquina nueva: evita que Docker reutilice, por error, una capa de instalación de dependencias antigua o incompleta de algún intento anterior, lo que podría dejar el backend sin paquetes que en realidad ya están en `package.json`.
+ 
+**En el día a día, una vez que el proyecto ya está levantado al menos una vez en esa máquina:**
+```bash
+make up
+```
+ 
+**Si en algún momento el proyecto se comporta de forma rara** (dependencias que "deberían estar" pero no aparecen, comportamiento inconsistente tras instalar un paquete nuevo), repetir `make first-run` suele resolverlo — vuelve a construir todo desde cero sin depender de ninguna caché previa.
+ 
+Consulta el resto de comandos disponibles (`make down`, `make logs`, `make db-migrate`, `make db-studio`, `make clean`, `make fclean`, `make re`) directamente en el `Makefile` — cada uno tiene un comentario explicando qué hace y cuándo usarlo.
 
 ---
 
@@ -200,6 +218,8 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [AiModule](./docs/docs-ai-module.md)
 
+[CommunityModule](./docs/docs-community-events.md)
+
 ---
 
 ## FRONTEND:
@@ -228,6 +248,7 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [AiModule front part](./docs/docs-ai-frontend.md)
 
+
 ---
 ---
 
@@ -240,6 +261,8 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 [+ Fix bug in chat room with msg in Conversaciones](./docs/docs-bug-dm-rooms.md)
 
 [+ Design System — componentes reutilizables](./docs/docs-design-system.md)
+
+[+ Varias mejoras: roles en vivo, amistad como privilegio y nombres temáticos](./docs/docs-mejoras-coherencia.md)
 
 ## 5. Verificación end-to-end
 
