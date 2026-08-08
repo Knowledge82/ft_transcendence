@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 import { streamConfession } from '../api/ai';
-import { PageContainer, Card, Textarea, Button } from '../components/ui';
+import { PageContainer, Card, Textarea, Button, BackLink } from '../components/ui';
+import { ROUTES } from '../routes';
 
 const MAX_LENGTH = 1000; // must stay in sync with MAX_INPUT_LENGTH in backend/src/ai/ai.service.ts
 // How slowly the text "speaks" on screen, independent of how fast the
@@ -66,9 +66,7 @@ export function ConfesionarioPage() {
   return (
     <PageContainer className="px-4 py-10">
       <div className="max-w-2xl mx-auto">
-        <Link to="/celda" className="text-sm text-gold-500 hover:text-gold-400">
-          ← Volver
-        </Link>
+        <BackLink to={ROUTES.HOME} />
 
         <h1 className="text-3xl font-semibold text-gold-500 mt-4 mb-2">
           El Confesionario

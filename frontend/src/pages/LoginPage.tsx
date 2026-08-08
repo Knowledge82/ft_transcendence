@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { ROUTES } from '../routes';
 import { useAuth } from '../context/AuthContext';
 import { validateEmail, validatePassword } from '../utils/validation';
 import { PageContainer, Card, Input, Button, FieldError } from '../components/ui';
@@ -39,7 +40,7 @@ export function LoginPage() {
     setIsSubmitting(true);
     try {
       await login(email, password);
-      navigate('/celda');
+      navigate(ROUTES.HOME);
     } catch (err) {
       setSubmitError('Email o contraseña incorrectos.');
     } finally {

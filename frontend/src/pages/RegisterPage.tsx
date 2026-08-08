@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { ROUTES } from '../routes';
 import { useAuth } from '../context/AuthContext';
 import { validateEmail, validatePassword, validateDisplayName } from '../utils/validation';
 import { PageContainer, Card, Input, Button, FieldError } from '../components/ui';
@@ -42,7 +43,7 @@ export function RegisterPage() {
     setIsSubmitting(true);
     try {
       await register(email, password, displayName);
-      navigate('/celda');
+      navigate(ROUTES.HOME);
     } catch (err) {
       setSubmitError('No se pudo completar el registro. Comprueba los datos.');
     } finally {

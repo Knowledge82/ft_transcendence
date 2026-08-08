@@ -264,6 +264,8 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [+ Varias mejoras: roles en vivo, amistad como privilegio y nombres temáticos](./docs/docs-mejoras-coherencia.md)
 
+[+ Fix routes, backlink](./docs/docs-routes-backlink.md)
+
 ## 5. Verificación end-to-end
 
 Todo el ciclo se probó manualmente con `curl` (con flags `-k` para el certificado autofirmado, `-c`/`-b` para gestionar cookies) y posteriormente también con Insomnia:
@@ -279,5 +281,5 @@ Todo el ciclo se probó manualmente con `curl` (con flags `-k` para el certifica
 ---
 
 ## 6. Estado actual y pendientes
-
+Deprecated
 [Estado actualizado para 02-07-2026](./docs/estado-actualizado.md)

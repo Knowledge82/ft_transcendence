@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { apiClient } from '../api/client';
 import { listAllUsers, changeUserRole, deleteUser } from '../api/admin';
 import type { AdminUser, Role } from '../api/admin';
-import { PageContainer, LoadingScreen, IconButton } from '../components/ui';
+import { PageContainer, LoadingScreen, IconButton, BackLink } from '../components/ui';
+import { ROUTES } from '../routes';
 
 const ROLES: Role[] = ['HERMANO', 'GUARDIAN', 'ARZOBISPO'];
 
@@ -44,8 +45,8 @@ export function AdminPage() {
     return (
       <PageContainer className="flex flex-col items-center justify-center gap-4">
         <p className="text-cream-100">No tienes el rango necesario para entrar aquí.</p>
-        <Link to="/celda" className="text-gold-500 hover:text-gold-400">
-          ← Volver a la celda
+        <Link to={ROUTES.HOME} className="text-gold-500 hover:text-gold-400">
+          ← Volver al Altar
         </Link>
       </PageContainer>
     );
@@ -54,9 +55,7 @@ export function AdminPage() {
   return (
     <PageContainer className="px-4 py-10">
       <div className="max-w-3xl mx-auto">
-        <Link to="/celda" className="text-sm text-gold-500 hover:text-gold-400">
-          ← Volver
-        </Link>
+        <BackLink to={ROUTES.HOME} />
 
         <h1 className="text-3xl font-semibold text-gold-500 mt-4 mb-8">
           Santuario — Administración
