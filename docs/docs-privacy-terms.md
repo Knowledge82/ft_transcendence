@@ -15,7 +15,7 @@ Ambas reflejan el funcionamiento real de la aplicación tal como está implement
 
 ## Accesibilidad — el otro requisito del enunciado
 
-No basta con que las páginas existan: el enunciado exige que sean *"easily accessible... e.g., footer links"*. Se creó un componente `Footer.tsx` reutilizable, con enlaces a ambas páginas, añadido tanto en la landing pública (`/`) como en el panel de perfil (`/altar`) — las dos páginas que cualquier usuario, con o sin sesión iniciada, va a visitar en algún momento.
+No basta con que las páginas existan: el enunciado exige que sean *"easily accessible... e.g., footer links"*. Se creó un componente `Footer.tsx` reutilizable, con enlaces a ambas páginas, añadido tanto en la landing pública (`/`) como en el panel de perfil (`/celda`) — las dos páginas que cualquier usuario, con o sin sesión iniciada, va a visitar en algún momento.
 
 ## Dónde está en el código
 

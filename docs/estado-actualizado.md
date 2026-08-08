@@ -8,7 +8,7 @@
 - Frontend de autenticación completo: páginas de login/registro con formularios controlados, `AuthContext` con sesión persistente vía silent refresh, rutas protegidas (`ProtectedRoute`)
 - Validación de formularios tanto en frontend como en backend
 - Paleta visual definitiva aplicada (Tailwind v4, tema oscuro + dorado)
-- `UsersModule`: consulta y actualización de perfil (`GET`/`PATCH /users/me`), subida de avatar con validación de tipo y tamaño (`POST /users/me/avatar`), panel de perfil editable en `/altar`
+- `UsersModule`: consulta y actualización de perfil (`GET`/`PATCH /users/me`), subida de avatar con validación de tipo y tamaño (`POST /users/me/avatar`), panel de perfil editable en `/celda`
 - `FriendsModule`: envío, aceptación y eliminación de solicitudes de amistad, listado de amigos — flujo completo también desde la interfaz (botón "+ Amigo" en el panel de miembros, sección de solicitudes pendientes con aceptación, todo con actualización en tiempo real vía WebSockets)
 - `ChatModule`: WebSockets con autenticación por JWT en el handshake, canal general, chats directos 1 a 1, historial persistente en base de datos, mensajería en tiempo real con salas de Socket.IO
 - Frontend de chat: página `/chat` con barra de conversaciones, historial, envío y recepción en vivo, autoscroll al último mensaje

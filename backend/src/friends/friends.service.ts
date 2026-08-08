@@ -28,7 +28,6 @@ export class FriendsService {
       throw new NotFoundException('User not found');
     }
 
-    // Check both directions: maybe the other person already sent US a request
     const existing = await this.prisma.friendship.findFirst({
       where: {
         OR: [
@@ -62,7 +61,6 @@ export class FriendsService {
       throw new NotFoundException('Friend request not found');
     }
 
-    // Only the person who RECEIVED the request can accept it
     if (friendship.addresseeId !== userId) {
       throw new ForbiddenException('You cannot accept this request');
     }
@@ -75,7 +73,9 @@ export class FriendsService {
 
   async removeFriendship(userId: number, otherUserId: number) {
     // Works both for rejecting a pending request and for unfriending
-    // an accepted one — either way, the row is simply deleted
+    // an accepted one — either way, the row is simply deleted. Returning
+    // the deleted row lets the caller tell these two cases apart (status)
+    // to decide whether a real "breakup" happened worth logging anywhere.
     const friendship = await this.prisma.friendship.findFirst({
       where: {
         OR: [
@@ -90,6 +90,7 @@ export class FriendsService {
     }
 
     await this.prisma.friendship.delete({ where: { id: friendship.id } });
+    return friendship;
   }
 
   async listFriends(userId: number) {
@@ -104,8 +105,6 @@ export class FriendsService {
       },
     });
 
-    // Each row has "requester" and "addressee" — we don't care which side
-    // the current user is on, we just want "the other person" in each row
     return friendships.map((f) =>
       f.requesterId === userId ? f.addressee : f.requester,
     );

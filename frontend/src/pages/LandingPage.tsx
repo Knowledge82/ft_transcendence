@@ -165,7 +165,7 @@ export function LandingPage() {
         >
           {isAuthenticated ? (
             <Link
-              to="/altar"
+              to="/celda"
               className="bg-gold-500 text-gold-on font-medium px-6 py-3 rounded-md hover:bg-gold-400 transition-colors animate-[pulse-glow_2.5s_ease-in-out_infinite]"
             >
               Entrar al Altar

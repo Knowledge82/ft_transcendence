@@ -101,8 +101,9 @@ export function UserProfilePage() {
           <div className="flex gap-3 justify-center">
             {!isSelf && (
               <>
-                <Button onClick={handleMessage}>Enviar mensaje</Button>
-                {!isFriend && (
+                {isFriend ? (
+                  <Button onClick={handleMessage}>Enviar mensaje</Button>
+                ) : (
                   <Button variant="secondary" onClick={handleAddFriend} disabled={requestSent}>
                     {requestSent ? 'Solicitud enviada' : '+ Amigo'}
                   </Button>

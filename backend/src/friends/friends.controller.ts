@@ -11,6 +11,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FriendsService } from './friends.service';
 import { ChatGateway } from '../chat/chat.gateway';
+import { CommunityService } from '../community/community.service';
 
 @Controller('friends')
 @UseGuards(JwtAuthGuard)
@@ -18,6 +19,7 @@ export class FriendsController {
   constructor(
     private readonly friendsService: FriendsService,
     private readonly chatGateway: ChatGateway,
+    private readonly communityService: CommunityService,
   ) {}
 
   @Get()
@@ -50,10 +52,14 @@ export class FriendsController {
     @Param('userId', ParseIntPipe) requesterId: number,
   ) {
     const friendship = await this.friendsService.acceptRequest(req.user.userId, requesterId);
-    // Notify the original requester too — otherwise their friends list
-    // only shows the new friend after a manual reload
     const accepter = await this.friendsService.getBasicInfo(req.user.userId);
     this.chatGateway.notifyUser(requesterId, 'friendRequestAccepted', accepter);
+
+    const requester = await this.friendsService.getBasicInfo(requesterId);
+    const accepterName = accepter?.displayName ?? `Usuario ${accepter?.id}`;
+    const requesterName = requester?.displayName ?? `Usuario ${requester?.id}`;
+    await this.communityService.createFriendshipAcceptedEvent(requesterName, accepterName);
+
     return friendship;
   }
 
@@ -62,6 +68,17 @@ export class FriendsController {
     @Request() req,
     @Param('userId', ParseIntPipe) otherUserId: number,
   ) {
-    await this.friendsService.removeFriendship(req.user.userId, otherUserId);
+    const removed = await this.friendsService.removeFriendship(req.user.userId, otherUserId);
+
+    // Only log a "breakup" event if this was an actual, accepted
+    // friendship — rejecting a request that was never accepted isn't a
+    // dramatic enough moment to announce to the whole community
+    if (removed.status === 'ACCEPTED') {
+      const userA = await this.friendsService.getBasicInfo(req.user.userId);
+      const userB = await this.friendsService.getBasicInfo(otherUserId);
+      const nameA = userA?.displayName ?? `Usuario ${userA?.id}`;
+      const nameB = userB?.displayName ?? `Usuario ${userB?.id}`;
+      await this.communityService.createFriendshipBrokenEvent(nameA, nameB);
+    }
   }
 }

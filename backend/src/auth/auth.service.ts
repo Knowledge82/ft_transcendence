@@ -9,8 +9,9 @@ import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { CommunityService } from '../community/community.service';
 
-const SALT_ROUNDS = 12; // coste del hash: más alto = más lento = más seguro contra fuerza bruta
+const SALT_ROUNDS = 12;
 const ACCESS_TOKEN_TTL = '15m';
 const REFRESH_TOKEN_TTL_DAYS = 7;
 
@@ -19,6 +20,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly communityService: CommunityService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -40,6 +42,9 @@ export class AuthService {
       },
     });
 
+    const name = user.displayName ?? `Usuario ${user.id}`;
+    await this.communityService.createUserRegisteredEvent(name);
+
     return this.issueTokens(user.id, user.email);
   }
 
@@ -48,8 +53,6 @@ export class AuthService {
       where: { email: dto.email },
     });
 
-    // Mensaje de error idéntico tanto si el email no existe como si la
-    // contraseña es incorrecta: así no revelamos qué emails están registrados
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
@@ -63,10 +66,6 @@ export class AuthService {
   }
 
   async refresh(rawToken: string) {
-    // Fail fast: if there's no token at all, don't even hit the database —
-    // this also prevents Prisma from throwing a validation error on
-    // `where: { token: undefined }`, which would surface as a 500 instead
-    // of the 401 it actually should be
     if (!rawToken) {
       throw new UnauthorizedException('No refresh token provided');
     }
@@ -80,9 +79,6 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token inválido o expirado');
     }
 
-    // Rotación: revocamos el token usado y emitimos uno nuevo.
-    // Así, si un refresh token robado se reutiliza después de que el
-    // usuario legítimo ya lo haya usado, podemos detectar el reuso.
     await this.prisma.refreshToken.update({
       where: { id: storedToken.id },
       data: { revoked: true },
@@ -93,7 +89,7 @@ export class AuthService {
 
   async logout(rawToken: string) {
     if (!rawToken) {
-      return; // nothing to revoke, silently no-op
+      return;
     }
 
     await this.prisma.refreshToken.updateMany({

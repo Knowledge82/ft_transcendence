@@ -100,6 +100,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return this.onlineUsers.has(userId);
   }
 
+  // Broadcasts to literally everyone connected — for events that aren't
+  // targeted at anyone in particular, like a new entry in the public
+  // community chronicle
+  broadcastToAll(event: string, payload: unknown) {
+    this.server.emit(event, payload);
+  }
+
   notifyUser(userId: number, event: string, payload: unknown) {
     const sockets = this.onlineUsers.get(userId);
     if (!sockets) {

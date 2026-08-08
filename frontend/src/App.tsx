@@ -24,7 +24,7 @@ function App() {
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsOfServicePage />} />
             <Route
-              path="/altar"
+              path="/celda"
               element={
                 <ProtectedRoute>
                   <HomePage />

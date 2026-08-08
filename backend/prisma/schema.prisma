@@ -41,6 +41,7 @@ model User {
 
   conversations ConversationParticipant[]
   messages      Message[]
+  notifications Notification[]
 }
 
 model RefreshToken {
@@ -101,4 +102,27 @@ model Message {
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+}
+
+// Personal, targeted notification — belongs to exactly one user, has a
+// read/unread state. This is the "inbox" half of the system.
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Public, community-wide chronicle entry — no owner, no read state. Some
+// of these mirror real actions (a new adept joined, a rank changed), some
+// are purely flavorful/fictional filler for atmosphere.
+model CommunityEvent {
+  id        Int      @id @default(autoincrement())
+  type      String
+  message   String
+  createdAt DateTime @default(now())
 }

@@ -16,7 +16,7 @@ Sin manifest, el sitio es solo una pestaña más del navegador. Con él, el nave
 {
   "name": "La Iglesia del Verdadero Relink",
   "short_name": "Verdadero Relink",
-  "start_url": "/altar",
+  "start_url": "/celda",
   "display": "standalone",
   "background_color": "#0b0a0f",
   "theme_color": "#0b0a0f",
@@ -27,7 +27,7 @@ Sin manifest, el sitio es solo una pestaña más del navegador. Con él, el nave
 }
 ```
 
-- `start_url: "/altar"` — al abrir la app instalada, entra directo al panel de perfil, no al manifiesto público de la landing page (quien instala la app ya suele tener sesión iniciada).
+- `start_url: "/celda"` — al abrir la app instalada, entra directo al panel de perfil, no al manifiesto público de la landing page (quien instala la app ya suele tener sesión iniciada).
 - `display: "standalone"` — el campo que realmente hace que se vea como una app: oculta la interfaz propia del navegador.
 - `icons` — dos tamaños mínimos (192px y 512px), el navegador elige cuál usar según el contexto (escritorio, icono de app, etc.).
 

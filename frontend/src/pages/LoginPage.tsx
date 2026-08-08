@@ -39,7 +39,7 @@ export function LoginPage() {
     setIsSubmitting(true);
     try {
       await login(email, password);
-      navigate('/altar');
+      navigate('/celda');
     } catch (err) {
       setSubmitError('Email o contraseña incorrectos.');
     } finally {
