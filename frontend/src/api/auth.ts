@@ -14,11 +14,13 @@ export async function registerRequest(
   email: string,
   password: string,
   displayName: string,
+  gender: 'MASCULINO' | 'FEMENINO',
 ): Promise<AuthResponse> {
   const { data } = await apiClient.post<AuthResponse>('/auth/register', {
     email,
     password,
     displayName,
+    gender,
   });
   return data;
 }

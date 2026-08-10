@@ -15,6 +15,7 @@ export class AdminService {
         displayName: true,
         avatarUrl: true,
         role: true,
+        gender: true,
         createdAt: true,
       },
       orderBy: { id: 'asc' },
@@ -34,7 +35,7 @@ export class AdminService {
     return this.prisma.user.update({
       where: { id: userId },
       data: { role: role as 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO' },
-      select: { id: true, email: true, displayName: true, role: true },
+      select: { id: true, email: true, displayName: true, role: true, gender: true },
     });
   }
 

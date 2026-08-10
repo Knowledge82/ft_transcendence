@@ -6,7 +6,7 @@ import { join } from 'path';
 const GENERAL_CHANNEL_NAME = 'general';
 const DELETED_MESSAGE_SELECT = {
   sender: { select: { id: true, displayName: true, avatarUrl: true } },
-  deletedBy: { select: { id: true, displayName: true, role: true } },
+  deletedBy: { select: { id: true, displayName: true, role: true, gender: true } },
 };
 
 // Converts the filename stored on disk into the URL the frontend actually

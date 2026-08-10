@@ -5,6 +5,7 @@ import { listAllUsers, changeUserRole, deleteUser } from '../api/admin';
 import type { AdminUser, Role } from '../api/admin';
 import { PageContainer, LoadingScreen, IconButton, BackLink } from '../components/ui';
 import { ROUTES } from '../routes';
+import { getGenderedRole } from '../utils/genderedRole';
 
 const ROLES: Role[] = ['HERMANO', 'INQUISIDOR', 'ARZOBISPO'];
 
@@ -86,7 +87,7 @@ export function AdminPage() {
                     >
                       {ROLES.map((role) => (
                         <option key={role} value={role}>
-                          {role}
+                          {getGenderedRole(role, user.gender)}
                         </option>
                       ))}
                     </select>

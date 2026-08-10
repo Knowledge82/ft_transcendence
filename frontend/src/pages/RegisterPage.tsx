@@ -5,16 +5,20 @@ import { useAuth } from '../context/AuthContext';
 import { validateEmail, validatePassword, validateDisplayName } from '../utils/validation';
 import { PageContainer, Card, Input, Button, FieldError } from '../components/ui';
 
+type Gender = 'MASCULINO' | 'FEMENINO';
+
 interface FieldErrors {
   email?: string;
   password?: string;
   displayName?: string;
+  gender?: string;
 }
 
 export function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [gender, setGender] = useState<Gender | ''>('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,6 +31,7 @@ export function RegisterPage() {
       email: validateEmail(email) ?? undefined,
       password: validatePassword(password) ?? undefined,
       displayName: validateDisplayName(displayName) ?? undefined,
+      gender: gender ? undefined : 'Debes elegir Hermano o Hermana',
     };
     setFieldErrors(errors);
     return Object.values(errors).every((error) => error === undefined);
@@ -36,13 +41,13 @@ export function RegisterPage() {
     event.preventDefault();
     setSubmitError(null);
 
-    if (!validate()) {
+    if (!validate() || !gender) {
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await register(email, password, displayName);
+      await register(email, password, displayName, gender);
       navigate(ROUTES.HOME);
     } catch (err) {
       setSubmitError('No se pudo completar el registro. Comprueba los datos.');
@@ -96,6 +101,47 @@ export function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
             <FieldError>{fieldErrors.password}</FieldError>
+          </div>
+
+          <div>
+            <span className="block text-sm font-medium text-cream-400 mb-1">Género</span>
+            <div className="flex gap-2">
+              <label
+                className={`flex-1 text-center py-2 rounded-md border cursor-pointer transition-colors ${
+                  gender === 'MASCULINO'
+                    ? 'bg-gold-500 text-gold-on border-gold-500 font-medium'
+                    : 'bg-ink-950 border-ink-800 text-cream-100 hover:bg-ink-800'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="gender"
+                  value="MASCULINO"
+                  checked={gender === 'MASCULINO'}
+                  onChange={() => setGender('MASCULINO')}
+                  className="sr-only"
+                />
+                Hermano
+              </label>
+              <label
+                className={`flex-1 text-center py-2 rounded-md border cursor-pointer transition-colors ${
+                  gender === 'FEMENINO'
+                    ? 'bg-gold-500 text-gold-on border-gold-500 font-medium'
+                    : 'bg-ink-950 border-ink-800 text-cream-100 hover:bg-ink-800'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="gender"
+                  value="FEMENINO"
+                  checked={gender === 'FEMENINO'}
+                  onChange={() => setGender('FEMENINO')}
+                  className="sr-only"
+                />
+                Hermana
+              </label>
+            </div>
+            <FieldError>{fieldErrors.gender}</FieldError>
           </div>
 
           {submitError && (

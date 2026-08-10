@@ -5,6 +5,7 @@ export interface PublicProfile {
   displayName: string | null;
   avatarUrl: string | null;
   role: 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO';
+  gender: 'MASCULINO' | 'FEMENINO';
   isOnline: boolean;
   createdAt: string;
 }

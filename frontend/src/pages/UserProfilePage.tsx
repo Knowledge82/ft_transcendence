@@ -95,7 +95,7 @@ export function UserProfilePage() {
           </div>
 
           <div className="mb-6">
-            <RoleBadge role={profile.role} />
+            <RoleBadge role={profile.role} gender={profile.gender} />
           </div>
 
           <div className="flex gap-3 justify-center">

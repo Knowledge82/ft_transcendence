@@ -3,6 +3,7 @@ import {
   Get,
   Patch,
   Post,
+  Delete,
   Param,
   ParseIntPipe,
   Body,
@@ -76,6 +77,11 @@ export class UsersController {
     }
     const avatarUrl = `/api/uploads/avatars/${file.filename}`;
     return this.usersService.updateAvatar(req.user.userId, avatarUrl);
+  }
+
+  @Delete('me/avatar')
+  async removeAvatar(@Request() req) {
+    return this.usersService.removeAvatar(req.user.userId);
   }
 
   // IMPORTANT: this route must stay declared AFTER 'me' and 'me/avatar' —

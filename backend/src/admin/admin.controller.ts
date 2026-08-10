@@ -15,6 +15,7 @@ import { AdminService } from './admin.service';
 import { ChatGateway } from '../chat/chat.gateway';
 import { CommunityService } from '../community/community.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { getGenderedRole } from '../common/gendered-role';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -37,12 +38,13 @@ export class AdminController {
     const updated = await this.adminService.changeRole(id, role);
     this.chatGateway.notifyUser(id, 'roleChanged', { role: updated.role });
 
+    const genderedRole = getGenderedRole(updated.role, updated.gender);
     const name = updated.displayName ?? `Usuario ${updated.id}`;
-    await this.communityService.createRoleChangedEvent(name, updated.role);
+    await this.communityService.createRoleChangedEvent(name, genderedRole);
     await this.notificationsService.createNotification(
       id,
       'ROLE_CHANGED',
-      `Tu rango ha cambiado a ${updated.role}.`,
+      `Tu rango ha cambiado a ${genderedRole}.`,
     );
 
     return updated;

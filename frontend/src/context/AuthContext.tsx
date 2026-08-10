@@ -11,7 +11,12 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, displayName: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    displayName: string,
+    gender: 'MASCULINO' | 'FEMENINO',
+  ) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -21,10 +26,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Register the bridge callback ONCE: if a background request refresh
-  // fails (the refresh cookie itself expired), client.ts calls this to
-  // tell React the session is really over — no direct navigation here,
-  // ProtectedRoute reacts to isAuthenticated becoming false on its own
   useEffect(() => {
     setOnSessionExpired(() => {
       setIsAuthenticated(false);
@@ -50,8 +51,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(true);
   }
 
-  async function register(email: string, password: string, displayName: string) {
-    const { accessToken } = await registerRequest(email, password, displayName);
+  async function register(
+    email: string,
+    password: string,
+    displayName: string,
+    gender: 'MASCULINO' | 'FEMENINO',
+  ) {
+    const { accessToken } = await registerRequest(email, password, displayName, gender);
     setClientAccessToken(accessToken);
     setIsAuthenticated(true);
   }

@@ -15,6 +15,7 @@ interface Profile {
   displayName: string | null;
   avatarUrl: string | null;
   role: 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO';
+  gender: 'MASCULINO' | 'FEMENINO';
 }
 
 export function HomePage() {
@@ -112,6 +113,16 @@ export function HomePage() {
     }
   }
 
+  async function handleRemoveAvatar() {
+    setAvatarError(null);
+    try {
+      const { data } = await apiClient.delete<Profile>('/users/me/avatar');
+      setProfile(data);
+    } catch (err) {
+      setAvatarError('No se pudo eliminar el avatar');
+    }
+  }
+
   if (isLoading || !profile) {
     return <LoadingScreen />;
   }
@@ -145,6 +156,14 @@ export function HomePage() {
           </div>
           {isUploadingAvatar && <p className="text-xs text-cream-400 mb-2">Subiendo...</p>}
           {avatarError && <p className="text-xs text-error-500 mb-2">{avatarError}</p>}
+          {profile.avatarUrl && !isUploadingAvatar && (
+            <button
+              onClick={handleRemoveAvatar}
+              className="text-xs text-cream-400 hover:text-error-500 transition-colors mb-2"
+            >
+              Eliminar avatar
+            </button>
+          )}
 
           {isEditingName ? (
             <form onSubmit={handleSaveName} className="mb-2">
@@ -189,7 +208,7 @@ export function HomePage() {
               justChangedRole ? 'animate-[pulse-glow_0.8s_ease-in-out_2]' : ''
             }`}
           >
-            <RoleBadge role={profile.role} />
+            <RoleBadge role={profile.role} gender={profile.gender} />
           </div>
 
           <div className="flex justify-center gap-8 mb-6">

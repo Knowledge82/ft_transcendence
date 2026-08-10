@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, MaxLength } from 'class-validator';
+import { IsEmail, IsString, MinLength, MaxLength, IsIn } from 'class-validator';
 
 export class RegisterDto {
   @IsEmail({}, { message: 'El email no tiene un formato válido' })
@@ -13,4 +13,7 @@ export class RegisterDto {
   @MinLength(2)
   @MaxLength(30)
   displayName: string;
+
+  @IsIn(['MASCULINO', 'FEMENINO'], { message: 'Debes elegir Hermano o Hermana' })
+  gender: 'MASCULINO' | 'FEMENINO';
 }

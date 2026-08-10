@@ -23,6 +23,11 @@ enum Role {
   ARZOBISPO
 }
 
+enum Gender {
+  MASCULINO
+  FEMENINO
+}
+
 // Modelo de usuario: datos base de autenticación y perfil
 model User {
   id           Int      @id @default(autoincrement())
@@ -31,6 +36,10 @@ model User {
   displayName  String?
   avatarUrl    String?
   role         Role     @default(HERMANO)
+  // Used only to pick the grammatically correct (masculine/feminine) form
+  // of the role name when displaying it — the role's actual permissions
+  // never depend on this
+  gender       Gender   @default(MASCULINO)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

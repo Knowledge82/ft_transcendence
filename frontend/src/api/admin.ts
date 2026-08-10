@@ -1,6 +1,7 @@
 import { apiClient } from './client';
 
 export type Role = 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO';
+export type Gender = 'MASCULINO' | 'FEMENINO';
 
 export interface AdminUser {
   id: number;
@@ -8,6 +9,7 @@ export interface AdminUser {
   displayName: string | null;
   avatarUrl: string | null;
   role: Role;
+  gender: Gender;
   createdAt: string;
 }
 

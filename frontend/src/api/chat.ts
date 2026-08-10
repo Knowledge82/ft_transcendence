@@ -20,6 +20,7 @@ export interface Message {
     id: number;
     displayName: string | null;
     role: 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO';
+    gender: 'MASCULINO' | 'FEMENINO';
   } | null;
   sender: {
     id: number;

@@ -67,7 +67,11 @@ export function NotificationBell() {
     <div className="relative" ref={panelRef}>
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="relative text-xl text-cream-100 hover:text-gold-500 transition-colors"
+        className={`relative text-xl transition-colors ${
+          notifications.length === 0
+            ? 'text-cream-400/40 hover:text-cream-400'
+            : 'text-cream-100 hover:text-gold-500'
+        }`}
         aria-label="Notificaciones"
       >
         🔔

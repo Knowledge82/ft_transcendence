@@ -4,26 +4,18 @@ interface AvatarProps {
   size?: number;
 }
 
-export function Avatar({ avatarUrl, fallbackText, size = 96 }: AvatarProps) {
+// No more letter-in-a-circle fallback — every user gets a real default
+// avatar image whenever avatarUrl is null (either they never uploaded
+// one, or they used "Eliminar avatar" to go back to the default).
+export function Avatar({ avatarUrl, size = 96 }: AvatarProps) {
   const style = { width: size, height: size };
 
-  if (avatarUrl) {
-    return (
-      <img
-        src={avatarUrl}
-        alt="Avatar"
-        style={style}
-        className="rounded-full object-cover border-2 border-gold-500"
-      />
-    );
-  }
-
   return (
-    <div
+    <img
+      src={avatarUrl ?? '/default-avatar.png'}
+      alt="Avatar"
       style={style}
-      className="rounded-full bg-ink-800 border-2 border-gold-500 flex items-center justify-center text-cream-400"
-    >
-      <span style={{ fontSize: size * 0.4 }}>{fallbackText[0]?.toUpperCase() ?? '?'}</span>
-    </div>
+      className="rounded-full object-cover border-2 border-gold-500"
+    />
   );
 }

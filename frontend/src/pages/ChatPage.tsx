@@ -8,6 +8,7 @@ import { apiClient } from '../api/client';
 import { useSocket } from '../context/SocketContext';
 import { LoadingScreen, StatusDot, IconButton, Input, Button, PageContainer, BackLink } from '../components/ui';
 import { ROUTES } from '../routes';
+import { getGenderedRole } from '../utils/genderedRole';
 
 export function ChatPage() {
   const { socket } = useSocket();
@@ -276,7 +277,7 @@ export function ChatPage() {
     setMessages((prev) => prev.map((m) => (m.id === messageId ? updated : m)));
   }
 
-  const isModerator = ownRole === 'GUARDIAN' || ownRole === 'ARZOBISPO';
+  const isModerator = ownRole === 'INQUISIDOR' || ownRole === 'ARZOBISPO';
   const isGeneralChannelSelected =
     generalChannel !== null && selectedConversationId === generalChannel.id;
 
@@ -464,7 +465,10 @@ export function ChatPage() {
 
                   {isDeleted ? (
                     <p className="text-sm">
-                      🔥 Herejía eliminada por {message.deletedBy?.role ?? '???'}{' '}
+                      🔥 Herejía eliminada por{' '}
+                      {message.deletedBy
+                        ? getGenderedRole(message.deletedBy.role, message.deletedBy.gender)
+                        : '???'}{' '}
                       <span className="text-gold-500 font-semibold not-italic">
                         {message.deletedBy?.displayName ?? 'un Inquisidor'}
                       </span>
