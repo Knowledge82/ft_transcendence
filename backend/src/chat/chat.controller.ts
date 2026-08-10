@@ -15,8 +15,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { unlink } from 'fs/promises';
+import { extname } from 'path';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ChatService } from './chat.service';
 import { ChatGateway } from './chat.gateway';
@@ -29,7 +28,10 @@ const ALLOWED_ATTACHMENT_TYPES = [
   'application/pdf',
 ];
 const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
-const MODERATOR_ROLES = ['GUARDIAN', 'ARZOBISPO'];
+// Only these roles may remove a heretical message — ordinary Hermanos
+// have NO self-service delete, not even for their own messages. Deletion
+// is a moderation act, not a personal "undo" button.
+const MODERATOR_ROLES = ['INQUISIDOR', 'ARZOBISPO'];
 
 @Controller('chat')
 @UseGuards(JwtAuthGuard)
@@ -121,27 +123,21 @@ export class ChatController {
       throw new NotFoundException('Message not found');
     }
 
-    const isAuthor = message.senderId === req.user.userId;
     const role = await this.chatService.getUserRole(req.user.userId);
     const isModerator = role !== null && MODERATOR_ROLES.includes(role);
 
-    if (!isAuthor && !isModerator) {
-      throw new ForbiddenException('No puedes eliminar este mensaje');
+    if (!isModerator) {
+      throw new ForbiddenException('Solo un Inquisidor puede señalar la herejía');
     }
 
-    await this.chatService.deleteMessage(id);
+    const updated = await this.chatService.deleteMessage(id, req.user.userId);
 
-    if (message.attachmentFilename) {
-      const filePath = join(process.cwd(), 'uploads', 'attachments', message.attachmentFilename);
-      unlink(filePath).catch(() => {});
-    }
+    // Broadcast the UPDATED message (now a tombstone), not just "it's
+    // gone" — everyone should see WHO deleted it and keep seeing that,
+    // not just have the bubble vanish
+    this.chatGateway.broadcastToRoom(updated.conversationId, 'messageUpdated', updated);
 
-    this.chatGateway.broadcastToRoom(message.conversationId, 'messageDeleted', {
-      messageId: id,
-      conversationId: message.conversationId,
-    });
-
-    return { deleted: true };
+    return updated;
   }
 
   @Get(':conversationId/messages')

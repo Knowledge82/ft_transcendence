@@ -14,7 +14,7 @@ interface Profile {
   email: string;
   displayName: string | null;
   avatarUrl: string | null;
-  role: 'HERMANO' | 'GUARDIAN' | 'ARZOBISPO';
+  role: 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO';
 }
 
 export function HomePage() {

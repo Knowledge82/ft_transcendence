@@ -6,7 +6,7 @@ import type { AdminUser, Role } from '../api/admin';
 import { PageContainer, LoadingScreen, IconButton, BackLink } from '../components/ui';
 import { ROUTES } from '../routes';
 
-const ROLES: Role[] = ['HERMANO', 'GUARDIAN', 'ARZOBISPO'];
+const ROLES: Role[] = ['HERMANO', 'INQUISIDOR', 'ARZOBISPO'];
 
 export function AdminPage() {
   const [ownRole, setOwnRole] = useState<Role | null>(null);

@@ -1,6 +1,6 @@
 import { apiClient } from './client';
 
-export type Role = 'HERMANO' | 'GUARDIAN' | 'ARZOBISPO';
+export type Role = 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO';
 
 export interface AdminUser {
   id: number;

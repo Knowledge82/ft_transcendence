@@ -1,5 +1,5 @@
 interface RoleBadgeProps {
-  role: 'HERMANO' | 'GUARDIAN' | 'ARZOBISPO';
+  role: 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO';
 }
 
 export function RoleBadge({ role }: RoleBadgeProps) {

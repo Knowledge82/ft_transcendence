@@ -4,7 +4,7 @@ export interface PublicProfile {
   id: number;
   displayName: string | null;
   avatarUrl: string | null;
-  role: 'HERMANO' | 'GUARDIAN' | 'ARZOBISPO';
+  role: 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO';
   isOnline: boolean;
   createdAt: string;
 }

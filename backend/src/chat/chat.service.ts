@@ -1,7 +1,13 @@
 import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { unlink } from 'fs/promises';
+import { join } from 'path';
 
 const GENERAL_CHANNEL_NAME = 'general';
+const DELETED_MESSAGE_SELECT = {
+  sender: { select: { id: true, displayName: true, avatarUrl: true } },
+  deletedBy: { select: { id: true, displayName: true, role: true } },
+};
 
 // Converts the filename stored on disk into the URL the frontend actually
 // fetches from — kept as a small pure helper so both saveMessage and
@@ -176,9 +182,7 @@ export class ChatService {
         attachmentType: attachment?.type,
         attachmentName: attachment?.name,
       },
-      include: {
-        sender: { select: { id: true, displayName: true, avatarUrl: true } },
-      },
+      include: DELETED_MESSAGE_SELECT,
     });
 
     return { ...message, attachmentUrl: toAttachmentUrl(message.attachmentFilename) };
@@ -194,9 +198,7 @@ export class ChatService {
       where: { conversationId },
       orderBy: { createdAt: 'desc' },
       take: limit,
-      include: {
-        sender: { select: { id: true, displayName: true, avatarUrl: true } },
-      },
+      include: DELETED_MESSAGE_SELECT,
     });
 
     return messages.map((m) => ({ ...m, attachmentUrl: toAttachmentUrl(m.attachmentFilename) }));
@@ -213,15 +215,37 @@ export class ChatService {
     return this.prisma.message.findFirst({ where: { attachmentFilename: filename } });
   }
 
-  async deleteMessage(messageId: number) {
+  // SOFT delete: the row stays in the database forever — only its
+  // content is cleared and a tombstone (who deleted it, and when) is
+  // recorded. This is what lets the frontend show "Herejía eliminada
+  // por <rango> <nombre>" in place of the original message, for everyone,
+  // permanently — not just remove it from view for people currently online.
+  async deleteMessage(messageId: number, deletedById: number) {
     const message = await this.prisma.message.findUnique({ where: { id: messageId } });
     if (!message) {
       throw new NotFoundException('Message not found');
     }
-    await this.prisma.message.delete({ where: { id: messageId } });
-    // Returned so the caller (controller) knows the conversationId to
-    // broadcast to, and the attachment filename to clean up from disk
-    return message;
+
+    // The physical file is still removed from disk — the tombstone only
+    // needs to say "something was here and got removed", not keep the
+    // actual (possibly heretical) file sitting around
+    if (message.attachmentFilename) {
+      const filePath = join(process.cwd(), 'uploads', 'attachments', message.attachmentFilename);
+      unlink(filePath).catch(() => {});
+    }
+
+    return this.prisma.message.update({
+      where: { id: messageId },
+      data: {
+        content: '',
+        attachmentFilename: null,
+        attachmentType: null,
+        attachmentName: null,
+        deletedAt: new Date(),
+        deletedById,
+      },
+      include: DELETED_MESSAGE_SELECT,
+    });
   }
 
   async getUserRole(userId: number): Promise<string | null> {

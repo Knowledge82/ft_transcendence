@@ -275,7 +275,7 @@ export function ChatPage() {
     // event (received by everyone, including ourselves) already does it
   }
 
-  const isModerator = ownRole === 'GUARDIAN' || ownRole === 'ARZOBISPO';
+  const isModerator = ownRole === 'INQUISIDOR' || ownRole === 'ARZOBISPO';
   const isGeneralChannelSelected =
     generalChannel !== null && selectedConversationId === generalChannel.id;
 

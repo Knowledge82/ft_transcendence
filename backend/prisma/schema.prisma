@@ -19,7 +19,7 @@ enum ConversationType {
 
 enum Role {
   HERMANO
-  GUARDIAN
+  INQUISIDOR
   ARZOBISPO
 }
 
@@ -40,7 +40,8 @@ model User {
   receivedFriendRequests Friendship[] @relation("FriendshipAddressee")
 
   conversations ConversationParticipant[]
-  messages      Message[]
+  messages         Message[] @relation("MessageSender")
+  deletedMessages  Message[] @relation("MessageDeletedBy")
   notifications Notification[]
 }
 
@@ -107,8 +108,17 @@ model Message {
   attachmentName     String?
   createdAt      DateTime @default(now())
 
+  // Soft delete: a "deleted" message is NOT removed from the database —
+  // its content stays hidden and a tombstone ("Herejía eliminada por...")
+  // is shown instead, permanently, to everyone. deletedById uses SetNull
+  // (not Cascade) so the tombstone survives even if the moderator who
+  // deleted it later has their own account removed.
+  deletedAt   DateTime?
+  deletedById Int?
+
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  deletedBy    User?        @relation("MessageDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
 }
 
 // Personal, targeted notification — belongs to exactly one user, has a

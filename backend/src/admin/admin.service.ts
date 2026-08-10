@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
-const VALID_ROLES = ['HERMANO', 'GUARDIAN', 'ARZOBISPO'];
+const VALID_ROLES = ['HERMANO', 'INQUISIDOR', 'ARZOBISPO'];
 
 @Injectable()
 export class AdminService {
@@ -33,7 +33,7 @@ export class AdminService {
 
     return this.prisma.user.update({
       where: { id: userId },
-      data: { role: role as 'HERMANO' | 'GUARDIAN' | 'ARZOBISPO' },
+      data: { role: role as 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO' },
       select: { id: true, email: true, displayName: true, role: true },
     });
   }
