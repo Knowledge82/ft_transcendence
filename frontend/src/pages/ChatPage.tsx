@@ -11,7 +11,7 @@ import { ROUTES } from '../routes';
 
 export function ChatPage() {
   const { socket } = useSocket();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
 
   const [generalChannel, setGeneralChannel] = useState<Conversation | null>(null);
@@ -67,20 +67,35 @@ export function ChatPage() {
         setOwnDisplayName(me.data.displayName);
         setOwnRole(me.data.role);
 
-        const dmParam = searchParams.get('dm');
-        const dmId = dmParam ? Number(dmParam) : null;
-        const matchingDm = dmId ? directList.find((c) => c.id === dmId) : undefined;
+        const cParam = searchParams.get('c');
+        const cId = cParam ? Number(cParam) : null;
         const stateOtherUser = (location.state as { otherUser?: typeof activeDmTarget })
           ?.otherUser;
 
-        if (matchingDm) {
-          setSelectedConversationId(matchingDm.id);
-          setChannelLabel(matchingDm.otherUser?.displayName ?? `Usuario ${matchingDm.otherUser?.id}`);
-          setActiveDmTarget(matchingDm.otherUser);
-        } else if (dmId && stateOtherUser) {
-          setSelectedConversationId(dmId);
-          setChannelLabel(stateOtherUser.displayName ?? `Usuario ${stateOtherUser.id}`);
-          setActiveDmTarget(stateOtherUser);
+        if (cId === general.id) {
+          setSelectedConversationId(general.id);
+          setChannelLabel('Capítulo');
+        } else if (cId) {
+          const matchingDm = directList.find((c) => c.id === cId);
+          if (matchingDm) {
+            setSelectedConversationId(matchingDm.id);
+            setChannelLabel(
+              matchingDm.otherUser?.displayName ?? `Usuario ${matchingDm.otherUser?.id}`,
+            );
+            setActiveDmTarget(matchingDm.otherUser);
+          } else if (stateOtherUser) {
+            // Brand new conversation, not in directList yet (no messages
+            // sent so far) — we still know who it's with because
+            // UserProfilePage passed it along via navigation state
+            setSelectedConversationId(cId);
+            setChannelLabel(stateOtherUser.displayName ?? `Usuario ${stateOtherUser.id}`);
+            setActiveDmTarget(stateOtherUser);
+          } else {
+            // ?c= points to a conversation we have no information about
+            // (e.g. a stale/invalid link) — fall back safely to the general channel
+            setSelectedConversationId(general.id);
+            setChannelLabel('Capítulo');
+          }
         } else {
           setSelectedConversationId(general.id);
           setChannelLabel('Capítulo');
@@ -173,11 +188,29 @@ export function ChatPage() {
     };
   }, [socket, selectedConversationId]);
 
+  // Central place that changes which conversation is selected — updates
+  // all the related state AND syncs the URL (?c=<id>) in one call, so
+  // every click handler doesn't have to remember to do both. `replace:
+  // true` avoids spamming the browser's back-button history with every
+  // single conversation switch.
+  function selectConversation(
+    id: number,
+    label: string,
+    dmTarget: typeof activeDmTarget,
+  ) {
+    setSelectedConversationId(id);
+    setChannelLabel(label);
+    setActiveDmTarget(dmTarget);
+    setSearchParams({ c: String(id) }, { replace: true });
+  }
+
   async function openDirectConversation(friend: Friend) {
     const conversation = await startDirectConversation(friend.id);
-    setSelectedConversationId(conversation.id);
-    setChannelLabel(friend.displayName ?? `Usuario ${friend.id}`);
-    setActiveDmTarget({ id: friend.id, displayName: friend.displayName, avatarUrl: friend.avatarUrl });
+    selectConversation(conversation.id, friend.displayName ?? `Usuario ${friend.id}`, {
+      id: friend.id,
+      displayName: friend.displayName,
+      avatarUrl: friend.avatarUrl,
+    });
   }
 
   async function handleAddFriend(userId: number) {
@@ -302,11 +335,7 @@ export function ChatPage() {
           <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">Canales</h2>
           {generalChannel && (
             <button
-              onClick={() => {
-                setSelectedConversationId(generalChannel.id);
-                setChannelLabel('Capítulo');
-                setActiveDmTarget(null);
-              }}
+              onClick={() => generalChannel && selectConversation(generalChannel.id, 'Capítulo', null)}
               className={`w-full text-left px-3 py-2 rounded-md mb-1 transition-colors ${
                 selectedConversationId === generalChannel.id
                   ? 'bg-gold-500 text-gold-on'
@@ -328,11 +357,7 @@ export function ChatPage() {
               return (
                 <button
                   key={conv.id}
-                  onClick={() => {
-                    setSelectedConversationId(conv.id);
-                    setChannelLabel(label);
-                    setActiveDmTarget(conv.otherUser);
-                  }}
+                  onClick={() => selectConversation(conv.id, label, conv.otherUser)}
                   className={`w-full flex items-center gap-2 text-left px-3 py-2 rounded-md mb-1 transition-colors ${
                     selectedConversationId === conv.id
                       ? 'bg-gold-500 text-gold-on'

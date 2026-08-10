@@ -49,7 +49,7 @@ export function UserProfilePage() {
   async function handleMessage() {
     if (!profile) return;
     const conversation = await startDirectConversation(profile.id);
-    navigate(`/chat?dm=${conversation.id}`, {
+    navigate(`/chat?c=${conversation.id}`, {
       state: {
         otherUser: {
           id: profile.id,
