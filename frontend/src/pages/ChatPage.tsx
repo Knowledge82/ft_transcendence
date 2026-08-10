@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { Link, useSearchParams, useLocation } from 'react-router-dom';
-import { getGeneralChannel, startDirectConversation, getMessageHistory, getGeneralMembers, getDirectConversations } from '../api/chat';
+import { getGeneralChannel, startDirectConversation, getMessageHistory, getGeneralMembers, getDirectConversations, uploadAttachment, deleteMessage, withAuthToken } from '../api/chat';
 import type { Conversation, Message, Member, DirectConversationSummary } from '../api/chat';
 import { listFriends, sendFriendRequest, listPendingRequests, acceptFriendRequest, removeFriend } from '../api/friends';
 import type { Friend, PendingRequest } from '../api/friends';
@@ -33,6 +33,19 @@ export function ChatPage() {
   const [ownDisplayName, setOwnDisplayName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Attachment upload state — pendingAttachment holds the file's metadata
+  // AFTER it's already uploaded to the server (has a filename/type/name),
+  // ready to be attached to the next message sent
+  const [pendingAttachment, setPendingAttachment] = useState<{
+    filename: string;
+    type: string;
+    name: string;
+  } | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [ownRole, setOwnRole] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,7 +55,7 @@ export function ChatPage() {
       getGeneralMembers(),
       listPendingRequests(),
       getDirectConversations(),
-      apiClient.get<{ id: number; displayName: string | null }>('/users/me'),
+      apiClient.get<{ id: number; displayName: string | null; role: string }>('/users/me'),
     ])
       .then(([general, friendsList, membersList, pending, directList, me]) => {
         setGeneralChannel(general);
@@ -52,6 +65,7 @@ export function ChatPage() {
         setDirectConversations(directList);
         setOwnUserId(me.data.id);
         setOwnDisplayName(me.data.displayName);
+        setOwnRole(me.data.role);
 
         const dmParam = searchParams.get('dm');
         const dmId = dmParam ? Number(dmParam) : null;
@@ -138,11 +152,16 @@ export function ChatPage() {
       );
     }
 
+    function handleMessageDeleted({ messageId }: { messageId: number }) {
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    }
+
     socket.on('newMessage', handleNewMessage);
     socket.on('userStatusChanged', handleStatusChanged);
     socket.on('memberJoined', handleMemberJoined);
     socket.on('friendRequestReceived', handleFriendRequestReceived);
     socket.on('friendRequestAccepted', handleFriendRequestAccepted);
+    socket.on('messageDeleted', handleMessageDeleted);
 
     return () => {
       socket.off('newMessage', handleNewMessage);
@@ -150,6 +169,7 @@ export function ChatPage() {
       socket.off('memberJoined', handleMemberJoined);
       socket.off('friendRequestReceived', handleFriendRequestReceived);
       socket.off('friendRequestAccepted', handleFriendRequestAccepted);
+      socket.off('messageDeleted', handleMessageDeleted);
     };
   }, [socket, selectedConversationId]);
 
@@ -189,20 +209,61 @@ export function ChatPage() {
     setFriends((prev) => prev.filter((f) => f.id !== userId));
   }
 
+  async function handleFileSelected(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+    setUploadProgress(0);
+    setUploadError(null);
+    try {
+      const uploaded = await uploadAttachment(file, setUploadProgress);
+      setPendingAttachment(uploaded);
+    } catch (err) {
+      console.error('No se pudo subir el archivo:', err);
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        'No se pudo subir el archivo.';
+      setUploadError(Array.isArray(message) ? message.join(', ') : message);
+    } finally {
+      setUploadProgress(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  }
+
+  async function handleDeleteMessage(messageId: number) {
+    if (!confirm('¿Eliminar este mensaje?')) {
+      return;
+    }
+    await deleteMessage(messageId);
+    // No need to update local state here — the 'messageDeleted' socket
+    // event (received by everyone, including ourselves) already does it
+  }
+
+  const isModerator = ownRole === 'GUARDIAN' || ownRole === 'ARZOBISPO';
+  const isGeneralChannelSelected =
+    generalChannel !== null && selectedConversationId === generalChannel.id;
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView();
   }, [messages]);
 
   function handleSend(event: FormEvent) {
     event.preventDefault();
-    if (!draft.trim() || !selectedConversationId || !socket) {
+    if ((!draft.trim() && !pendingAttachment) || !selectedConversationId || !socket) {
       return;
     }
     socket.emit('sendMessage', {
       conversationId: selectedConversationId,
       content: draft.trim(),
+      attachmentFilename: pendingAttachment?.filename,
+      attachmentType: pendingAttachment?.type,
+      attachmentName: pendingAttachment?.name,
     });
     setDraft('');
+    setPendingAttachment(null);
 
     if (
       activeDmTarget &&
@@ -351,13 +412,14 @@ export function ChatPage() {
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {messages.map((message) => {
             const isOwn = message.senderId === ownUserId;
+            const canDelete = isOwn || isModerator;
             return (
               <div
                 key={message.id}
-                className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${isOwn ? 'justify-end' : 'justify-start'} group`}
               >
                 <div
-                  className={`max-w-xs rounded-lg px-3 py-2 ${
+                  className={`max-w-xs rounded-lg px-3 py-2 relative ${
                     isOwn ? 'bg-gold-500 text-gold-on' : 'bg-ink-900 text-cream-100'
                   }`}
                 >
@@ -369,7 +431,49 @@ export function ChatPage() {
                       {message.sender.displayName ?? `Usuario ${message.senderId}`}
                     </Link>
                   )}
-                  <p>{message.content}</p>
+
+                  {message.attachmentUrl && (
+                    <div className="mb-2">
+                      {message.attachmentType?.startsWith('image/') ? (
+                        <a
+                          href={withAuthToken(message.attachmentUrl)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <img
+                            src={withAuthToken(message.attachmentUrl)}
+                            alt={message.attachmentName ?? 'Adjunto'}
+                            className="rounded-md max-h-48 object-cover"
+                          />
+                        </a>
+                      ) : (
+                        <a
+                          href={withAuthToken(message.attachmentUrl)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`flex items-center gap-2 text-sm underline ${
+                            isOwn ? 'text-gold-on' : 'text-gold-500'
+                          }`}
+                        >
+                          📄 {message.attachmentName ?? 'Documento'}
+                        </a>
+                      )}
+                    </div>
+                  )}
+
+                  {message.content && <p>{message.content}</p>}
+
+                  {canDelete && (
+                    <button
+                      onClick={() => handleDeleteMessage(message.id)}
+                      title="Eliminar mensaje"
+                      className={`absolute -top-2 ${
+                        isOwn ? '-left-2' : '-right-2'
+                      } w-5 h-5 rounded-full bg-ink-950 border border-ink-800 text-error-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center`}
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -377,7 +481,57 @@ export function ChatPage() {
           <div ref={bottomRef} />
         </div>
 
+        {uploadError && (
+          <div className="px-4 pt-3">
+            <p className="text-sm text-error-500">{uploadError}</p>
+          </div>
+        )}
+
+        {pendingAttachment && (
+          <div className="px-4 pt-3 flex items-center gap-2 text-sm text-cream-100">
+            <span className="bg-ink-900 border border-ink-800 rounded-md px-2 py-1 truncate max-w-xs">
+              📎 {pendingAttachment.name}
+            </span>
+            <button
+              onClick={() => setPendingAttachment(null)}
+              className="text-error-500 hover:text-red-400 text-xs"
+            >
+              Quitar
+            </button>
+          </div>
+        )}
+
+        {uploadProgress !== null && (
+          <div className="px-4 pt-2">
+            <div className="w-full h-1 bg-ink-800 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gold-500 transition-all"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSend} className="p-4 border-t border-ink-800 flex gap-2">
+          {!isGeneralChannelSelected && (
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
+                onChange={handleFileSelected}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                title="Adjuntar archivo"
+                className="text-cream-400 hover:text-gold-500 transition-colors px-2"
+              >
+                📎
+              </button>
+            </>
+          )}
           <Input
             type="text"
             value={draft}

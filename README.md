@@ -354,7 +354,9 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [+ Fix routes, backlink](./docs/docs-routes-backlink.md)
 
-[Notification system. Back + Front](./docs/docs-notifications.md)
+[+ Notification system. Back + Front](./docs/docs-notifications.md)
+
+[+ Attachment in chat](./docs/docs-chat-attachments.md)
 
 ## 5. Verificación end-to-end
 

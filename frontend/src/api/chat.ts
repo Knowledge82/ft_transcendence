@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { apiClient, getAccessToken } from './client';
 
 export interface Conversation {
   id: number;
@@ -12,6 +12,9 @@ export interface Message {
   senderId: number;
   content: string;
   createdAt: string;
+  attachmentUrl: string | null;
+  attachmentType: string | null;
+  attachmentName: string | null;
   sender: {
     id: number;
     displayName: string | null;
@@ -59,4 +62,46 @@ export async function startDirectConversation(otherUserId: number): Promise<Conv
 export async function getMessageHistory(conversationId: number): Promise<Message[]> {
   const { data } = await apiClient.get<Message[]>(`/chat/${conversationId}/messages`);
   return data;
+}
+
+export interface UploadedAttachment {
+  filename: string;
+  type: string;
+  name: string;
+}
+
+export async function uploadAttachment(
+  file: File,
+  onProgress?: (percent: number) => void,
+): Promise<UploadedAttachment> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const { data } = await apiClient.post<UploadedAttachment>('/chat/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    onUploadProgress: (event) => {
+      if (onProgress && event.total) {
+        onProgress(Math.round((event.loaded / event.total) * 100));
+      }
+    },
+  });
+  return data;
+}
+
+export async function deleteMessage(messageId: number): Promise<void> {
+  await apiClient.delete(`/chat/messages/${messageId}`);
+}
+
+// Plain <img src="..."> and <a href="..."> tags can't send our usual
+// Authorization header — the browser fetches them natively, bypassing
+// axios entirely. This appends the current access token as a query
+// param instead, which our attachment-serving endpoint accepts as a
+// fallback specifically for this reason.
+export function withAuthToken(url: string): string {
+  const token = getAccessToken();
+  if (!token) {
+    return url;
+  }
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}token=${encodeURIComponent(token)}`;
 }

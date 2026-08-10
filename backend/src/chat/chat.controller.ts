@@ -1,7 +1,35 @@
-import { Controller, Get, Post, Param, ParseIntPipe, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  ParseIntPipe,
+  Request,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import { unlink } from 'fs/promises';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ChatService } from './chat.service';
 import { ChatGateway } from './chat.gateway';
+
+const ALLOWED_ATTACHMENT_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'application/pdf',
+];
+const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+const MODERATOR_ROLES = ['GUARDIAN', 'ARZOBISPO'];
 
 @Controller('chat')
 @UseGuards(JwtAuthGuard)
@@ -25,9 +53,6 @@ export class ChatController {
     }));
   }
 
-  // IMPORTANT: must be declared BEFORE ':conversationId/messages' — otherwise
-  // "conversations" would be captured by the :conversationId param and
-  // rejected by ParseIntPipe as not-a-number
   @Get('conversations/direct')
   async getDirectConversations(@Request() req) {
     const conversations = await this.chatService.getUserDirectConversations(req.user.userId);
@@ -48,12 +73,75 @@ export class ChatController {
       req.user.userId,
       otherUserId,
     );
-    // Make sure both people's currently-open sockets actually join the
-    // room immediately — otherwise a message sent right after creating
-    // this conversation wouldn't reach either of them live
     this.chatGateway.joinConversationRoom(req.user.userId, conversation.id);
     this.chatGateway.joinConversationRoom(otherUserId, conversation.id);
     return conversation;
+  }
+
+  @Post('upload')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/attachments',
+        filename: (req, file, callback) => {
+          const userId = (req as { user?: { userId?: number } }).user?.userId;
+          const uniqueSuffix = Date.now();
+          const ext = extname(file.originalname);
+          callback(null, `${userId}-${uniqueSuffix}${ext}`);
+        },
+      }),
+      limits: { fileSize: MAX_ATTACHMENT_SIZE_BYTES },
+      fileFilter: (req, file, callback) => {
+        if (!ALLOWED_ATTACHMENT_TYPES.includes(file.mimetype)) {
+          callback(
+            new BadRequestException('Solo se permiten imágenes o archivos PDF'),
+            false,
+          );
+          return;
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  async uploadAttachment(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+    return {
+      filename: file.filename,
+      type: file.mimetype,
+      name: file.originalname,
+    };
+  }
+
+  @Delete('messages/:id')
+  async deleteMessage(@Request() req, @Param('id', ParseIntPipe) id: number) {
+    const message = await this.chatService.getMessageById(id);
+    if (!message) {
+      throw new NotFoundException('Message not found');
+    }
+
+    const isAuthor = message.senderId === req.user.userId;
+    const role = await this.chatService.getUserRole(req.user.userId);
+    const isModerator = role !== null && MODERATOR_ROLES.includes(role);
+
+    if (!isAuthor && !isModerator) {
+      throw new ForbiddenException('No puedes eliminar este mensaje');
+    }
+
+    await this.chatService.deleteMessage(id);
+
+    if (message.attachmentFilename) {
+      const filePath = join(process.cwd(), 'uploads', 'attachments', message.attachmentFilename);
+      unlink(filePath).catch(() => {});
+    }
+
+    this.chatGateway.broadcastToRoom(message.conversationId, 'messageDeleted', {
+      messageId: id,
+      conversationId: message.conversationId,
+    });
+
+    return { deleted: true };
   }
 
   @Get(':conversationId/messages')

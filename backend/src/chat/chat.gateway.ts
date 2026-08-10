@@ -20,6 +20,9 @@ interface JwtPayload {
 interface SendMessagePayload {
   conversationId: number;
   content: string;
+  attachmentFilename?: string;
+  attachmentType?: string;
+  attachmentName?: string;
 }
 
 const roomName = (conversationId: number) => `conversation:${conversationId}`;
@@ -107,6 +110,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit(event, payload);
   }
 
+  // Broadcasts only to the people currently in a specific conversation —
+  // used when a message gets deleted, so it disappears live for everyone
+  // in that chat without bothering unrelated users
+  broadcastToRoom(conversationId: number, event: string, payload: unknown) {
+    this.server.to(roomName(conversationId)).emit(event, payload);
+  }
+
   notifyUser(userId: number, event: string, payload: unknown) {
     const sockets = this.onlineUsers.get(userId);
     if (!sockets) {
@@ -145,6 +155,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         payload.conversationId,
         senderId,
         payload.content,
+        payload.attachmentFilename
+          ? {
+              filename: payload.attachmentFilename,
+              type: payload.attachmentType ?? 'application/octet-stream',
+              name: payload.attachmentName ?? payload.attachmentFilename,
+            }
+          : undefined,
       );
     } catch (error) {
       throw new WsException(error.message ?? 'Could not send message');

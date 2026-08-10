@@ -1,7 +1,14 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 const GENERAL_CHANNEL_NAME = 'general';
+
+// Converts the filename stored on disk into the URL the frontend actually
+// fetches from — kept as a small pure helper so both saveMessage and
+// getMessageHistory build it the exact same way
+function toAttachmentUrl(filename: string | null): string | null {
+  return filename ? `/api/chat/attachments/${filename}` : null;
+}
 
 @Injectable()
 export class ChatService {
@@ -134,18 +141,47 @@ export class ChatService {
     return row !== null;
   }
 
-  async saveMessage(conversationId: number, senderId: number, content: string) {
+  async saveMessage(
+    conversationId: number,
+    senderId: number,
+    content: string,
+    attachment?: { filename: string; type: string; name: string },
+  ) {
     const allowed = await this.isParticipant(conversationId, senderId);
     if (!allowed) {
       throw new ForbiddenException('You are not part of this conversation');
     }
 
-    return this.prisma.message.create({
-      data: { conversationId, senderId, content },
+    // Attachments are a privilege of private conversations, same spirit
+    // as DMs themselves being reserved for friends — keeps the shared
+    // public channel free of clutter and easier to moderate
+    if (attachment) {
+      const conversation = await this.prisma.conversation.findUnique({
+        where: { id: conversationId },
+        select: { type: true },
+      });
+      if (conversation?.type !== 'DIRECT') {
+        throw new ForbiddenException(
+          'Los archivos adjuntos solo están permitidos en conversaciones privadas',
+        );
+      }
+    }
+
+    const message = await this.prisma.message.create({
+      data: {
+        conversationId,
+        senderId,
+        content,
+        attachmentFilename: attachment?.filename,
+        attachmentType: attachment?.type,
+        attachmentName: attachment?.name,
+      },
       include: {
         sender: { select: { id: true, displayName: true, avatarUrl: true } },
       },
     });
+
+    return { ...message, attachmentUrl: toAttachmentUrl(message.attachmentFilename) };
   }
 
   async getMessageHistory(conversationId: number, userId: number, limit = 50) {
@@ -154,7 +190,7 @@ export class ChatService {
       throw new ForbiddenException('You are not part of this conversation');
     }
 
-    return this.prisma.message.findMany({
+    const messages = await this.prisma.message.findMany({
       where: { conversationId },
       orderBy: { createdAt: 'desc' },
       take: limit,
@@ -162,5 +198,37 @@ export class ChatService {
         sender: { select: { id: true, displayName: true, avatarUrl: true } },
       },
     });
+
+    return messages.map((m) => ({ ...m, attachmentUrl: toAttachmentUrl(m.attachmentFilename) }));
+  }
+
+  async getMessageById(messageId: number) {
+    return this.prisma.message.findUnique({ where: { id: messageId } });
+  }
+
+  // Used by the authenticated attachment-serving endpoint to figure out
+  // which conversation a given file belongs to, so we can check whether
+  // the requester is actually allowed to see it
+  async findMessageByAttachment(filename: string) {
+    return this.prisma.message.findFirst({ where: { attachmentFilename: filename } });
+  }
+
+  async deleteMessage(messageId: number) {
+    const message = await this.prisma.message.findUnique({ where: { id: messageId } });
+    if (!message) {
+      throw new NotFoundException('Message not found');
+    }
+    await this.prisma.message.delete({ where: { id: messageId } });
+    // Returned so the caller (controller) knows the conversationId to
+    // broadcast to, and the attachment filename to clean up from disk
+    return message;
+  }
+
+  async getUserRole(userId: number): Promise<string | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+    return user?.role ?? null;
   }
 }

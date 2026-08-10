@@ -98,6 +98,13 @@ model Message {
   conversationId Int
   senderId       Int
   content        String
+  // Attachment fields — all optional, since most messages have no file.
+  // attachmentFilename is the name on disk (used to look the file up when
+  // serving it); attachmentName is the ORIGINAL filename, kept separately
+  // for display purposes (users see their real filename, not a UUID).
+  attachmentFilename String?
+  attachmentType     String?
+  attachmentName     String?
   createdAt      DateTime @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
