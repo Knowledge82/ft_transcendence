@@ -71,8 +71,96 @@ make up
  
 **Si en algún momento el proyecto se comporta de forma rara** (dependencias que "deberían estar" pero no aparecen, comportamiento inconsistente tras instalar un paquete nuevo), repetir `make first-run` suele resolverlo — vuelve a construir todo desde cero sin depender de ninguna caché previa.
  
-Consulta el resto de comandos disponibles (`make down`, `make logs`, `make db-migrate`, `make db-studio`, `make clean`, `make fclean`, `make re`) directamente en el `Makefile` — cada uno tiene un comentario explicando qué hace y cuándo usarlo.
-
+### Guía de comandos del `Makefile`
+ 
+Referencia rápida de cada comando disponible y cuándo usar cada uno.
+ 
+#### `make` / `make all` / `make up`
+ 
+El comando del día a día. Levanta todos los contenedores, reconstruyéndolos si el código ha cambiado desde la última vez. Al final, reinicia automáticamente `nginx` — esto evita un error `502 Bad Gateway` que puede aparecer si solo se reconstruyó un servicio (por ejemplo el backend) y nginx se quedó con la dirección de red antigua de ese contenedor. No hace falta preocuparse por eso: ya está resuelto dentro de este mismo comando.
+ 
+```bash
+make
+```
+ 
+#### `make first-run`
+ 
+Úsalo la primera vez que levantas el proyecto en un ordenador nuevo (o si algo se comporta de forma rara y sospechas de una caché de Docker corrupta). Reconstruye todo desde cero, sin usar ninguna capa de construcción guardada previamente — más lento, pero garantiza que no arrastras nada de un intento anterior fallido.
+ 
+```bash
+make first-run
+```
+ 
+#### `make down`
+ 
+Detiene todos los contenedores sin borrar nada — ni el código, ni los datos de la base de datos. La próxima vez que hagas `make up`, todo sigue donde lo dejaste.
+ 
+```bash
+make down
+```
+ 
+#### `make logs`
+ 
+Muestra los logs en tiempo real de todos los contenedores a la vez. Útil para ver qué está pasando sin tener que parar y volver a levantar el proyecto.
+ 
+```bash
+make logs
+```
+ 
+#### `make db-migrate`
+ 
+Úsalo después de un `git pull` si alguien del equipo ha cambiado el esquema de la base de datos (`schema.prisma`) y ha subido una migración nueva. Aplica las migraciones que ya existen como archivos en el repositorio — no crea nada nuevo, solo pone tu base de datos local al día con lo que otros ya definieron.
+ 
+```bash
+make db-migrate
+```
+ 
+#### `make db-migrate-dev name=nombre_descriptivo`
+ 
+Úsalo cuando tú mismo cambias `schema.prisma` (añades un campo, una tabla, etc.) y necesitas generar la migración correspondiente. Requiere un nombre descriptivo — se guardará como parte del nombre del archivo de migración, así que conviene que explique brevemente qué cambia.
+ 
+```bash
+make db-migrate-dev name=add_articles
+```
+ 
+#### `make db-studio`
+ 
+Abre Prisma Studio, una interfaz visual en el navegador para explorar y editar directamente el contenido de la base de datos — útil para revisar datos sin escribir SQL a mano.
+ 
+```bash
+make db-studio
+```
+ 
+#### `make clean`
+ 
+Detiene los contenedores y borra los volúmenes del proyecto — esto incluye la base de datos. Los datos se pierden, pero las imágenes de Docker ya construidas se conservan (la siguiente reconstrucción es más rápida que con `fclean`).
+ 
+```bash
+make clean
+```
+ 
+#### `make fclean`
+ 
+Limpieza profunda: además de todo lo que hace `clean`, borra también las imágenes de Docker del proyecto. La siguiente vez que levantes el proyecto, se reconstruye todo desde cero.
+ 
+```bash
+make fclean
+```
+ 
+#### `make re`
+ 
+El "reinicio total": ejecuta `fclean` y luego `all` — borra absolutamente todo (contenedores, volúmenes, imágenes) y vuelve a levantar el proyecto de cero, exactamente igual que `first-run`. Úsalo cuando quieras empezar de página en blanco sin salir del propio Makefile.
+ 
+```bash
+make re
+```
+ 
+### Comprobaciones automáticas al ejecutar cualquier comando
+ 
+Antes de ejecutar cualquiera de las reglas anteriores, el `Makefile` comprueba dos cosas y avisa con un mensaje claro si algo falla:
+ 
+1. **¿Está Docker instalado en esta máquina?** Si no, indica el enlace de instalación.
+2. **¿Tiene tu usuario permiso para hablar con Docker?** Si no (típico si acabas de instalar Docker o de añadirte al grupo `docker`), te indica que cierres sesión y vuelvas a entrar, o que ejecutes `newgrp docker` como solución rápida sin reiniciar.
 ---
 
 

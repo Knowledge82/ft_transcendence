@@ -21,15 +21,26 @@ endif
 ifeq ($(shell docker ps >/dev/null 2>&1 && echo ok),)
 $(error No se puede conectar con Docker (permission denied). Si acabas de instalar Docker o de añadir tu usuario al grupo "docker" con 'sudo usermod -aG docker $$USER', tienes que cerrar sesión y volver a entrar (o reiniciar) para que el cambio de grupo se aplique. Solución rápida sin reiniciar: ejecuta 'newgrp docker' en esta misma terminal antes de repetir el comando.)
 endif
+
 # colors
 GREEN = \033[1;32m
 RESET = \033[0m
+
 # Regla principal (por defecto)
 all: up
-# Levantar todos los contenedores y construirlos si es necesario
+
+# Levantar todos los contenedores y construirlos si es necesario.
+# Reinicia nginx al final SIEMPRE: si solo se reconstruyó un servicio
+# (por ejemplo backend o frontend), ese contenedor recibe una IP nueva de
+# Docker, pero nginx sigue apuntando a la IP antigua que tenía cacheada,
+# lo que produce un 502 Bad Gateway hasta que se reinicia manualmente.
+# Reiniciarlo aquí, cada vez, elimina esa clase de error por completo.
 up:
 	@echo "$(GREEN)Levantando el proyecto...$(RESET)"
-	$(COMPOSE) up --build
+	$(COMPOSE) up --build -d
+	$(COMPOSE) restart nginx
+	$(COMPOSE) logs -f
+
 # Primer arranque en una máquina nueva: fuerza una reconstrucción completa
 # SIN CACHÉ. Evita el problema de que Docker reutilice una capa antigua de
 # "npm install" (por ejemplo, de un intento anterior fallido en esa misma
@@ -39,33 +50,50 @@ first-run:
 	@echo "$(GREEN)Primer arranque: construyendo desde cero, sin caché...$(RESET)"
 	$(COMPOSE) build --no-cache
 	$(COMPOSE) up
+
 # Detener los contenedores sin borrar los datos de la base de datos
 down:
 	@echo "$(GREEN)Deteniendo los servicios...$(RESET)"
 	$(COMPOSE) down
+
 # Ver los logs en tiempo real de todos los contenedores
 logs:
 	$(COMPOSE) logs -f
+
 # --- Gestión de la Base de Datos (Prisma) ---
-# Aplicar las migraciones de Prisma a la base de datos dentro del contenedor
+
+# Aplica las migraciones YA EXISTENTES (creadas por ti o por otra persona
+# del equipo y ya subidas al repositorio) — esto es lo que debes ejecutar
+# después de un "git pull" si alguien más cambió el esquema de la base de
+# datos. No crea ninguna migración nueva, solo aplica las que faltan.
 db-migrate:
-	@echo "$(GREEN)Aplicando el esquema sagrado de Prisma a la base de datos...$(RESET)"
-	$(COMPOSE) exec backend npx prisma migrate dev --name init
+	@echo "$(GREEN)Aplicando migraciones pendientes...$(RESET)"
+	$(COMPOSE) exec backend npx prisma migrate deploy
+
+# Crea una migración NUEVA a partir de los cambios que tú has hecho en
+# schema.prisma. Requiere un nombre descriptivo: make db-migrate-dev name=add_x
+db-migrate-dev:
+	@echo "$(GREEN)Creando nueva migración: $(name)$(RESET)"
+	$(COMPOSE) exec backend npx prisma migrate dev --name $(name)
+
 # Abrir Prisma Studio (interfaz gráfica de la base de datos)
 db-studio:
 	$(COMPOSE) exec backend npx prisma studio
+
 # Detener contenedores y borrarlos
 clean:
 	@echo "$(GREEN)Limpiando contenedores y volúmenes del proyecto.....$(RESET)"
 	$(COMPOSE) down --volumes --remove-orphans
+
 # Limpieza profunda: borra contenedores, volúmenes (¡OJO: borra la BD!) e imágenes huérfanas
 fclean: clean
 	@echo "$(GREEN)Eliminando imágenes específicas del proyecto...$(RESET)"
-	$(COMPOSE) down --rmi all --volumes --remove-orphans	
-rebuild:
-	@echo "$(GREEN)Reconstruyendo sin borrar datos...$(RESET)"
-	$(COMPOSE) up --build
-# Reconstruir todo el proyecto desde cero
+	$(COMPOSE) down --rmi all --volumes --remove-orphans
+
+# Reconstruir todo el proyecto desde cero (borra imágenes y volúmenes
+# primero, así que la reconstrucción siguiente no puede heredar ninguna
+# caché vieja — el mismo efecto que --no-cache, sin necesitarlo)
 re: fclean all
+
 # Indicamos que estas reglas no corresponden a nombres de archivos físicos
-.PHONY: all up first-run down logs db-migrate db-studio clean fclean re rebuild
+.PHONY: all up first-run down logs db-migrate db-migrate-dev db-studio clean fclean re
