@@ -195,7 +195,7 @@ export function HomePage() {
           <div className="flex justify-center gap-8 mb-6">
             <div>
               <p className="text-xl text-gold-500 font-semibold">{friendCount}</p>
-              <p className="text-xs text-cream-400">Hermanos</p>
+              <p className="text-xs text-cream-400">Amigos</p>
             </div>
             <div>
               <p className="text-xl text-gold-500 font-semibold">{onlineCount}</p>

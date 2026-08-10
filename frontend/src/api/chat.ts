@@ -15,6 +15,12 @@ export interface Message {
   attachmentUrl: string | null;
   attachmentType: string | null;
   attachmentName: string | null;
+  deletedAt: string | null;
+  deletedBy: {
+    id: number;
+    displayName: string | null;
+    role: 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO';
+  } | null;
   sender: {
     id: number;
     displayName: string | null;
@@ -88,8 +94,9 @@ export async function uploadAttachment(
   return data;
 }
 
-export async function deleteMessage(messageId: number): Promise<void> {
-  await apiClient.delete(`/chat/messages/${messageId}`);
+export async function deleteMessage(messageId: number): Promise<Message> {
+  const { data } = await apiClient.delete<Message>(`/chat/messages/${messageId}`);
+  return data;
 }
 
 // Plain <img src="..."> and <a href="..."> tags can't send our usual

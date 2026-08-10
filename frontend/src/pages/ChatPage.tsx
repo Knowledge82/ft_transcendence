@@ -167,8 +167,10 @@ export function ChatPage() {
       );
     }
 
-    function handleMessageDeleted({ messageId }: { messageId: number }) {
-      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    // The message isn't removed from the list — it's REPLACED with its
+    // updated (tombstoned) version, which now carries deletedAt/deletedBy
+    function handleMessageUpdated(updated: Message) {
+      setMessages((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
     }
 
     socket.on('newMessage', handleNewMessage);
@@ -176,7 +178,7 @@ export function ChatPage() {
     socket.on('memberJoined', handleMemberJoined);
     socket.on('friendRequestReceived', handleFriendRequestReceived);
     socket.on('friendRequestAccepted', handleFriendRequestAccepted);
-    socket.on('messageDeleted', handleMessageDeleted);
+    socket.on('messageUpdated', handleMessageUpdated);
 
     return () => {
       socket.off('newMessage', handleNewMessage);
@@ -184,7 +186,7 @@ export function ChatPage() {
       socket.off('memberJoined', handleMemberJoined);
       socket.off('friendRequestReceived', handleFriendRequestReceived);
       socket.off('friendRequestAccepted', handleFriendRequestAccepted);
-      socket.off('messageDeleted', handleMessageDeleted);
+      socket.off('messageUpdated', handleMessageUpdated);
     };
   }, [socket, selectedConversationId]);
 
@@ -267,15 +269,14 @@ export function ChatPage() {
   }
 
   async function handleDeleteMessage(messageId: number) {
-    if (!confirm('¿Eliminar este mensaje?')) {
+    if (!confirm('¿Señalar esta herejía y eliminarla?')) {
       return;
     }
-    await deleteMessage(messageId);
-    // No need to update local state here — the 'messageDeleted' socket
-    // event (received by everyone, including ourselves) already does it
+    const updated = await deleteMessage(messageId);
+    setMessages((prev) => prev.map((m) => (m.id === messageId ? updated : m)));
   }
 
-  const isModerator = ownRole === 'INQUISIDOR' || ownRole === 'ARZOBISPO';
+  const isModerator = ownRole === 'GUARDIAN' || ownRole === 'ARZOBISPO';
   const isGeneralChannelSelected =
     generalChannel !== null && selectedConversationId === generalChannel.id;
 
@@ -437,7 +438,7 @@ export function ChatPage() {
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {messages.map((message) => {
             const isOwn = message.senderId === ownUserId;
-            const canDelete = isOwn || isModerator;
+            const isDeleted = message.deletedAt !== null;
             return (
               <div
                 key={message.id}
@@ -445,10 +446,14 @@ export function ChatPage() {
               >
                 <div
                   className={`max-w-xs rounded-lg px-3 py-2 relative ${
-                    isOwn ? 'bg-gold-500 text-gold-on' : 'bg-ink-900 text-cream-100'
+                    isDeleted
+                      ? 'bg-ink-950 border border-ink-800 text-cream-400 italic'
+                      : isOwn
+                      ? 'bg-gold-500 text-gold-on'
+                      : 'bg-ink-900 text-cream-100'
                   }`}
                 >
-                  {!isOwn && (
+                  {!isOwn && !isDeleted && (
                     <Link
                       to={`/perfil/${message.senderId}`}
                       className="text-xs text-cream-400 mb-1 block hover:underline w-fit"
@@ -457,41 +462,52 @@ export function ChatPage() {
                     </Link>
                   )}
 
-                  {message.attachmentUrl && (
-                    <div className="mb-2">
-                      {message.attachmentType?.startsWith('image/') ? (
-                        <a
-                          href={withAuthToken(message.attachmentUrl)}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <img
-                            src={withAuthToken(message.attachmentUrl)}
-                            alt={message.attachmentName ?? 'Adjunto'}
-                            className="rounded-md max-h-48 object-cover"
-                          />
-                        </a>
-                      ) : (
-                        <a
-                          href={withAuthToken(message.attachmentUrl)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className={`flex items-center gap-2 text-sm underline ${
-                            isOwn ? 'text-gold-on' : 'text-gold-500'
-                          }`}
-                        >
-                          📄 {message.attachmentName ?? 'Documento'}
-                        </a>
+                  {isDeleted ? (
+                    <p className="text-sm">
+                      🔥 Herejía eliminada por {message.deletedBy?.role ?? '???'}{' '}
+                      <span className="text-gold-500 font-semibold not-italic">
+                        {message.deletedBy?.displayName ?? 'un Inquisidor'}
+                      </span>
+                    </p>
+                  ) : (
+                    <>
+                      {message.attachmentUrl && (
+                        <div className="mb-2">
+                          {message.attachmentType?.startsWith('image/') ? (
+                            <a
+                              href={withAuthToken(message.attachmentUrl)}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <img
+                                src={withAuthToken(message.attachmentUrl)}
+                                alt={message.attachmentName ?? 'Adjunto'}
+                                className="rounded-md max-h-48 object-cover"
+                              />
+                            </a>
+                          ) : (
+                            <a
+                              href={withAuthToken(message.attachmentUrl)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className={`flex items-center gap-2 text-sm underline ${
+                                isOwn ? 'text-gold-on' : 'text-gold-500'
+                              }`}
+                            >
+                              📄 {message.attachmentName ?? 'Documento'}
+                            </a>
+                          )}
+                        </div>
                       )}
-                    </div>
+
+                      {message.content && <p>{message.content}</p>}
+                    </>
                   )}
 
-                  {message.content && <p>{message.content}</p>}
-
-                  {canDelete && (
+                  {isModerator && !isDeleted && (
                     <button
                       onClick={() => handleDeleteMessage(message.id)}
-                      title="Eliminar mensaje"
+                      title="Señalar herejía"
                       className={`absolute -top-2 ${
                         isOwn ? '-left-2' : '-right-2'
                       } w-5 h-5 rounded-full bg-ink-950 border border-ink-800 text-error-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center`}
