@@ -68,7 +68,7 @@ export function NotificationBell() {
       <button
         onClick={() => setIsOpen((prev) => !prev)}
         className={`relative text-xl transition-colors ${
-          notifications.length === 0
+          unreadCount === 0
             ? 'text-cream-400/40 hover:text-cream-400'
             : 'text-cream-100 hover:text-gold-500'
         }`}

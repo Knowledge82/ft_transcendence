@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getRandomArticles } from '../api/articles';
 import type { Article } from '../api/articles';
 import { ROUTES } from '../routes';
 
 export function RandomArticles() {
+  const { t } = useTranslation();
   const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -21,7 +23,7 @@ export function RandomArticles() {
   return (
     <div className="mb-6">
       <h2 className="text-xs uppercase tracking-wide text-gold-500 mb-3 text-center">
-        Lo último de la Biblioteca
+        {t('widgets.libraryTitle')}
       </h2>
       <div className="flex justify-center gap-4">
         {articles.map((article) => (

@@ -1,9 +1,11 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ROUTES } from '../routes';
 import { useAuth } from '../context/AuthContext';
 import { validateEmail, validatePassword } from '../utils/validation';
 import { PageContainer, Card, Input, Button, FieldError } from '../components/ui';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 interface FieldErrors {
   email?: string;
@@ -11,6 +13,8 @@ interface FieldErrors {
 }
 
 export function LoginPage() {
+  const { t } = useTranslation();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -42,7 +46,7 @@ export function LoginPage() {
       await login(email, password);
       navigate(ROUTES.HOME);
     } catch (err) {
-      setSubmitError('Email o contraseña incorrectos.');
+      setSubmitError(t('login.invalidCredentials'));
     } finally {
       setIsSubmitting(false);
     }
@@ -50,15 +54,19 @@ export function LoginPage() {
 
   return (
     <PageContainer className="flex items-center justify-center px-4">
-      <Card className="w-full max-w-sm">
+      <div className="w-full max-w-sm">
+        <div className="flex justify-end mb-3">
+          <LanguageSwitcher />
+        </div>
+        <Card>
         <h1 className="text-2xl font-semibold text-cream-100 mb-6 text-center">
-          Iniciar sesión
+          {t('login.title')}
         </h1>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-cream-400 mb-1">
-              Email
+              {t('login.email')}
             </label>
             <Input
               id="email"
@@ -71,7 +79,7 @@ export function LoginPage() {
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-cream-400 mb-1">
-              Contraseña
+              {t('login.password')}
             </label>
             <Input
               id="password"
@@ -87,17 +95,18 @@ export function LoginPage() {
           )}
 
           <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? 'Entrando...' : 'Entrar'}
+            {isSubmitting ? t('login.submitting') : t('login.submit')}
           </Button>
         </form>
 
         <p className="mt-6 text-sm text-cream-400 text-center">
-          ¿No tienes cuenta?{' '}
+          {t('login.noAccount')}{' '}
           <Link to="/register" className="text-gold-500 hover:text-gold-400 font-medium">
-            Regístrate
+            {t('login.register')}
           </Link>
         </p>
-      </Card>
+        </Card>
+      </div>
     </PageContainer>
   );
 }

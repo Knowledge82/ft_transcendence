@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation, Trans } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { Footer } from '../components/Footer';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
+// Deliberately NOT translated — this is the project's brand/proper name,
+// the same way "McDonald's" doesn't get translated into other languages
 const TITLE = 'La Iglesia del Verdadero Relink';
 const LOADER_MS = 2000;
 const PAUSE_AFTER_TYPING_MS = 800;
@@ -10,6 +14,7 @@ const PURE_IMAGE_MS = 2000;
 const BODY_DELAY_MS = 700;
 
 export function LandingPage() {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
 
   const [stage, setStage] = useState<'loading' | 'image' | 'text'>('loading');
@@ -48,58 +53,53 @@ export function LandingPage() {
     };
   }, []);
 
+  const codeClass = 'text-gold-400 bg-ink-900 px-1.5 py-0.5 rounded';
+
+  // p3 (the terminal output block) is intentionally NOT translated below —
+  // it's the real output of the `make` command, which is always in
+  // English regardless of the interface language, same as any other
+  // program's literal console output
   const bodyParagraphs = [
-    <p key="p1">¿Te ha pasado esto en una defensa en 42 Barcelona?</p>,
+    <p key="p1">{t('landing.p1')}</p>,
     <p key="p2">
-      El evaluador, con su aire de suficiencia, ejecuta{' '}
-      <code className="text-gold-400 bg-ink-900 px-1.5 py-0.5 rounded">make</code>{' '}
-      después de buildear tu precioso, brillante y totalmente correcto
-      proyecto. Aparece la línea sagrada:
+      <Trans i18nKey="landing.p2" components={[<code className={codeClass} key="c0" />]} />
     </p>,
     <pre
       key="p3"
       className="bg-ink-900 border border-ink-800 rounded-lg p-4 text-cream-400 text-sm overflow-x-auto"
+      dir="ltr"
     >
       make: Nothing to be done for 'all'.
     </pre>,
     <p key="p4">
-      Pero no le basta. Con una cara de gilipollas increíble, escribe{' '}
-      <code className="text-gold-400 bg-ink-900 px-1.5 py-0.5 rounded">
-        touch Makefile
-      </code>
-      , ejecuta <code className="text-gold-400 bg-ink-900 px-1.5 py-0.5 rounded">make</code>{' '}
-      otra vez y se queda esperando con superioridad moral, afirmando que tu
-      Makefile está mal porque «no has añadido el Makefile ni los headers
-      como dependencias».
+      <Trans
+        i18nKey="landing.p4"
+        components={[
+          <code className={codeClass} key="c0" />,
+          <code className={codeClass} key="c1" />,
+        ]}
+      />
     </p>,
-    <p key="p5">
-      Y tú te quedaste ahí. Callado. Mientras por dentro te hervía la sangre
-      ante semejante ignorancia disfrazada de autoridad.
-    </p>,
+    <p key="p5">{t('landing.p5')}</p>,
     <p key="p6" className="text-gold-500 font-medium">
-      Tú conocías la verdad.
+      {t('landing.p6')}
     </p>,
     <p key="p7">
-      Tu <code className="text-gold-400 bg-ink-900 px-1.5 py-0.5 rounded">Makefile</code>{' '}
-      era impecable. El linker no se había ejecutado en vano. No había
-      ningún relinkado.
+      <Trans i18nKey="landing.p7" components={[<code className={codeClass} key="c0" />]} />
     </p>,
-    <p key="p8">
-      Confundir la recompilación con el relinkado no es una opinión. Es una
-      pura herejía.
-    </p>,
-    <p key="p9">
-      Aquí no estás solo. Aquí te revelamos toda la verdad de los
-      Makefiles, entendemos la diferencia, defendemos los Makefiles limpios
-      y señalamos a los falsos profetas.
-    </p>,
+    <p key="p8">{t('landing.p8')}</p>,
+    <p key="p9">{t('landing.p9')}</p>,
     <p key="p10" className="text-cream-400">
-      Las puertas del Verdadero Relink están abiertas. Entra.
+      {t('landing.p10')}
     </p>,
   ];
 
   return (
     <div className="min-h-screen bg-ink-950 relative overflow-hidden flex flex-col">
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+
       {/* Loader: typewriter title centered, "Cargando" pinned to the bottom */}
       <div
         className={`fixed inset-0 bg-ink-950 transition-opacity duration-700 ${
@@ -107,12 +107,12 @@ export function LandingPage() {
         }`}
       >
         <div className="absolute inset-0 flex items-center justify-center px-6">
-          <h1 className="text-3xl md:text-4xl font-semibold text-gold-500 text-center leading-tight">
+          <h1 className="text-3xl md:text-4xl font-semibold text-gold-500 text-center leading-tight" dir="ltr">
             {TITLE.slice(0, visibleChars)}
           </h1>
         </div>
         <p className="absolute bottom-12 left-0 right-0 text-center text-sm uppercase tracking-widest text-cream-400 animate-pulse">
-          Cargando
+          {t('landing.loading')}
         </p>
       </div>
 
@@ -139,7 +139,7 @@ export function LandingPage() {
             showGreeting ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          Hermano. Hermana.
+          {t('landing.greeting')}
         </p>
 
         {/* Body, cascading top to bottom via per-paragraph delay */}
@@ -168,7 +168,7 @@ export function LandingPage() {
               to="/celda"
               className="bg-gold-500 text-gold-on font-medium px-6 py-3 rounded-md hover:bg-gold-400 transition-colors animate-[pulse-glow_2.5s_ease-in-out_infinite]"
             >
-              Entrar al Altar
+              {t('landing.ctaAuthenticated')}
             </Link>
           ) : (
             <>
@@ -176,10 +176,10 @@ export function LandingPage() {
                 to="/register"
                 className="bg-gold-500 text-gold-on font-medium px-6 py-3 rounded-md hover:bg-gold-400 transition-colors animate-[pulse-glow_2.5s_ease-in-out_infinite]"
               >
-                Únete a la Iglesia
+                {t('landing.ctaRegister')}
               </Link>
               <Link to="/login" className="text-sm text-cream-400 hover:text-cream-100">
-                Ya soy hermano — iniciar sesión
+                {t('landing.ctaLogin')}
               </Link>
             </>
           )}

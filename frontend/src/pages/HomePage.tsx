@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { apiClient } from '../api/client';
@@ -9,6 +10,7 @@ import { PageContainer, Card, LoadingScreen, Avatar, RoleBadge, Input, Button } 
 import { ActivityTicker } from '../components/ActivityTicker';
 import { NotificationBell } from '../components/NotificationBell';
 import { RandomArticles } from '../components/RandomArticles';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 interface Profile {
   id: number;
@@ -20,6 +22,7 @@ interface Profile {
 }
 
 export function HomePage() {
+  const { t } = useTranslation();
   const { logout } = useAuth();
   const { socket } = useSocket();
 
@@ -72,7 +75,7 @@ export function HomePage() {
     setNameError(null);
 
     if (nameDraft.trim().length < 2) {
-      setNameError('El nombre debe tener al menos 2 caracteres');
+      setNameError(t('home.nameTooShort'));
       return;
     }
 
@@ -83,7 +86,7 @@ export function HomePage() {
       setProfile(data);
       setIsEditingName(false);
     } catch (err) {
-      setNameError('No se pudo actualizar el nombre');
+      setNameError(t('home.nameUpdateError'));
     }
   }
 
@@ -105,7 +108,7 @@ export function HomePage() {
       });
       setProfile(data);
     } catch (err) {
-      setAvatarError('No se pudo subir la imagen (¿formato o tamaño no válidos?)');
+      setAvatarError(t('home.avatarUploadError'));
     } finally {
       setIsUploadingAvatar(false);
       if (fileInputRef.current) {
@@ -120,7 +123,7 @@ export function HomePage() {
       const { data } = await apiClient.delete<Profile>('/users/me/avatar');
       setProfile(data);
     } catch (err) {
-      setAvatarError('No se pudo eliminar el avatar');
+      setAvatarError(t('home.avatarRemoveError'));
     }
   }
 
@@ -132,7 +135,8 @@ export function HomePage() {
     <PageContainer className="flex flex-col">
       <div className="flex-1 px-4 py-10">
         <div className="max-w-md mx-auto">
-          <div className="flex justify-end mb-2">
+          <div className="flex justify-between items-center mb-2">
+            <LanguageSwitcher />
             <NotificationBell />
           </div>
           <ActivityTicker />
@@ -144,7 +148,7 @@ export function HomePage() {
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingAvatar}
               className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-gold-500 text-gold-on text-xs flex items-center justify-center hover:bg-gold-400 disabled:opacity-50"
-              title="Cambiar avatar"
+              title={t('home.changeAvatar')}
             >
               ✎
             </button>
@@ -156,14 +160,14 @@ export function HomePage() {
               className="hidden"
             />
           </div>
-          {isUploadingAvatar && <p className="text-xs text-cream-400 mb-2">Subiendo...</p>}
+          {isUploadingAvatar && <p className="text-xs text-cream-400 mb-2">{t('home.uploading')}</p>}
           {avatarError && <p className="text-xs text-error-500 mb-2">{avatarError}</p>}
           {profile.avatarUrl && !isUploadingAvatar && (
             <button
               onClick={handleRemoveAvatar}
               className="text-xs text-cream-400 hover:text-error-500 transition-colors mb-2"
             >
-              Eliminar avatar
+              {t('home.removeAvatar')}
             </button>
           )}
 
@@ -178,7 +182,7 @@ export function HomePage() {
               />
               <div className="flex justify-center gap-2 mt-2">
                 <button type="submit" className="text-xs text-gold-500 hover:text-gold-400">
-                  Guardar
+                  {t('common.save')}
                 </button>
                 <button
                   type="button"
@@ -189,7 +193,7 @@ export function HomePage() {
                   }}
                   className="text-xs text-cream-400 hover:text-cream-100"
                 >
-                  Cancelar
+                  {t('common.cancel')}
                 </button>
               </div>
               {nameError && <p className="text-xs text-error-500 mt-1">{nameError}</p>}
@@ -198,9 +202,9 @@ export function HomePage() {
             <h1
               onClick={() => setIsEditingName(true)}
               className="text-2xl font-semibold text-gold-500 mb-1 cursor-pointer hover:underline"
-              title="Haz clic para editar"
+              title={t('home.editNameHint')}
             >
-              {profile.displayName ?? 'Sin nombre'}
+              {profile.displayName ?? t('home.noName')}
             </h1>
           )}
 
@@ -216,11 +220,11 @@ export function HomePage() {
           <div className="flex justify-center gap-8 mb-6">
             <div>
               <p className="text-xl text-gold-500 font-semibold">{friendCount}</p>
-              <p className="text-xs text-cream-400">Amigos</p>
+              <p className="text-xs text-cream-400">{t('home.friends')}</p>
             </div>
             <div>
               <p className="text-xl text-gold-500 font-semibold">{onlineCount}</p>
-              <p className="text-xs text-cream-400">En línea</p>
+              <p className="text-xs text-cream-400">{t('home.online')}</p>
             </div>
           </div>
 
@@ -229,30 +233,30 @@ export function HomePage() {
               to="/chat"
               className="bg-gold-500 text-gold-on font-medium px-4 py-2 rounded-md hover:bg-gold-400 transition-colors"
             >
-              Ir al chat
+              {t('home.goToChat')}
             </Link>
             <Link
               to="/confesionario"
               className="bg-gold-500 text-gold-on font-medium px-4 py-2 rounded-md hover:bg-gold-400 transition-colors"
             >
-              El Confesionario
+              {t('home.confessional')}
             </Link>
             <Link
               to="/biblioteca"
               className="bg-ink-800 text-gold-500 font-medium px-4 py-2 rounded-md hover:bg-ink-800/70 transition-colors"
             >
-              Biblioteca
+              {t('home.library')}
             </Link>
             {profile.role === 'ARZOBISPO' && (
               <Link
                 to="/santuario"
                 className="bg-ink-800 text-gold-500 font-medium px-4 py-2 rounded-md hover:bg-ink-800/70 transition-colors"
               >
-                Santuario
+                {t('home.sanctuary')}
               </Link>
             )}
             <Button variant="secondary" onClick={() => logout()}>
-              Cerrar sesión
+              {t('home.logout')}
             </Button>
           </div>
         </Card>

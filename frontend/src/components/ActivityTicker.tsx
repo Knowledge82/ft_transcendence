@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSocket } from '../context/SocketContext';
 import { getTodayCommunityFeed } from '../api/community';
 import type { CommunityEvent } from '../api/community';
@@ -35,6 +36,7 @@ function renderMessage(message: string) {
 }
 
 export function ActivityTicker() {
+  const { t } = useTranslation();
   const { socket } = useSocket();
   const [events, setEvents] = useState<CommunityEvent[]>([]);
   const [index, setIndex] = useState(0);
@@ -76,7 +78,7 @@ export function ActivityTicker() {
   return (
     <Card className="mb-6 text-center min-h-[96px] flex flex-col items-center justify-center">
       <h2 className="text-xs uppercase tracking-wide text-gold-500 mb-3">
-        Actividad del Capítulo
+        {t('widgets.activityTitle')}
       </h2>
       {current ? (
         <p
@@ -88,7 +90,7 @@ export function ActivityTicker() {
           {renderMessage(current.message)}
         </p>
       ) : (
-        <p className="text-sm text-cream-400">Todo tranquilo por hoy...</p>
+        <p className="text-sm text-cream-400">{t('widgets.activityEmpty')}</p>
       )}
     </Card>
   );

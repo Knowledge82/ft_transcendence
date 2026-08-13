@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { Link, useSearchParams, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getGeneralChannel, startDirectConversation, getMessageHistory, getGeneralMembers, getDirectConversations, uploadAttachment, deleteMessage, withAuthToken } from '../api/chat';
 import type { Conversation, Message, Member, DirectConversationSummary } from '../api/chat';
 import { listFriends, sendFriendRequest, listPendingRequests, acceptFriendRequest, removeFriend } from '../api/friends';
@@ -11,6 +12,7 @@ import { ROUTES } from '../routes';
 import { getGenderedRole } from '../utils/genderedRole';
 
 export function ChatPage() {
+  const { t } = useTranslation();
   const { socket } = useSocket();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
@@ -27,7 +29,6 @@ export function ChatPage() {
   const [sentRequests, setSentRequests] = useState<Set<number>>(new Set());
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
-  const [channelLabel, setChannelLabel] = useState('Capítulo');
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState('');
   const [ownUserId, setOwnUserId] = useState<number | null>(null);
@@ -48,6 +49,20 @@ export function ChatPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Small helper reused everywhere we fall back to showing a raw user id
+  // instead of a real display name — keeps the translated "User" word
+  // consistent instead of repeating the same ternary everywhere
+  function userFallback(id: number | undefined) {
+    return `${t('common.user')} ${id}`;
+  }
+
+  // The header label is DERIVED, never stored — storing an already-
+  // translated string in state would go stale the moment the user
+  // switches language without re-selecting the conversation
+  const headerLabel = activeDmTarget
+    ? activeDmTarget.displayName ?? userFallback(activeDmTarget.id)
+    : t('chat.generalChannel');
 
   useEffect(() => {
     Promise.all([
@@ -75,31 +90,24 @@ export function ChatPage() {
 
         if (cId === general.id) {
           setSelectedConversationId(general.id);
-          setChannelLabel('Capítulo');
         } else if (cId) {
           const matchingDm = directList.find((c) => c.id === cId);
           if (matchingDm) {
             setSelectedConversationId(matchingDm.id);
-            setChannelLabel(
-              matchingDm.otherUser?.displayName ?? `Usuario ${matchingDm.otherUser?.id}`,
-            );
             setActiveDmTarget(matchingDm.otherUser);
           } else if (stateOtherUser) {
             // Brand new conversation, not in directList yet (no messages
             // sent so far) — we still know who it's with because
             // UserProfilePage passed it along via navigation state
             setSelectedConversationId(cId);
-            setChannelLabel(stateOtherUser.displayName ?? `Usuario ${stateOtherUser.id}`);
             setActiveDmTarget(stateOtherUser);
           } else {
             // ?c= points to a conversation we have no information about
             // (e.g. a stale/invalid link) — fall back safely to the general channel
             setSelectedConversationId(general.id);
-            setChannelLabel('Capítulo');
           }
         } else {
           setSelectedConversationId(general.id);
-          setChannelLabel('Capítulo');
         }
       })
       .finally(() => setIsLoading(false));
@@ -196,20 +204,15 @@ export function ChatPage() {
   // every click handler doesn't have to remember to do both. `replace:
   // true` avoids spamming the browser's back-button history with every
   // single conversation switch.
-  function selectConversation(
-    id: number,
-    label: string,
-    dmTarget: typeof activeDmTarget,
-  ) {
+  function selectConversation(id: number, dmTarget: typeof activeDmTarget) {
     setSelectedConversationId(id);
-    setChannelLabel(label);
     setActiveDmTarget(dmTarget);
     setSearchParams({ c: String(id) }, { replace: true });
   }
 
   async function openDirectConversation(friend: Friend) {
     const conversation = await startDirectConversation(friend.id);
-    selectConversation(conversation.id, friend.displayName ?? `Usuario ${friend.id}`, {
+    selectConversation(conversation.id, {
       id: friend.id,
       displayName: friend.displayName,
       avatarUrl: friend.avatarUrl,
@@ -238,7 +241,7 @@ export function ChatPage() {
   }
 
   async function handleRemoveFriend(userId: number) {
-    if (!confirm('¿Seguro que quieres quitar a este hermano de tu lista de amigos?')) {
+    if (!confirm(t('chat.confirmRemoveFriend'))) {
       return;
     }
     await removeFriend(userId);
@@ -259,7 +262,7 @@ export function ChatPage() {
       console.error('No se pudo subir el archivo:', err);
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'No se pudo subir el archivo.';
+        t('chat.uploadError');
       setUploadError(Array.isArray(message) ? message.join(', ') : message);
     } finally {
       setUploadProgress(null);
@@ -270,7 +273,7 @@ export function ChatPage() {
   }
 
   async function handleDeleteMessage(messageId: number) {
-    if (!confirm('¿Señalar esta herejía y eliminarla?')) {
+    if (!confirm(t('chat.confirmDeleteMessage'))) {
       return;
     }
     const updated = await deleteMessage(messageId);
@@ -321,9 +324,12 @@ export function ChatPage() {
     <PageContainer className="flex flex-col" showFrame={false}>
       <header className="grid grid-cols-3 items-center px-4 py-2 bg-ink-900 border-b border-ink-800">
         <div />
-        <span className="text-sm text-gold-500 font-medium text-center">{channelLabel}</span>
+        <span className="text-sm text-gold-500 font-medium text-center">{headerLabel}</span>
         <span className="text-sm text-cream-400 text-right">
-          Conectado como <span className="text-gold-500 font-medium">{ownDisplayName ?? `Usuario ${ownUserId}`}</span>
+          {t('chat.loggedInAs')}{' '}
+          <span className="text-gold-500 font-medium">
+            {ownDisplayName ?? userFallback(ownUserId ?? undefined)}
+          </span>
         </span>
       </header>
 
@@ -334,17 +340,17 @@ export function ChatPage() {
         </div>
 
         <div className="p-4">
-          <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">Canales</h2>
+          <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">{t('chat.channels')}</h2>
           {generalChannel && (
             <button
-              onClick={() => generalChannel && selectConversation(generalChannel.id, 'Capítulo', null)}
+              onClick={() => generalChannel && selectConversation(generalChannel.id, null)}
               className={`w-full text-left px-3 py-2 rounded-md mb-1 transition-colors ${
                 selectedConversationId === generalChannel.id
                   ? 'bg-gold-500 text-gold-on'
                   : 'text-cream-100 hover:bg-ink-800'
               }`}
             >
-              Capítulo
+              {t('chat.generalChannel')}
             </button>
           )}
         </div>
@@ -352,14 +358,14 @@ export function ChatPage() {
         {directConversations.length > 0 && (
           <div className="p-4 border-t border-ink-800">
             <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">
-              Conversaciones
+              {t('chat.conversations')}
             </h2>
             {directConversations.map((conv) => {
-              const label = conv.otherUser?.displayName ?? `Usuario ${conv.otherUser?.id}`;
+              const label = conv.otherUser?.displayName ?? userFallback(conv.otherUser?.id);
               return (
                 <button
                   key={conv.id}
-                  onClick={() => selectConversation(conv.id, label, conv.otherUser)}
+                  onClick={() => selectConversation(conv.id, conv.otherUser)}
                   className={`w-full flex items-center gap-2 text-left px-3 py-2 rounded-md mb-1 transition-colors ${
                     selectedConversationId === conv.id
                       ? 'bg-gold-500 text-gold-on'
@@ -377,7 +383,7 @@ export function ChatPage() {
         {pendingRequests.length > 0 && (
           <div className="p-4 border-t border-ink-800">
             <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">
-              Solicitudes pendientes
+              {t('chat.pendingRequests')}
             </h2>
             {pendingRequests.map((request) => (
               <div key={request.id} className="flex items-center justify-between gap-2 mb-1">
@@ -385,17 +391,17 @@ export function ChatPage() {
                   to={`/perfil/${request.requesterId}`}
                   className="text-sm text-cream-100 truncate hover:underline"
                 >
-                  {request.requester.displayName ?? `Usuario ${request.requesterId}`}
+                  {request.requester.displayName ?? userFallback(request.requesterId)}
                 </Link>
                 <div className="flex gap-1 flex-shrink-0">
                   <IconButton onClick={() => handleAcceptRequest(request.requesterId)}>
-                    Aceptar
+                    {t('chat.accept')}
                   </IconButton>
                   <IconButton
                     tone="danger"
                     onClick={() => handleRejectRequest(request.requesterId)}
                   >
-                    Rechazar
+                    {t('chat.reject')}
                   </IconButton>
                 </div>
               </div>
@@ -404,9 +410,9 @@ export function ChatPage() {
         )}
 
         <div className="p-4">
-          <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">Amigos</h2>
+          <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">{t('home.friends')}</h2>
           {friends.length === 0 && (
-            <p className="text-sm text-cream-400">Todavía no tienes amigos añadidos.</p>
+            <p className="text-sm text-cream-400">{t('chat.noFriendsYet')}</p>
           )}
           {friends.map((friend) => (
             <div
@@ -418,15 +424,15 @@ export function ChatPage() {
                 to={`/perfil/${friend.id}`}
                 className="flex-1 text-left text-sm text-cream-100 truncate hover:underline"
               >
-                {friend.displayName ?? `Usuario ${friend.id}`}
+                {friend.displayName ?? userFallback(friend.id)}
               </Link>
-              <IconButton onClick={() => openDirectConversation(friend)} title="Enviar mensaje">
+              <IconButton onClick={() => openDirectConversation(friend)} title={t('chat.sendMessage')}>
                 ✉
               </IconButton>
               <IconButton
                 tone="danger"
                 onClick={() => handleRemoveFriend(friend.id)}
-                title="Quitar amigo"
+                title={t('chat.removeFriend')}
               >
                 ✕
               </IconButton>
@@ -459,18 +465,18 @@ export function ChatPage() {
                       to={`/perfil/${message.senderId}`}
                       className="text-xs text-cream-400 mb-1 block hover:underline w-fit"
                     >
-                      {message.sender.displayName ?? `Usuario ${message.senderId}`}
+                      {message.sender.displayName ?? userFallback(message.senderId)}
                     </Link>
                   )}
 
                   {isDeleted ? (
                     <p className="text-sm">
-                      🔥 Herejía eliminada por{' '}
+                      🔥 {t('chat.heresyDeletedBy')}{' '}
                       {message.deletedBy
                         ? getGenderedRole(message.deletedBy.role, message.deletedBy.gender)
                         : '???'}{' '}
                       <span className="text-gold-500 font-semibold not-italic">
-                        {message.deletedBy?.displayName ?? 'un Inquisidor'}
+                        {message.deletedBy?.displayName ?? t('chat.anInquisitor')}
                       </span>
                     </p>
                   ) : (
@@ -485,7 +491,7 @@ export function ChatPage() {
                             >
                               <img
                                 src={withAuthToken(message.attachmentUrl)}
-                                alt={message.attachmentName ?? 'Adjunto'}
+                                alt={message.attachmentName ?? t('chat.attachment')}
                                 className="rounded-md max-h-48 object-cover"
                               />
                             </a>
@@ -498,7 +504,7 @@ export function ChatPage() {
                                 isOwn ? 'text-gold-on' : 'text-gold-500'
                               }`}
                             >
-                              📄 {message.attachmentName ?? 'Documento'}
+                              📄 {message.attachmentName ?? t('chat.document')}
                             </a>
                           )}
                         </div>
@@ -511,7 +517,7 @@ export function ChatPage() {
                   {isModerator && !isDeleted && (
                     <button
                       onClick={() => handleDeleteMessage(message.id)}
-                      title="Señalar herejía"
+                      title={t('chat.flagHeresy')}
                       className={`absolute -top-2 ${
                         isOwn ? '-left-2' : '-right-2'
                       } w-5 h-5 rounded-full bg-ink-950 border border-ink-800 text-error-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center`}
@@ -541,7 +547,7 @@ export function ChatPage() {
               onClick={() => setPendingAttachment(null)}
               className="text-error-500 hover:text-red-400 text-xs"
             >
-              Quitar
+              {t('chat.removeAttachment')}
             </button>
           </div>
         )}
@@ -570,7 +576,7 @@ export function ChatPage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                title="Adjuntar archivo"
+                title={t('chat.attachFile')}
                 className="text-cream-400 hover:text-gold-500 transition-colors px-2"
               >
                 📎
@@ -581,16 +587,19 @@ export function ChatPage() {
             type="text"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="Escribe un mensaje..."
+            placeholder={t('chat.messagePlaceholder')}
             className="flex-1"
           />
-          <Button type="submit">Enviar</Button>
+          <Button type="submit">{t('chat.send')}</Button>
         </form>
       </main>
 
       <aside className="w-56 bg-ink-900 border-l border-ink-800 p-4 overflow-y-auto">
         <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">
-          Hermanos ({members.filter((m) => m.isOnline).length}/{members.length})
+          {t('chat.membersHeader', {
+            online: members.filter((m) => m.isOnline).length,
+            total: members.length,
+          })}
         </h2>
         {[...members]
           .sort((a, b) => Number(b.isOnline) - Number(a.isOnline))
@@ -606,11 +615,11 @@ export function ChatPage() {
                   to={`/perfil/${member.id}`}
                   className="text-sm text-cream-100 truncate flex-1 hover:underline"
                 >
-                  {member.displayName ?? `Usuario ${member.id}`}
+                  {member.displayName ?? userFallback(member.id)}
                 </Link>
                 {!isSelf && !isFriend && (
                   <IconButton onClick={() => handleAddFriend(member.id)} disabled={alreadySent}>
-                    {alreadySent ? 'Enviada' : '+ Amigo'}
+                    {alreadySent ? t('chat.requestSent') : t('chat.addFriend')}
                   </IconButton>
                 )}
               </div>

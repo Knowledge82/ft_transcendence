@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ROUTES } from '../routes';
 import { useAuth } from '../context/AuthContext';
 import { validateEmail, validatePassword, validateDisplayName } from '../utils/validation';
@@ -15,6 +16,8 @@ interface FieldErrors {
 }
 
 export function RegisterPage() {
+  const { t } = useTranslation();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -31,7 +34,7 @@ export function RegisterPage() {
       email: validateEmail(email) ?? undefined,
       password: validatePassword(password) ?? undefined,
       displayName: validateDisplayName(displayName) ?? undefined,
-      gender: gender ? undefined : 'Debes elegir Hermano o Hermana',
+      gender: gender ? undefined : t('register.genderRequired'),
     };
     setFieldErrors(errors);
     return Object.values(errors).every((error) => error === undefined);
@@ -50,7 +53,7 @@ export function RegisterPage() {
       await register(email, password, displayName, gender);
       navigate(ROUTES.HOME);
     } catch (err) {
-      setSubmitError('No se pudo completar el registro. Comprueba los datos.');
+      setSubmitError(t('register.submitError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -60,13 +63,13 @@ export function RegisterPage() {
     <PageContainer className="flex items-center justify-center px-4">
       <Card className="w-full max-w-sm">
         <h1 className="text-2xl font-semibold text-cream-100 mb-6 text-center">
-          Registro
+          {t('register.title')}
         </h1>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div>
             <label htmlFor="displayName" className="block text-sm font-medium text-cream-400 mb-1">
-              Nombre
+              {t('register.name')}
             </label>
             <Input
               id="displayName"
@@ -79,7 +82,7 @@ export function RegisterPage() {
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-cream-400 mb-1">
-              Email
+              {t('login.email')}
             </label>
             <Input
               id="email"
@@ -92,7 +95,7 @@ export function RegisterPage() {
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-cream-400 mb-1">
-              Contraseña
+              {t('login.password')}
             </label>
             <Input
               id="password"
@@ -104,13 +107,15 @@ export function RegisterPage() {
           </div>
 
           <div>
-            <span className="block text-sm font-medium text-cream-400 mb-1">Género</span>
-            <div className="flex gap-2">
+            <span className="block text-sm font-medium text-cream-400 mb-1">
+              {t('register.gender')}
+            </span>
+            <div className="inline-flex w-full rounded-full border border-ink-800 bg-ink-950 p-1">
               <label
-                className={`flex-1 text-center py-2 rounded-md border cursor-pointer transition-colors ${
+                className={`flex-1 text-center py-1.5 rounded-full cursor-pointer transition-all duration-200 text-sm ${
                   gender === 'MASCULINO'
-                    ? 'bg-gold-500 text-gold-on border-gold-500 font-medium'
-                    : 'bg-ink-950 border-ink-800 text-cream-100 hover:bg-ink-800'
+                    ? 'bg-gold-500 text-gold-on font-medium shadow-sm'
+                    : 'text-cream-400 hover:text-cream-100'
                 }`}
               >
                 <input
@@ -121,13 +126,13 @@ export function RegisterPage() {
                   onChange={() => setGender('MASCULINO')}
                   className="sr-only"
                 />
-                Hermano
+                {t('register.hermano')}
               </label>
               <label
-                className={`flex-1 text-center py-2 rounded-md border cursor-pointer transition-colors ${
+                className={`flex-1 text-center py-1.5 rounded-full cursor-pointer transition-all duration-200 text-sm ${
                   gender === 'FEMENINO'
-                    ? 'bg-gold-500 text-gold-on border-gold-500 font-medium'
-                    : 'bg-ink-950 border-ink-800 text-cream-100 hover:bg-ink-800'
+                    ? 'bg-gold-500 text-gold-on font-medium shadow-sm'
+                    : 'text-cream-400 hover:text-cream-100'
                 }`}
               >
                 <input
@@ -138,7 +143,7 @@ export function RegisterPage() {
                   onChange={() => setGender('FEMENINO')}
                   className="sr-only"
                 />
-                Hermana
+                {t('register.hermana')}
               </label>
             </div>
             <FieldError>{fieldErrors.gender}</FieldError>
@@ -149,14 +154,14 @@ export function RegisterPage() {
           )}
 
           <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? 'Enviando...' : 'Registrarse'}
+            {isSubmitting ? t('register.submitting') : t('register.submit')}
           </Button>
         </form>
 
         <p className="mt-6 text-sm text-cream-400 text-center">
-          ¿Ya tienes cuenta?{' '}
+          {t('register.hasAccount')}{' '}
           <Link to="/login" className="text-gold-500 hover:text-gold-400 font-medium">
-            Inicia sesión
+            {t('register.login')}
           </Link>
         </p>
       </Card>
