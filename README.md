@@ -419,6 +419,5 @@ Todo el ciclo se probó manualmente con `curl` (con flags `-k` para el certifica
 
 ---
 
-## 6. Estado actual y pendientes
-Deprecated
-[Estado actualizado para 02-07-2026](./docs/estado-actualizado.md)
+## 6. Estado actual y los puntos acumulados.
+[Estado actualizado para 13.07.26](./docs/estado-actualizado.md)
