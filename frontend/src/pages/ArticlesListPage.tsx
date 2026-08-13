@@ -5,6 +5,7 @@ import type { Article } from '../api/articles';
 import { apiClient } from '../api/client';
 import { ROUTES } from '../routes';
 import { PageContainer, Card, LoadingScreen, BackLink, Button } from '../components/ui';
+import { getGenderedRole } from '../utils/genderedRole';
 
 const MODERATOR_ROLES = ['INQUISIDOR', 'ARZOBISPO'];
 
@@ -60,7 +61,9 @@ export function ArticlesListPage() {
                     {article.title}
                   </h2>
                   <p className="text-xs text-cream-400 mb-3">
-                    {article.author.displayName ?? `Usuario ${article.author.id}`} ·{' '}
+                    {getGenderedRole(article.author.role, article.author.gender)}{' '}
+                    {article.author.displayName ?? `Usuario ${article.author.id}`}
+                    {' · '}
                     {new Date(article.createdAt).toLocaleDateString('es-ES')}
                   </p>
                   <p className="text-sm text-cream-100">{excerpt(article.content)}</p>

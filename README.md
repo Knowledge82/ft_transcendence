@@ -400,6 +400,10 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 [+ Gender, default avatar, bell](./docs/docs-gender-avatar-bell.md)
 
 [+ Articulos](./docs/docs-biblioteca.md)
+[+ Articulos fix some issues](./docs/docs-biblioteca-fixes.md)
+
+
+
 
 ## 5. Verificación end-to-end
 

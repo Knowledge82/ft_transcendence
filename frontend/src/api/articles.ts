@@ -9,6 +9,8 @@ export interface Article {
     id: number;
     displayName: string | null;
     avatarUrl: string | null;
+    role: 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO';
+    gender: 'MASCULINO' | 'FEMENINO';
   };
 }
 
@@ -30,4 +32,17 @@ export async function getRandomArticles(count = 3): Promise<Article[]> {
 export async function createArticle(title: string, content: string): Promise<Article> {
   const { data } = await apiClient.post<Article>('/articles', { title, content });
   return data;
+}
+
+export async function updateArticle(
+  id: number,
+  title: string,
+  content: string,
+): Promise<Article> {
+  const { data } = await apiClient.patch<Article>(`/articles/${id}`, { title, content });
+  return data;
+}
+
+export async function deleteArticle(id: number): Promise<void> {
+  await apiClient.delete(`/articles/${id}`);
 }

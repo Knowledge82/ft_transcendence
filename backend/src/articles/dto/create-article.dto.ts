@@ -8,6 +8,6 @@ export class CreateArticleDto {
 
   @IsString()
   @MinLength(50, { message: 'El artículo debe tener al menos 50 caracteres' })
-  @MaxLength(5000, { message: 'El artículo no puede superar los 5000 caracteres' })
+  @MaxLength(2000, { message: 'El artículo no puede superar los 2000 caracteres' })
   content: string;
 }

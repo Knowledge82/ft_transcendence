@@ -1,23 +1,49 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { getArticleById } from '../api/articles';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { getArticleById, deleteArticle } from '../api/articles';
 import type { Article } from '../api/articles';
+import { apiClient } from '../api/client';
 import { ROUTES } from '../routes';
-import { PageContainer, Card, LoadingScreen, BackLink, Avatar } from '../components/ui';
+import { PageContainer, Card, LoadingScreen, BackLink, Avatar, IconButton } from '../components/ui';
+import { getGenderedRole } from '../utils/genderedRole';
 
 export function ArticleDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
   const [article, setArticle] = useState<Article | null>(null);
+  const [ownUserId, setOwnUserId] = useState<number | null>(null);
+  const [ownRole, setOwnRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
-    getArticleById(Number(id))
-      .then(setArticle)
+    Promise.all([
+      getArticleById(Number(id)),
+      apiClient.get<{ id: number; role: string }>('/users/me'),
+    ])
+      .then(([articleData, me]) => {
+        setArticle(articleData);
+        setOwnUserId(me.data.id);
+        setOwnRole(me.data.role);
+      })
       .catch(() => setError('No se pudo encontrar este tratado'))
       .finally(() => setIsLoading(false));
   }, [id]);
+
+  const isArzobispo = ownRole === 'ARZOBISPO';
+  const isAuthor = article !== null && ownUserId === article.author.id;
+  const canEdit = isAuthor || isArzobispo;
+
+  async function handleDelete() {
+    if (!article) return;
+    if (!confirm('¿Seguro que quieres retirar este tratado de la biblioteca? Esta acción no se puede deshacer.')) {
+      return;
+    }
+    await deleteArticle(article.id);
+    navigate(ROUTES.LIBRARY);
+  }
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -35,7 +61,24 @@ export function ArticleDetailPage() {
   return (
     <PageContainer className="px-4 py-10">
       <div className="max-w-2xl mx-auto">
-        <BackLink to={ROUTES.LIBRARY} label="← Volver a la Biblioteca" />
+        <div className="flex justify-between items-center">
+          <BackLink to={ROUTES.LIBRARY} label="← Volver a la Biblioteca" />
+          {canEdit && (
+            <div className="flex gap-3">
+              <Link
+                to={`${ROUTES.ARTICLE(article.id)}/editar`}
+                className="text-xs text-gold-500 hover:text-gold-400"
+              >
+                Editar
+              </Link>
+              {isArzobispo && (
+                <IconButton tone="danger" onClick={handleDelete}>
+                  Eliminar
+                </IconButton>
+              )}
+            </div>
+          )}
+        </div>
 
         <Card className="mt-6">
           <h1 className="text-2xl font-semibold text-gold-500 mb-4">{article.title}</h1>
@@ -48,6 +91,7 @@ export function ArticleDetailPage() {
             />
             <div>
               <p className="text-sm text-cream-100">
+                {getGenderedRole(article.author.role, article.author.gender)}{' '}
                 {article.author.displayName ?? `Usuario ${article.author.id}`}
               </p>
               <p className="text-xs text-cream-400">

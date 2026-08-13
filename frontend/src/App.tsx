@@ -87,6 +87,14 @@ function App() {
               }
             />
             <Route
+              path="/biblioteca/:id/editar"
+              element={
+                <ProtectedRoute>
+                  <NewArticlePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/biblioteca/:id"
               element={
                 <ProtectedRoute>

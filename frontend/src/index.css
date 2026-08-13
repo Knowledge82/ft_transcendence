@@ -27,3 +27,20 @@ body {
     box-shadow: 0 0 0 12px rgba(212, 175, 55, 0);
   }
 }
+
+/* "Hot news" flicker behind the article scrolls on /celda — alternates
+   between two warm tones (orange/red) at slightly different sizes, so it
+   reads as an irregular, living flame-like glow rather than a mechanical
+   pulse of a single color */
+@keyframes scroll-glow {
+  0%, 100% {
+    box-shadow: 0 0 12px 4px rgba(232, 90, 30, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 18px 8px rgba(212, 60, 20, 0.5);
+  }
+}
+
+.animate-scroll-glow {
+  animation: scroll-glow 1.8s ease-in-out infinite;
+}

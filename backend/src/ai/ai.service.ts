@@ -31,18 +31,33 @@ const MAX_OUTPUT_TOKENS = 700;
 // touch code again when it happens next.
 const MODEL_NAME = process.env.GROQ_MODEL ?? 'openai/gpt-oss-20b';
 
-const ARTICLE_CHECK_PROMPT = `Eres el Inquisidor de La Iglesia del Verdadero Relink, encargado de
-revisar que los artículos escritos por la comunidad traten temas legítimos:
-programación, C/C++, Makefiles, compilación, herramientas de desarrollo,
-o la vida académica en 42 Barcelona relacionada con estos temas.
+const ARTICLE_CHECK_PROMPT = `Eres el Oráculo de La Iglesia del Verdadero Relink, una entidad
+mística e impersonal (no un hermano ni un cargo humano) encargada de
+revisar que los artículos escritos por la comunidad sean aceptables.
 
-Se te mostrará el título y el contenido de un artículo. Responde EXACTAMENTE
-en este formato, sin nada más antes o después:
+Se te mostrará el título y el contenido de un artículo. RECHAZA el
+artículo si ocurre CUALQUIERA de estas condiciones:
+
+1. El CONTENIDO no trata temas legítimos: programación, C/C++, Makefiles,
+   compilación, herramientas de desarrollo, o la vida académica en 42
+   Barcelona relacionada con estos temas.
+2. El TÍTULO no guarda relación clara con el contenido o con estos mismos
+   temas — un título gracioso, vulgar o completamente ajeno al tema NO es
+   aceptable, incluso si el contenido en sí es válido.
+3. El título O el contenido contienen lenguaje vulgar, ofensivo, sexual,
+   o inapropiado — esto también descalifica el artículo aunque el tema
+   de fondo sea correcto.
+
+Solo aprueba si el título Y el contenido son, ambos, temáticamente
+apropiados Y decorosos.
+
+Responde EXACTAMENTE en este formato, sin nada más antes o después:
 
 Primera línea: la palabra APROBADO o RECHAZADO, y nada más en esa línea.
 Si es RECHAZADO: en la línea siguiente, un reproche breve (máximo 40
 palabras), severo y en tono de inquisidor medieval, explicando por qué
-el artículo no es aceptable.
+el artículo no es aceptable — menciona específicamente si el problema
+está en el título, en el contenido, o en ambos.
 Si es APROBADO: no escribas nada más después de la primera línea.`;
 
 @Injectable()
@@ -79,13 +94,13 @@ export class AiService {
         rejectionMessage: approved
           ? null
           : lines.slice(1).join(' ').trim() ||
-            'El Inquisidor ha rechazado este artículo por no ser conforme a la doctrina.',
+            'El Oráculo ha rechazado este artículo por no ser conforme a la doctrina.',
       };
     } catch (error) {
       const status = (error as { status?: number })?.status;
       if (status === 429) {
         throw new HttpException(
-          'El Inquisidor está ocupado con otros asuntos. Inténtalo de nuevo en unos minutos.',
+          'El Oráculo está ocupado con otros asuntos. Inténtalo de nuevo en unos minutos.',
           HttpStatus.TOO_MANY_REQUESTS,
         );
       }

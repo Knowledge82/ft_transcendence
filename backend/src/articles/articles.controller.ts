@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Delete,
   Body,
   Param,
   ParseIntPipe,
@@ -9,6 +11,7 @@ import {
   Request,
   UseGuards,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -70,5 +73,49 @@ export class ArticlesController {
     await this.communityService.createArticlePublishedEvent(authorName, article.title);
 
     return article;
+  }
+
+  @Patch(':id')
+  async update(
+    @Request() req,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreateArticleDto,
+  ) {
+    const existing = await this.articlesService.getArticleById(id);
+    const isAuthor = existing.authorId === req.user.userId;
+    const requesterRole = await this.articlesService.getUserRole(req.user.userId);
+    const isArzobispo = requesterRole === 'ARZOBISPO';
+
+    if (!isAuthor && !isArzobispo) {
+      throw new ForbiddenException('Solo el autor o un Arzobispo pueden corregir este tratado');
+    }
+
+    // Editing is treated as "republishing" — the content changed, so it
+    // goes through the same relevance check again before being saved
+    const check = await this.aiService.checkArticleRelevance(dto.title, dto.content);
+    if (!check.approved) {
+      throw new BadRequestException(check.rejectionMessage);
+    }
+
+    const updated = await this.articlesService.updateArticle(id, dto.title, dto.content);
+
+    const editor = await this.articlesService.getUserBasicInfo(req.user.userId);
+    const editorName = editor?.displayName ?? `Usuario ${req.user.userId}`;
+    await this.communityService.createArticleEditedEvent(editorName, updated.title);
+
+    return updated;
+  }
+
+  @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles('ARZOBISPO')
+  async remove(@Request() req, @Param('id', ParseIntPipe) id: number) {
+    const deleted = await this.articlesService.deleteArticle(id);
+
+    const deleter = await this.articlesService.getUserBasicInfo(req.user.userId);
+    const deleterName = deleter?.displayName ?? `Usuario ${req.user.userId}`;
+    await this.communityService.createArticleDeletedEvent(deleterName, deleted.title);
+
+    return { deleted: true };
   }
 }

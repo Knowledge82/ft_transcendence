@@ -80,6 +80,16 @@ const ARTICLE_PUBLISHED_TEMPLATES: Array<(name: string, title: string) => string
   (name, title) => `**${name}** ha dejado su huella en la biblioteca con "${title}".`,
 ];
 
+const ARTICLE_EDITED_TEMPLATES: Array<(name: string, title: string) => string> = [
+  (name, title) => `**${name}** ha revisado el tratado "${title}".`,
+  (name, title) => `El tratado "${title}" ha sido corregido por **${name}**.`,
+];
+
+const ARTICLE_DELETED_TEMPLATES: Array<(name: string, title: string) => string> = [
+  (name, title) => `**${name}** ha retirado el tratado "${title}" de la biblioteca.`,
+  (name, title) => `El tratado "${title}" ha sido quemado por orden de **${name}**.`,
+];
+
 function pickRandom<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)];
 }
@@ -150,6 +160,17 @@ export class CommunityService implements OnModuleInit {
     return this.createEvent(
       'ARTICLE_PUBLISHED',
       pickRandom(ARTICLE_PUBLISHED_TEMPLATES)(name, title),
+    );
+  }
+
+  async createArticleEditedEvent(name: string, title: string) {
+    return this.createEvent('ARTICLE_EDITED', pickRandom(ARTICLE_EDITED_TEMPLATES)(name, title));
+  }
+
+  async createArticleDeletedEvent(name: string, title: string) {
+    return this.createEvent(
+      'ARTICLE_DELETED',
+      pickRandom(ARTICLE_DELETED_TEMPLATES)(name, title),
     );
   }
 

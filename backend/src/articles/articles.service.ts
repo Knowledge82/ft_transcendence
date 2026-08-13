@@ -2,7 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 const AUTHOR_SELECT = {
-  author: { select: { id: true, displayName: true, avatarUrl: true } },
+  author: {
+    select: { id: true, displayName: true, avatarUrl: true, role: true, gender: true },
+  },
 };
 
 @Injectable()
@@ -32,6 +34,37 @@ export class ArticlesService {
       throw new NotFoundException('Article not found');
     }
     return article;
+  }
+
+  async updateArticle(id: number, title: string, content: string) {
+    return this.prisma.article.update({
+      where: { id },
+      data: { title, content },
+      include: AUTHOR_SELECT,
+    });
+  }
+
+  async deleteArticle(id: number) {
+    const article = await this.getArticleById(id);
+    await this.prisma.article.delete({ where: { id } });
+    // Returned so the controller can still reference the title/author
+    // for the community event, AFTER the row is already gone
+    return article;
+  }
+
+  async getUserRole(userId: number): Promise<string | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+    return user?.role ?? null;
+  }
+
+  async getUserBasicInfo(userId: number) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, displayName: true },
+    });
   }
 
   // Random selection for the /celda widget — done in two steps because

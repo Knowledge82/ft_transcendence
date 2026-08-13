@@ -80,7 +80,7 @@ export function LandingPage() {
       Tú conocías la verdad.
     </p>,
     <p key="p7">
-      Tu <code className="text-gold-400 bg-ink-900 px-1.5 py-0.5 rounded">make</code>{' '}
+      Tu <code className="text-gold-400 bg-ink-900 px-1.5 py-0.5 rounded">Makefile</code>{' '}
       era impecable. El linker no se había ejecutado en vano. No había
       ningún relinkado.
     </p>,
