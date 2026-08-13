@@ -1,8 +1,7 @@
 ## 6. Estado del proyecto frente al enunciado, por módulo
 
-Leyenda: ✅ Hecho · ⏳ Aún no hecho · 🚫 No lo haremos (decisión consciente, no olvido)
+> Leyenda: ✅ Hecho · ⏳ Aún no hecho · 🚫 No lo haremos (decisión consciente, no olvido)
 
-> Nota importante: este documento refleja únicamente el trabajo cubierto en las sesiones de desarrollo documentadas hasta ahora. Si existe una base de juego (Pong) construida por otro miembro del equipo o en otra sesión no reflejada aquí, no aparece en esta tabla — habría que añadirla aparte.
 
 ---
 
@@ -47,7 +46,7 @@ Módulo completamente sin empezar. Pendiente decidir si se aborda antes de la de
 | Requisito | Estado | Puntos |
 |---|---|---|
 | Major: Gestión estándar de usuario (perfil editable, avatar con default, amigos + estado online, página de perfil) | ✅ | 2 |
-| Minor: Estadísticas de juego e historial de partidas | ⏳/N-A (requiere un módulo de juego que no se ha tratado en estas sesiones) | 0 |
+| Minor: Estadísticas de juego e historial de partidas | 🚫 | 0 |
 | Minor: Autenticación remota OAuth 2.0 | ⏳ | 0 |
 | Major: Sistema de permisos avanzado (CRUD de usuarios, gestión de roles, vistas/acciones según rol) | ✅ | 2 |
 | Major: Sistema de organizaciones (crear/editar/eliminar, añadir/quitar usuarios, acciones dentro de la organización) | ⏳ | 0 |
