@@ -1,34 +1,97 @@
-## 6. Estado actual y pendientes
+## 6. Estado del proyecto frente al enunciado, por módulo
 
-### Completado
-- Infraestructura Docker completa y estable (postgres, backend, frontend, nginx, HTTPS)
-- Módulo de autenticación backend: registro, login, refresh con rotación, logout con revocación
-- Refresh token vía cookie httpOnly (no expuesto en el body de la respuesta)
-- Renovación automática del access token cuando caduca a mitad de sesión (interceptor de respuesta en el frontend, con protección contra múltiples llamadas de refresh simultáneas)
-- Frontend de autenticación completo: páginas de login/registro con formularios controlados, `AuthContext` con sesión persistente vía silent refresh, rutas protegidas (`ProtectedRoute`)
-- Validación de formularios tanto en frontend como en backend
-- Paleta visual definitiva aplicada (Tailwind v4, tema oscuro + dorado)
-- `UsersModule`: consulta y actualización de perfil (`GET`/`PATCH /users/me`), subida de avatar con validación de tipo y tamaño (`POST /users/me/avatar`), panel de perfil editable en `/celda`
-- `FriendsModule`: envío, aceptación y eliminación de solicitudes de amistad, listado de amigos — flujo completo también desde la interfaz (botón "+ Amigo" en el panel de miembros, sección de solicitudes pendientes con aceptación, todo con actualización en tiempo real vía WebSockets)
-- `ChatModule`: WebSockets con autenticación por JWT en el handshake, canal general, chats directos 1 a 1, historial persistente en base de datos, mensajería en tiempo real con salas de Socket.IO
-- Frontend de chat: página `/chat` con barra de conversaciones, historial, envío y recepción en vivo, autoscroll al último mensaje
-- Estado online de los usuarios: presencia en tiempo real vía WebSockets, visible tanto en la lista de amigos como en un panel de miembros del canal general (siempre visible, ordenado por conectados primero), con notificación en vivo de nuevos miembros
-- Landing page pública (`/`) con manifiesto temático, revelado en tres fases (loader, imagen, texto en cascada), favicon e identidad visual propios
-- Páginas de Política de Privacidad y Términos de Servicio, accesibles desde el footer en las páginas principales
-- Sistema de rangos y permisos (`AdminModule`): roles `HERMANO`/`GUARDIAN`/`ARZOBISPO`, guard personalizado que verifica el rango en tiempo real (no depende del contenido del JWT), panel de administración (`/santuario`) para gestionar usuarios y rangos
+Leyenda: ✅ Hecho · ⏳ Aún no hecho · 🚫 No lo haremos (decisión consciente, no olvido)
 
-### Pendiente (requisitos obligatorios del enunciado)
-- **Diseño responsive** — la interfaz actual (especialmente `ChatPage`, con barras laterales de ancho fijo) no está adaptada a pantallas pequeñas; el enunciado exige compatibilidad con todos los dispositivos
+> Nota importante: este documento refleja únicamente el trabajo cubierto en las sesiones de desarrollo documentadas hasta ahora. Si existe una base de juego (Pong) construida por otro miembro del equipo o en otra sesión no reflejada aquí, no aparece en esta tabla — habría que añadirla aparte.
 
-### Pendiente (deuda técnica / buenas prácticas)
-- Rate limiting en `/auth/login` (actualmente sin protección contra fuerza bruta)
-- Limpieza periódica de refresh tokens expirados/revocados en la base de datos
-- Notificaciones de mensaje nuevo cuando la conversación correspondiente no está abierta
-- Paginación del historial de mensajes (por ahora siempre se cargan los últimos 50, sin forma de pedir mensajes más antiguos)
-- Auditoría de errores/warnings en la consola del navegador (aplazada deliberadamente hasta que el proyecto esté más cerca de su forma final)
+---
 
-### Pendiente (módulos bonus)
-- 2FA
-- OAuth con 42 intra
-- Módulo de Inteligencia Artificial (Confesor-bot)
-- Uso funcional del rango `GUARDIAN` (por ahora existe el rango, pero ninguna acción de moderación real lo requiere todavía)
+### Módulo 1 — Web
+
+| Requisito | Estado | Puntos |
+|---|---|---|
+| Major: Framework de frontend y backend (React + NestJS) | ✅ | 2 |
+| Minor: framework de frontend (por separado) | ✅ (ya cubierto por el Major anterior, no acumulable) | — |
+| Minor: framework de backend (por separado) | ✅ (ya cubierto por el Major anterior, no acumulable) | — |
+| Major: Funcionalidades en tiempo real (WebSockets) | ✅ | 2 |
+| Major: Interacción entre usuarios (chat, perfil, amigos) | ✅ | 2 |
+| Major: API pública con clave de API, rate limiting, documentación, 5+ endpoints | 🚫 | 0 |
+| Minor: ORM (Prisma) | ✅ | 1 |
+| Minor: Sistema completo de notificaciones | ✅ | 1 |
+| Minor: Funcionalidades colaborativas en tiempo real | 🚫 | 0 |
+| Minor: Server-Side Rendering (SSR) | 🚫 | 0 |
+| Minor: PWA con soporte offline e instalabilidad | ✅ (solo instalabilidad, sin soporte offline) | 1 |
+| Minor: Design system propio (10+ componentes) | ✅ (11 componentes) | 1 |
+| Minor: Búsqueda avanzada (filtros, orden, paginación) | 🚫 | 0 |
+| Minor: Sistema de subida y gestión de archivos | ✅ | 1 |
+| Subtotal Web | | 11 |
+
+---
+
+### Módulo 2 — Accessibility and Internationalization
+
+| Requisito | Estado | Puntos |
+|---|---|---|
+| Major: Cumplimiento WCAG 2.1 AA completo | ⏳ | 0 |
+| Minor: Soporte multi-idioma (3+ idiomas, i18n, selector) | ⏳ | 0 |
+| Minor: Soporte RTL | ⏳ | 0 |
+| Minor: Compatibilidad con navegadores adicionales | ⏳ | 0 |
+| Subtotal Accessibility/i18n | | 0 |
+
+Módulo completamente sin empezar. Pendiente decidir si se aborda antes de la defensa.
+
+---
+
+### Módulo 3 — User Management
+
+| Requisito | Estado | Puntos |
+|---|---|---|
+| Major: Gestión estándar de usuario (perfil editable, avatar con default, amigos + estado online, página de perfil) | ✅ | 2 |
+| Minor: Estadísticas de juego e historial de partidas | ⏳/N-A (requiere un módulo de juego que no se ha tratado en estas sesiones) | 0 |
+| Minor: Autenticación remota OAuth 2.0 | ⏳ | 0 |
+| Major: Sistema de permisos avanzado (CRUD de usuarios, gestión de roles, vistas/acciones según rol) | ✅ | 2 |
+| Major: Sistema de organizaciones (crear/editar/eliminar, añadir/quitar usuarios, acciones dentro de la organización) | ⏳ | 0 |
+| Minor: 2FA completo | ⏳ | 0 |
+| Minor: Panel de analíticas de actividad de usuario | ⏳ | 0 |
+| Subtotal User Management | | 4 |
+
+---
+
+### Módulo 4 — Artificial Intelligence
+
+| Requisito | Estado | Puntos |
+|---|---|---|
+| Major: IA oponente para juegos | ⏳/N-A (requiere un módulo de juego) | 0 |
+| Major: Sistema RAG completo | ⏳ | 0 |
+| Major: Interfaz completa de sistema LLM (texto/streaming, manejo de errores, rate limiting) | ✅ (el Confesor, sobre Groq) | 2 |
+| Major: Sistema de recomendación con ML | ⏳ | 0 |
+| Minor: Moderación de contenido por IA | ✅ (el Oráculo, revisión de artículos) | 1 |
+| Minor: Integración de voz/habla | ⏳ | 0 |
+| Minor: Análisis de sentimiento | ⏳ | 0 |
+| Minor: Reconocimiento y etiquetado de imágenes | ⏳ | 0 |
+| Subtotal AI | | 3 |
+
+---
+
+## Resumen general
+
+| Módulo | Puntos conseguidos |
+|---|---|
+| Web | 11 |
+| Accessibility/i18n | 0 |
+| User Management | 4 |
+| Artificial Intelligence | 3 |
+| Total | 18 |
+
+## Decisiones conscientes de no implementar (🚫)
+
+- API pública (Web, Major): no encaja de forma natural en el proyecto y habría exigido una capa entera de autenticación por clave separada del JWT existente.
+- Funcionalidades colaborativas en tiempo real (Web, Minor): no hay ninguna funcionalidad del proyecto que se preste a edición compartida en vivo.
+- SSR (Web, Minor): habría exigido una reestructuración arquitectónica grande para un beneficio marginal en este proyecto.
+- Búsqueda avanzada (Web, Minor): no se identificó ningún caso de uso lo bastante genuino como para justificarla por sí sola.
+
+## Huecos abiertos más relevantes de cara a la defensa
+
+1. Accessibility/i18n está completamente vacío — es el módulo con más margen de mejora rápida si se decide invertir tiempo (especialmente el soporte de idiomas, más asequible que WCAG AA completo).
+2. Organizaciones (User Management, Major, 2 puntos) — no se ha empezado, y es un Major con peso considerable.
+3. ¿Existe un módulo de juego (Pong)? Varios requisitos (estadísticas de partidas, IA oponente) dependen de él y no se han tratado en estas sesiones — conviene confirmar si se ha construido aparte.
