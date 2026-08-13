@@ -13,5 +13,6 @@ import { UserThrottlerGuard } from './user-throttler.guard';
   ],
   controllers: [AiController],
   providers: [AiService, UserThrottlerGuard],
+  exports: [AiService],
 })
 export class AiModule {}

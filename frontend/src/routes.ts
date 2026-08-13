@@ -13,4 +13,7 @@ export const ROUTES = {
   PRIVACY: '/privacy',
   TERMS: '/terms',
   PROFILE: (userId: number | string) => `/perfil/${userId}`,
+  LIBRARY: '/biblioteca',
+  NEW_ARTICLE: '/biblioteca/nueva',
+  ARTICLE: (articleId: number | string) => `/biblioteca/${articleId}`,
 } as const;

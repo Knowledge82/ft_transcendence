@@ -74,6 +74,12 @@ const USER_REGISTERED_TEMPLATES: Array<(name: string) => string> = [
   (name) => `**${name}** ha jurado nunca más relinkar innecesariamente. Bienvenido seas.`,
 ];
 
+const ARTICLE_PUBLISHED_TEMPLATES: Array<(name: string, title: string) => string> = [
+  (name, title) => `**${name}** ha publicado un nuevo tratado: "${title}".`,
+  (name, title) => `El Capítulo da la bienvenida a una nueva homilía de **${name}**: "${title}".`,
+  (name, title) => `**${name}** ha dejado su huella en la biblioteca con "${title}".`,
+];
+
 function pickRandom<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)];
 }
@@ -138,6 +144,13 @@ export class CommunityService implements OnModuleInit {
 
   async createRoleChangedEvent(name: string, role: string) {
     return this.createEvent('ROLE_CHANGED', pickRandom(ROLE_CHANGED_TEMPLATES)(name, role));
+  }
+
+  async createArticlePublishedEvent(name: string, title: string) {
+    return this.createEvent(
+      'ARTICLE_PUBLISHED',
+      pickRandom(ARTICLE_PUBLISHED_TEMPLATES)(name, title),
+    );
   }
 
   async createFriendshipAcceptedEvent(nameA: string, nameB: string) {

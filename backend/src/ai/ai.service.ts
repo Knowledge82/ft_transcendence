@@ -19,7 +19,7 @@ El usuario te mostrará un fragmento de Makefile. Tu trabajo:
    una frase completa — nunca dejes una idea a medias. Sé conciso desde
    la primera frase, no te extiendas antes de llegar al punto.`;
 
-const MAX_INPUT_LENGTH = 1000;
+const MAX_INPUT_LENGTH = 4000;
 // This is a safety net, NOT the primary length control — the prompt
 // above (a concrete word count) is what actually keeps responses short.
 // Set generously above what ~90 words normally needs, so a well-behaved
@@ -31,12 +31,66 @@ const MAX_OUTPUT_TOKENS = 700;
 // touch code again when it happens next.
 const MODEL_NAME = process.env.GROQ_MODEL ?? 'openai/gpt-oss-20b';
 
+const ARTICLE_CHECK_PROMPT = `Eres el Inquisidor de La Iglesia del Verdadero Relink, encargado de
+revisar que los artículos escritos por la comunidad traten temas legítimos:
+programación, C/C++, Makefiles, compilación, herramientas de desarrollo,
+o la vida académica en 42 Barcelona relacionada con estos temas.
+
+Se te mostrará el título y el contenido de un artículo. Responde EXACTAMENTE
+en este formato, sin nada más antes o después:
+
+Primera línea: la palabra APROBADO o RECHAZADO, y nada más en esa línea.
+Si es RECHAZADO: en la línea siguiente, un reproche breve (máximo 40
+palabras), severo y en tono de inquisidor medieval, explicando por qué
+el artículo no es aceptable.
+Si es APROBADO: no escribas nada más después de la primera línea.`;
+
 @Injectable()
 export class AiService {
   private readonly groq: Groq;
 
   constructor() {
     this.groq = new Groq({ apiKey: process.env.GROQ_API_KEY ?? '' });
+  }
+
+  // Non-streaming — we need one complete verdict, not text that "types
+  // itself out" like the Confesor's response
+  async checkArticleRelevance(
+    title: string,
+    content: string,
+  ): Promise<{ approved: boolean; rejectionMessage: string | null }> {
+    try {
+      const completion = await this.groq.chat.completions.create({
+        model: MODEL_NAME,
+        messages: [
+          { role: 'system', content: ARTICLE_CHECK_PROMPT },
+          { role: 'user', content: `Título: ${title}\n\nContenido: ${content}` },
+        ],
+        max_tokens: 150,
+      });
+
+      const raw = completion.choices[0]?.message?.content?.trim() ?? '';
+      const lines = raw.split('\n');
+      const verdict = lines[0]?.trim().toUpperCase();
+      const approved = verdict === 'APROBADO';
+
+      return {
+        approved,
+        rejectionMessage: approved
+          ? null
+          : lines.slice(1).join(' ').trim() ||
+            'El Inquisidor ha rechazado este artículo por no ser conforme a la doctrina.',
+      };
+    } catch (error) {
+      const status = (error as { status?: number })?.status;
+      if (status === 429) {
+        throw new HttpException(
+          'El Inquisidor está ocupado con otros asuntos. Inténtalo de nuevo en unos minutos.',
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+      throw error;
+    }
   }
 
   async *streamConfession(makefileContent: string): AsyncGenerator<string> {
@@ -72,7 +126,7 @@ export class AiService {
 
       if (status === 429) {
         throw new HttpException(
-          'El Confesor ha agotado su paciencia  por ahora. Inténtalo de nuevo en unos minutos.',
+          'El Confesor ha agotado su cuota gratuita de consultas a la IA por ahora. Inténtalo de nuevo en unos minutos.',
           HttpStatus.TOO_MANY_REQUESTS,
         );
       }

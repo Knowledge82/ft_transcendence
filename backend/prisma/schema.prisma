@@ -52,6 +52,7 @@ model User {
   messages         Message[] @relation("MessageSender")
   deletedMessages  Message[] @relation("MessageDeletedBy")
   notifications Notification[]
+  articles      Article[]
 }
 
 model RefreshToken {
@@ -151,4 +152,17 @@ model CommunityEvent {
   type      String
   message   String
   createdAt DateTime @default(now())
+}
+
+// Only ever created already-approved — there's no draft state, since
+// publishing itself IS the moment the AI relevance check runs. If it
+// fails the check, nothing is ever written here at all.
+model Article {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  authorId  Int
+  createdAt DateTime @default(now())
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }

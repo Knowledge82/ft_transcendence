@@ -8,6 +8,7 @@ import { Footer } from '../components/Footer';
 import { PageContainer, Card, LoadingScreen, Avatar, RoleBadge, Input, Button } from '../components/ui';
 import { ActivityTicker } from '../components/ActivityTicker';
 import { NotificationBell } from '../components/NotificationBell';
+import { RandomArticles } from '../components/RandomArticles';
 
 interface Profile {
   id: number;
@@ -135,6 +136,7 @@ export function HomePage() {
             <NotificationBell />
           </div>
           <ActivityTicker />
+          <RandomArticles />
           <Card className="text-center">
           <div className="relative w-24 h-24 mx-auto mb-4">
             <Avatar avatarUrl={profile.avatarUrl} fallbackText={profile.displayName ?? profile.email} size={96} />
@@ -234,6 +236,12 @@ export function HomePage() {
               className="bg-gold-500 text-gold-on font-medium px-4 py-2 rounded-md hover:bg-gold-400 transition-colors"
             >
               El Confesionario
+            </Link>
+            <Link
+              to="/biblioteca"
+              className="bg-ink-800 text-gold-500 font-medium px-4 py-2 rounded-md hover:bg-ink-800/70 transition-colors"
+            >
+              Biblioteca
             </Link>
             {profile.role === 'ARZOBISPO' && (
               <Link

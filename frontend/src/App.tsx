@@ -12,6 +12,9 @@ import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import { AdminPage } from './pages/AdminPage';
 import { ConfesionarioPage } from './pages/ConfesionarioPage';
 import { UserProfilePage } from './pages/UserProfilePage';
+import { ArticlesListPage } from './pages/ArticlesListPage';
+import { ArticleDetailPage } from './pages/ArticleDetailPage';
+import { NewArticlePage } from './pages/NewArticlePage';
 function App() {
   return (
     <BrowserRouter>
@@ -60,6 +63,34 @@ function App() {
               element={
                 <ProtectedRoute>
                   <UserProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            {/* IMPORTANT: /biblioteca/nueva must stay declared BEFORE
+                /biblioteca/:id — otherwise "nueva" would be captured by
+                the :id param, same route-ordering rule we've hit before
+                on the backend controllers */}
+            <Route
+              path="/biblioteca"
+              element={
+                <ProtectedRoute>
+                  <ArticlesListPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/biblioteca/nueva"
+              element={
+                <ProtectedRoute>
+                  <NewArticlePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/biblioteca/:id"
+              element={
+                <ProtectedRoute>
+                  <ArticleDetailPage />
                 </ProtectedRoute>
               }
             />
