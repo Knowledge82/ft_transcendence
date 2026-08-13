@@ -89,8 +89,3 @@ Módulo completamente sin empezar. Pendiente decidir si se aborda antes de la de
 - SSR (Web, Minor): habría exigido una reestructuración arquitectónica grande para un beneficio marginal en este proyecto.
 - Búsqueda avanzada (Web, Minor): no se identificó ningún caso de uso lo bastante genuino como para justificarla por sí sola.
 
-## Huecos abiertos más relevantes de cara a la defensa
-
-1. Accessibility/i18n está completamente vacío — es el módulo con más margen de mejora rápida si se decide invertir tiempo (especialmente el soporte de idiomas, más asequible que WCAG AA completo).
-2. Organizaciones (User Management, Major, 2 puntos) — no se ha empezado, y es un Major con peso considerable.
-3. ¿Existe un módulo de juego (Pong)? Varios requisitos (estadísticas de partidas, IA oponente) dependen de él y no se han tratado en estas sesiones — conviene confirmar si se ha construido aparte.
