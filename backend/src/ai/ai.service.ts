@@ -81,21 +81,32 @@ export class AiService {
           { role: 'system', content: ARTICLE_CHECK_PROMPT },
           { role: 'user', content: `Título: ${title}\n\nContenido: ${content}` },
         ],
-        max_tokens: 150,
+        max_tokens: 600,
       });
 
       const raw = completion.choices[0]?.message?.content?.trim() ?? '';
-      const lines = raw.split('\n');
-      const verdict = lines[0]?.trim().toUpperCase();
-      const approved = verdict === 'APROBADO';
 
-      return {
-        approved,
-        rejectionMessage: approved
-          ? null
-          : lines.slice(1).join(' ').trim() ||
-            'El Oráculo ha rechazado este artículo por no ser conforme a la doctrina.',
-      };
+      // Don't rely on the model splitting verdict and reason onto two
+      // separate lines — smaller/faster models often ignore that and
+      // write both in one line (e.g. "RECHAZADO: el título no..."). We
+      // just check whether the word APROBADO appears at all near the
+      // start of the reply, and treat EVERYTHING else as the reason,
+      // regardless of how it's laid out.
+      const normalized = raw.toUpperCase();
+      const approved = normalized.startsWith('APROBADO');
+
+      let rejectionMessage: string | null = null;
+      if (!approved) {
+        // Strip a leading "RECHAZADO" (with or without a following colon
+        // or dash) from wherever it appears, so we're left with just the
+        // actual reason text — whether it was on the same line or the next
+        rejectionMessage =
+          raw
+            .replace(/^RECHAZADO\s*[:\-–]?\s*/i, '')
+            .trim() || 'El Oráculo ha rechazado este artículo por no ser conforme a la doctrina.';
+      }
+
+      return { approved, rejectionMessage };
     } catch (error) {
       const status = (error as { status?: number })?.status;
       if (status === 429) {

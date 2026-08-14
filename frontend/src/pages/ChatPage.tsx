@@ -12,7 +12,7 @@ import { ROUTES } from '../routes';
 import { getGenderedRole } from '../utils/genderedRole';
 
 export function ChatPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { socket } = useSocket();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
@@ -473,7 +473,7 @@ export function ChatPage() {
                     <p className="text-sm">
                       🔥 {t('chat.heresyDeletedBy')}{' '}
                       {message.deletedBy
-                        ? getGenderedRole(message.deletedBy.role, message.deletedBy.gender)
+                        ? getGenderedRole(message.deletedBy.role, message.deletedBy.gender, i18n.language)
                         : '???'}{' '}
                       <span className="text-gold-500 font-semibold not-italic">
                         {message.deletedBy?.displayName ?? t('chat.anInquisitor')}

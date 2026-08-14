@@ -98,7 +98,7 @@ export function ArticleDetailPage() {
             />
             <div>
               <p className="text-sm text-cream-100">
-                {getGenderedRole(article.author.role, article.author.gender)}{' '}
+                {getGenderedRole(article.author.role, article.author.gender, i18n.language)}{' '}
                 {article.author.displayName ?? `${t('common.user')} ${article.author.id}`}
               </p>
               <p className="text-xs text-cream-400">

@@ -12,7 +12,7 @@ import { getGenderedRole } from '../utils/genderedRole';
 const ROLES: Role[] = ['HERMANO', 'INQUISIDOR', 'ARZOBISPO'];
 
 export function AdminPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [ownRole, setOwnRole] = useState<Role | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -93,7 +93,7 @@ export function AdminPage() {
                     >
                       {ROLES.map((role) => (
                         <option key={role} value={role}>
-                          {getGenderedRole(role, user.gender)}
+                          {getGenderedRole(role, user.gender, i18n.language)}
                         </option>
                       ))}
                     </select>

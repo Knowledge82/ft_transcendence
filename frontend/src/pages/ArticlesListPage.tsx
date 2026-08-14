@@ -68,7 +68,7 @@ export function ArticlesListPage() {
                     {article.title}
                   </h2>
                   <p className="text-xs text-cream-400 mb-3">
-                    {getGenderedRole(article.author.role, article.author.gender)}{' '}
+                    {getGenderedRole(article.author.role, article.author.gender, i18n.language)}{' '}
                     {article.author.displayName ?? `${t('common.user')} ${article.author.id}`}
                     {' · '}
                     {new Date(article.createdAt).toLocaleDateString(getDateLocale(i18n.language))}
