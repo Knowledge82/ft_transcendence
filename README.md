@@ -402,7 +402,7 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 [+ Articulos](./docs/docs-biblioteca.md)
 [+ Articulos fix some issues](./docs/docs-biblioteca-fixes.md)
 
-
+[+ Internacionalización](./docs/docs-i18n-resumen.md)
 
 
 ## 5. Verificación end-to-end
