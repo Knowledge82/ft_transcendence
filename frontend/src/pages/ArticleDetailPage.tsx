@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getArticleById, deleteArticle } from '../api/articles';
 import type { Article } from '../api/articles';
 import { apiClient } from '../api/client';
 import { ROUTES } from '../routes';
 import { PageContainer, Card, LoadingScreen, BackLink, Avatar, IconButton } from '../components/ui';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { getGenderedRole } from '../utils/genderedRole';
+import { getDateLocale } from '../utils/dateLocale';
 
 export function ArticleDetailPage() {
+  const { t, i18n } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -28,7 +32,7 @@ export function ArticleDetailPage() {
         setOwnUserId(me.data.id);
         setOwnRole(me.data.role);
       })
-      .catch(() => setError('No se pudo encontrar este tratado'))
+      .catch(() => setError(t('articles.loadError')))
       .finally(() => setIsLoading(false));
   }, [id]);
 
@@ -38,7 +42,7 @@ export function ArticleDetailPage() {
 
   async function handleDelete() {
     if (!article) return;
-    if (!confirm('¿Seguro que quieres retirar este tratado de la biblioteca? Esta acción no se puede deshacer.')) {
+    if (!confirm(t('articles.confirmDelete'))) {
       return;
     }
     await deleteArticle(article.id);
@@ -52,8 +56,8 @@ export function ArticleDetailPage() {
   if (error || !article) {
     return (
       <PageContainer className="flex flex-col items-center justify-center gap-4">
-        <p className="text-cream-100">{error ?? 'Tratado no encontrado'}</p>
-        <BackLink to={ROUTES.LIBRARY} label="← Volver a la Biblioteca" />
+        <p className="text-cream-100">{error ?? t('articles.notFound')}</p>
+        <BackLink to={ROUTES.LIBRARY} label={t('articles.backToLibrary')} />
       </PageContainer>
     );
   }
@@ -62,22 +66,25 @@ export function ArticleDetailPage() {
     <PageContainer className="px-4 py-10">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center">
-          <BackLink to={ROUTES.LIBRARY} label="← Volver a la Biblioteca" />
-          {canEdit && (
-            <div className="flex gap-3">
-              <Link
-                to={`${ROUTES.ARTICLE(article.id)}/editar`}
-                className="text-xs text-gold-500 hover:text-gold-400"
-              >
-                Editar
-              </Link>
-              {isArzobispo && (
-                <IconButton tone="danger" onClick={handleDelete}>
-                  Eliminar
-                </IconButton>
-              )}
-            </div>
-          )}
+          <BackLink to={ROUTES.LIBRARY} label={t('articles.backToLibrary')} />
+          <div className="flex items-center gap-4">
+            {canEdit && (
+              <div className="flex gap-3">
+                <Link
+                  to={`${ROUTES.ARTICLE(article.id)}/editar`}
+                  className="text-xs text-gold-500 hover:text-gold-400"
+                >
+                  {t('articles.edit')}
+                </Link>
+                {isArzobispo && (
+                  <IconButton tone="danger" onClick={handleDelete}>
+                    {t('articles.delete')}
+                  </IconButton>
+                )}
+              </div>
+            )}
+            <LanguageSwitcher />
+          </div>
         </div>
 
         <Card className="mt-6">
@@ -92,10 +99,10 @@ export function ArticleDetailPage() {
             <div>
               <p className="text-sm text-cream-100">
                 {getGenderedRole(article.author.role, article.author.gender)}{' '}
-                {article.author.displayName ?? `Usuario ${article.author.id}`}
+                {article.author.displayName ?? `${t('common.user')} ${article.author.id}`}
               </p>
               <p className="text-xs text-cream-400">
-                {new Date(article.createdAt).toLocaleDateString('es-ES', {
+                {new Date(article.createdAt).toLocaleDateString(getDateLocale(i18n.language), {
                   day: 'numeric',
                   month: 'long',
                   year: 'numeric',

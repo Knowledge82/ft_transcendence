@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { streamConfession } from '../api/ai';
 import { PageContainer, Card, Textarea, Button, BackLink } from '../components/ui';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { ROUTES } from '../routes';
 
 const MAX_LENGTH = 1000; // must stay in sync with MAX_INPUT_LENGTH in backend/src/ai/ai.service.ts
@@ -10,6 +12,7 @@ const MAX_LENGTH = 1000; // must stay in sync with MAX_INPUT_LENGTH in backend/s
 const REVEAL_MS_PER_CHAR = 18;
 
 export function ConfesionarioPage() {
+  const { t } = useTranslation();
   const [makefile, setMakefile] = useState('');
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -50,6 +53,9 @@ export function ConfesionarioPage() {
       }
     } catch (err) {
       if (err instanceof Error && err.name !== 'AbortError') {
+        // This message comes from the backend (e.g. the Confesor's own
+        // quota/error messages) — not yet part of the frontend's i18n
+        // system, same open question as the CommunityEvent chronicle text
         setError(err.message);
       }
     } finally {
@@ -66,14 +72,15 @@ export function ConfesionarioPage() {
   return (
     <PageContainer className="px-4 py-10">
       <div className="max-w-2xl mx-auto">
-        <BackLink to={ROUTES.HOME} />
+        <div className="flex justify-between items-center">
+          <BackLink to={ROUTES.HOME} />
+          <LanguageSwitcher />
+        </div>
 
         <h1 className="text-3xl font-semibold text-gold-500 mt-4 mb-2">
-          El Confesionario
+          {t('confesionario.title')}
         </h1>
-        <p className="text-sm text-cream-400 mb-8">
-          Trae tu Makefile ante el Confesor. Él verá tus pecados... y te dirá la verdad.
-        </p>
+        <p className="text-sm text-cream-400 mb-8">{t('confesionario.subtitle')}</p>
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <Textarea
@@ -88,7 +95,7 @@ export function ConfesionarioPage() {
 
           <div className="flex gap-3">
             <Button type="submit" disabled={isStreaming || !makefile.trim()}>
-              {isStreaming ? 'Confesando...' : 'Confesarme'}
+              {isStreaming ? t('confesionario.streaming') : t('confesionario.submit')}
             </Button>
             {isFetching && (
               <button
@@ -96,7 +103,7 @@ export function ConfesionarioPage() {
                 onClick={handleCancel}
                 className="text-sm text-cream-400 hover:text-cream-100"
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
             )}
           </div>
@@ -111,7 +118,7 @@ export function ConfesionarioPage() {
         {fullText && (
           <Card className="mt-6">
             <p className="text-xs uppercase tracking-wide text-gold-500 mb-3">
-              El Confesor dice:
+              {t('confesionario.confessorSays')}
             </p>
             <p className="text-cream-100 leading-relaxed whitespace-pre-wrap">
               {visibleResponse}

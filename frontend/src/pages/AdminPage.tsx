@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { apiClient } from '../api/client';
 import { listAllUsers, changeUserRole, deleteUser } from '../api/admin';
 import type { AdminUser, Role } from '../api/admin';
 import { PageContainer, LoadingScreen, IconButton, BackLink } from '../components/ui';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { ROUTES } from '../routes';
 import { getGenderedRole } from '../utils/genderedRole';
 
 const ROLES: Role[] = ['HERMANO', 'INQUISIDOR', 'ARZOBISPO'];
 
 export function AdminPage() {
+  const { t } = useTranslation();
   const [ownRole, setOwnRole] = useState<Role | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +34,7 @@ export function AdminPage() {
   }
 
   async function handleDelete(userId: number) {
-    if (!confirm('¿Seguro que quieres eliminar esta cuenta? Esta acción no se puede deshacer.')) {
+    if (!confirm(t('admin.confirmDelete'))) {
       return;
     }
     await deleteUser(userId);
@@ -45,9 +48,9 @@ export function AdminPage() {
   if (ownRole !== 'ARZOBISPO') {
     return (
       <PageContainer className="flex flex-col items-center justify-center gap-4">
-        <p className="text-cream-100">No tienes el rango necesario para entrar aquí.</p>
+        <p className="text-cream-100">{t('admin.notAllowed')}</p>
         <Link to={ROUTES.HOME} className="text-gold-500 hover:text-gold-400">
-          ← Volver al Altar
+          {t('admin.backHome')}
         </Link>
       </PageContainer>
     );
@@ -56,19 +59,22 @@ export function AdminPage() {
   return (
     <PageContainer className="px-4 py-10">
       <div className="max-w-3xl mx-auto">
-        <BackLink to={ROUTES.HOME} />
+        <div className="flex justify-between items-center">
+          <BackLink to={ROUTES.HOME} />
+          <LanguageSwitcher />
+        </div>
 
         <h1 className="text-3xl font-semibold text-gold-500 mt-4 mb-8">
-          Santuario — Administración
+          {t('admin.title')}
         </h1>
 
         <div className="bg-ink-900 border border-ink-800 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-ink-800 text-cream-400 text-left">
-                <th className="px-4 py-3">Usuario</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Rango</th>
+                <th className="px-4 py-3">{t('admin.user')}</th>
+                <th className="px-4 py-3">{t('admin.email')}</th>
+                <th className="px-4 py-3">{t('admin.rank')}</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -76,7 +82,7 @@ export function AdminPage() {
               {users.map((user) => (
                 <tr key={user.id} className="border-b border-ink-800 last:border-0">
                   <td className="px-4 py-3 text-cream-100">
-                    {user.displayName ?? `Usuario ${user.id}`}
+                    {user.displayName ?? `${t('common.user')} ${user.id}`}
                   </td>
                   <td className="px-4 py-3 text-cream-400">{user.email}</td>
                   <td className="px-4 py-3">
@@ -94,7 +100,7 @@ export function AdminPage() {
                   </td>
                   <td className="px-4 py-3">
                     <IconButton tone="danger" onClick={() => handleDelete(user.id)}>
-                      Eliminar
+                      {t('admin.delete')}
                     </IconButton>
                   </td>
                 </tr>

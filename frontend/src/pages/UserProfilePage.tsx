@@ -1,13 +1,26 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getPublicProfile } from '../api/users';
 import type { PublicProfile } from '../api/users';
 import { sendFriendRequest, listFriends } from '../api/friends';
 import { startDirectConversation } from '../api/chat';
 import { apiClient } from '../api/client';
-import { PageContainer, Card, LoadingScreen, Avatar, StatusDot, RoleBadge, Button } from '../components/ui';
+import { ROUTES } from '../routes';
+import {
+  PageContainer,
+  Card,
+  LoadingScreen,
+  Avatar,
+  StatusDot,
+  RoleBadge,
+  Button,
+  BackLink,
+} from '../components/ui';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 export function UserProfilePage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -30,7 +43,7 @@ export function UserProfilePage() {
         setIsFriend(friends.some((f) => f.id === profileData.id));
         setOwnUserId(me.data.id);
       })
-      .catch(() => setError('No se pudo encontrar a este hermano'))
+      .catch(() => setError(t('profile.notFound')))
       .finally(() => setIsLoading(false));
   }, [id]);
 
@@ -67,10 +80,8 @@ export function UserProfilePage() {
   if (error || !profile) {
     return (
       <PageContainer className="flex flex-col items-center justify-center gap-4">
-        <p className="text-cream-100">{error ?? 'Perfil no encontrado'}</p>
-        <Link to="/chat" className="text-gold-500 hover:text-gold-400">
-          ← Volver
-        </Link>
+        <p className="text-cream-100">{error ?? t('profile.profileNotFound')}</p>
+        <BackLink to={ROUTES.CHAT} />
       </PageContainer>
     );
   }
@@ -78,9 +89,10 @@ export function UserProfilePage() {
   return (
     <PageContainer className="px-4 py-10">
       <div className="max-w-md mx-auto">
-        <Link to="/chat" className="text-sm text-gold-500 hover:text-gold-400">
-          ← Volver
-        </Link>
+        <div className="flex justify-between items-center">
+          <BackLink to={ROUTES.CHAT} />
+          <LanguageSwitcher />
+        </div>
 
         <Card className="text-center mt-6">
           <div className="w-24 h-24 mx-auto mb-4">
@@ -90,7 +102,7 @@ export function UserProfilePage() {
           <div className="flex items-center justify-center gap-2 mb-1">
             <StatusDot isOnline={profile.isOnline} />
             <h1 className="text-2xl font-semibold text-gold-500">
-              {profile.displayName ?? `Usuario ${profile.id}`}
+              {profile.displayName ?? `${t('common.user')} ${profile.id}`}
             </h1>
           </div>
 
@@ -102,10 +114,10 @@ export function UserProfilePage() {
             {!isSelf && (
               <>
                 {isFriend ? (
-                  <Button onClick={handleMessage}>Enviar mensaje</Button>
+                  <Button onClick={handleMessage}>{t('profile.sendMessage')}</Button>
                 ) : (
                   <Button variant="secondary" onClick={handleAddFriend} disabled={requestSent}>
-                    {requestSent ? 'Solicitud enviada' : '+ Amigo'}
+                    {requestSent ? t('profile.requestSent') : t('profile.addFriend')}
                   </Button>
                 )}
               </>

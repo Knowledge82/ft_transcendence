@@ -1,15 +1,18 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { createArticle, updateArticle, getArticleById } from '../api/articles';
 import { apiClient } from '../api/client';
 import { ROUTES } from '../routes';
 import { PageContainer, Card, LoadingScreen, BackLink, Input, Textarea, Button } from '../components/ui';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 const MODERATOR_ROLES = ['INQUISIDOR', 'ARZOBISPO'];
 const MAX_TITLE_LENGTH = 150;
 const MAX_CONTENT_LENGTH = 2000;
 
 export function NewArticlePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEditMode = Boolean(id);
@@ -54,9 +57,12 @@ export function NewArticlePage() {
         : await createArticle(title.trim(), content.trim());
       navigate(ROUTES.ARTICLE(article.id));
     } catch (err) {
+      // Same open question as the Confesor's error messages — this comes
+      // straight from the backend (the Oráculo's rejection text), not
+      // yet integrated with the frontend's i18n system
       const message =
         (err as { response?: { data?: { message?: string | string[] } } })?.response?.data
-          ?.message ?? 'El Oráculo ha rechazado esta petición.';
+          ?.message ?? t('articles.defaultRejection');
       setError(Array.isArray(message) ? message.join(', ') : message);
     } finally {
       setIsPublishing(false);
@@ -71,11 +77,9 @@ export function NewArticlePage() {
     return (
       <PageContainer className="flex flex-col items-center justify-center gap-4">
         <p className="text-cream-100">
-          {isEditMode
-            ? 'Solo el autor o un Arzobispo pueden corregir este tratado.'
-            : 'No tienes el rango necesario para escribir tratados.'}
+          {isEditMode ? t('articles.notAllowedEdit') : t('articles.notAllowedNew')}
         </p>
-        <BackLink to={ROUTES.LIBRARY} label="← Volver a la Biblioteca" />
+        <BackLink to={ROUTES.LIBRARY} label={t('articles.backToLibrary')} />
       </PageContainer>
     );
   }
@@ -83,22 +87,23 @@ export function NewArticlePage() {
   return (
     <PageContainer className="px-4 py-10">
       <div className="max-w-2xl mx-auto">
-        <BackLink to={ROUTES.LIBRARY} label="← Volver a la Biblioteca" />
+        <div className="flex justify-between items-center">
+          <BackLink to={ROUTES.LIBRARY} label={t('articles.backToLibrary')} />
+          <LanguageSwitcher />
+        </div>
 
         <h1 className="text-3xl font-semibold text-gold-500 mt-4 mb-2">
-          {isEditMode ? 'Corregir el tratado' : 'Escribir un tratado'}
+          {isEditMode ? t('articles.editHeading') : t('articles.newHeading')}
         </h1>
         <p className="text-sm text-cream-400 mb-8">
-          El Oráculo revisará que tu tratado sea conforme a la doctrina antes de
-          {isEditMode ? ' guardar los cambios' : ' publicarlo'}. Si no lo es, tendrás que
-          hacer penitencia y volver a intentarlo.
+          {isEditMode ? t('articles.oracleIntroEdit') : t('articles.oracleIntroNew')}
         </p>
 
         <Card>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-cream-400 mb-1">
-                Título
+                {t('articles.titleLabel')}
               </label>
               <Input
                 id="title"
@@ -113,7 +118,7 @@ export function NewArticlePage() {
 
             <div>
               <label htmlFor="content" className="block text-sm font-medium text-cream-400 mb-1">
-                Contenido
+                {t('articles.contentLabel')}
               </label>
               <Textarea
                 id="content"
@@ -138,10 +143,10 @@ export function NewArticlePage() {
               className="w-full"
             >
               {isPublishing
-                ? 'El Oráculo está juzgando...'
+                ? t('articles.judging')
                 : isEditMode
-                ? 'Guardar cambios'
-                : 'Publicar'}
+                ? t('articles.saveChanges')
+                : t('articles.publish')}
             </Button>
           </form>
         </Card>
