@@ -40,7 +40,11 @@ export class AdminController {
 
     const genderedRole = getGenderedRole(updated.role, updated.gender);
     const name = updated.displayName ?? `Usuario ${updated.id}`;
-    await this.communityService.createRoleChangedEvent(name, genderedRole);
+    // The community chronicle now stores the RAW role+gender — the
+    // frontend genders it per the viewer's own language at display time.
+    // The personal notification below is a separate system, still
+    // pre-rendered in Spanish for now (not yet part of this refactor).
+    await this.communityService.createRoleChangedEvent(name, updated.role, updated.gender);
     await this.notificationsService.createNotification(
       id,
       'ROLE_CHANGED',

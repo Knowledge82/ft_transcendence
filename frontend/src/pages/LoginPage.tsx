@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ROUTES } from '../routes';
 import { useAuth } from '../context/AuthContext';
 import { validateEmail, validatePassword } from '../utils/validation';
-import { PageContainer, Card, Input, Button, FieldError } from '../components/ui';
+import { PageContainer, Card, Input, Button, FieldError, BackLink } from '../components/ui';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 interface FieldErrors {
@@ -55,7 +55,8 @@ export function LoginPage() {
   return (
     <PageContainer className="flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <div className="flex justify-end mb-3">
+        <div className="flex justify-between items-center mb-3">
+          <BackLink to={ROUTES.LANDING} />
           <LanguageSwitcher />
         </div>
         <Card>

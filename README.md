@@ -404,6 +404,7 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [+ Internacionalización](./docs/docs-i18n-resumen.md)
 
+[+ Translate CommunityEvent widget](./docs/docs-community-event-multilang.md)
 
 ## 5. Verificación end-to-end
 

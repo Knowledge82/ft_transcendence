@@ -3,7 +3,8 @@ import { apiClient } from './client';
 export interface CommunityEvent {
   id: number;
   type: string;
-  message: string;
+  templateIndex: number | null;
+  params: Record<string, string> | null;
   createdAt: string;
 }
 

@@ -171,5 +171,73 @@
     "termsS5Body": "Al tratarse de un proyecto académico, no se garantiza disponibilidad continua ni ausencia de errores. El servicio se ofrece \"tal cual\", sin garantías de ningún tipo.",
     "termsS6Title": "6. Cambios en estos términos",
     "termsS6Body": "Estos términos pueden actualizarse a medida que el proyecto evoluciona. Los cambios significativos se reflejarán en la fecha de última actualización indicada arriba."
+  },
+  "community": {
+    "userRegistered": {
+      "0": "**{{name}}** ha llamado a las puertas del Verdadero Relink y ha sido recibido como novicio.",
+      "1": "Un nuevo novicio, **{{name}}**, se ha unido al Capítulo.",
+      "2": "**{{name}}** ha jurado nunca más relinkar innecesariamente. Bienvenido seas."
+    },
+    "roleChanged": {
+      "0": "**{{name}}** ha alcanzado el rango de {{role}}.",
+      "1": "El Capítulo reconoce a **{{name}}** con el rango de {{role}}.",
+      "2": "**{{name}}** asciende a {{role}} ante la mirada de sus hermanos."
+    },
+    "friendshipAccepted": {
+      "0": "**{{nameA}}** y **{{nameB}}** han jurado hermandad ante el Verdadero Relink.",
+      "1": "**{{nameA}}** y **{{nameB}}** han sellado un pacto de hermandad ante el altar del Makefile.",
+      "2": "Se ha registrado un nuevo vínculo fraternal entre **{{nameA}}** y **{{nameB}}**.",
+      "3": "**{{nameA}}** y **{{nameB}}** compartieron pan y un `git diff` en señal de hermandad.",
+      "4": "El Capítulo da la bienvenida a la nueva hermandad entre **{{nameA}}** y **{{nameB}}**.",
+      "5": "**{{nameA}}** y **{{nameB}}** han jurado no relinkar el uno contra el otro, jamás."
+    },
+    "friendshipBroken": {
+      "0": "**{{nameA}}** y **{{nameB}}** han roto su hermandad. Se rumorea que fue por un `touch Makefile`.",
+      "1": "El vínculo entre **{{nameA}}** y **{{nameB}}** se ha disuelto ante el Capítulo, en silencio.",
+      "2": "**{{nameA}}** y **{{nameB}}** ya no se consideran hermanos. Nadie pregunta por qué.",
+      "3": "Se ha declarado el cisma entre **{{nameA}}** y **{{nameB}}**. Que el linker los perdone.",
+      "4": "**{{nameA}}** y **{{nameB}}** han decidido seguir caminos separados dentro del Capítulo."
+    },
+    "articlePublished": {
+      "0": "**{{name}}** ha publicado un nuevo tratado: \"{{title}}\".",
+      "1": "El Capítulo da la bienvenida a una nueva homilía de **{{name}}**: \"{{title}}\".",
+      "2": "**{{name}}** ha dejado su huella en la biblioteca con \"{{title}}\"."
+    },
+    "articleEdited": {
+      "0": "**{{name}}** ha revisado el tratado \"{{title}}\".",
+      "1": "El tratado \"{{title}}\" ha sido corregido por **{{name}}**."
+    },
+    "articleDeleted": {
+      "0": "**{{name}}** ha retirado el tratado \"{{title}}\" de la biblioteca.",
+      "1": "El tratado \"{{title}}\" ha sido quemado por orden de **{{name}}**."
+    },
+    "fictionalStatic": {
+      "0": "Los hermanos organizaron una procesión en honor a la nueva versión de CMake.",
+      "1": "Un novicio fue sorprendido añadiendo el Makefile a las dependencias. Se le impuso penitencia.",
+      "2": "El Arzobispo bendijo tres binarios recién compilados sin ningún warning.",
+      "3": "Se ha encontrado un `touch Makefile` olvidado en un pasillo. Nadie lo reclama.",
+      "4": "La biblioteca del Capítulo adquirió un ejemplar original del primer `-Wall -Wextra -Werror`.",
+      "5": "Un hermano confesó haber usado `make -B` \"solo una vez, por curiosidad\".",
+      "6": "Las campanas del Capítulo repicaron: alguien logró un build limpio a la primera.",
+      "7": "Se celebró la Vigilia del Linker, en silencio, esperando que no se ejecutara innecesariamente.",
+      "8": "Un peregrino llegó desde otro campus preguntando por la diferencia entre recompilar y relinkar.",
+      "9": "El Consejo debate si `make re` en mitad de la noche cuenta como herejía o como penitencia.",
+      "10": "Un hermano juró haber visto un `Makefile.bak` moverse solo entre los archivos.",
+      "11": "Se avistó a un novicio leyendo la documentación de GNU Make a la luz de una vela.",
+      "12": "El Capítulo celebró un minuto de silencio por cada `rm -rf` ejecutado sin confirmación.",
+      "13": "Alguien propuso sustituir las campanas por el sonido de un build exitoso. Fue rechazado por unanimidad.",
+      "14": "Un hermano fue visto susurrándole a su terminal antes de ejecutar `make`.",
+      "15": "Se ha encontrado una inscripción antigua: \"El que relinka sin necesidad, relinka en vano\".",
+      "16": "El Arzobispo declaró el jueves como el día oficial de revisión de `.gitignore`.",
+      "17": "Un peregrino llegó pidiendo perdón por haber usado un IDE con autocompletado de Makefiles.",
+      "18": "Se rumorea que en las catacumbas del Capítulo hay un `Makefile` sin una sola tabulación mal puesta.",
+      "19": "Tres hermanos discutieron durante horas sobre si `.PHONY` es dogma o simple recomendación.",
+      "20": "El Consejo aprobó una nueva vidriera dedicada a la memoria del primer `Segmentation fault` bien depurado.",
+      "21": "Un novicio preguntó qué es el linker. El silencio que siguió fue considerado respuesta suficiente.",
+      "22": "Se celebró una vigilia nocturna esperando que terminara una compilación particularmente larga.",
+      "23": "Un hermano fue sorprendido comentando código en inglés y hablando de él en español. Se le perdonó.",
+      "24": "El Capítulo adquirió una réplica exacta del primer terminal que mostró \"Segmentation fault (core dumped)\".",
+      "25": "Se debate si escribir `make clean && make` antes de dormir cuenta como oración nocturna."
+    }
   }
 }

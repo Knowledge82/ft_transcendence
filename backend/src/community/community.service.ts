@@ -3,96 +3,59 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ChatGateway } from '../chat/chat.gateway';
 import Groq from 'groq-sdk';
 
-// Curated fallback pool — used most of the time, since it's free and
-// instant. Kept large (25+ entries) specifically because it now gets
-// picked very often — a small pool at high frequency would repeat
-// noticeably within the same day.
-const FICTIONAL_EVENTS = [
-  'Los hermanos organizaron una procesión en honor a la nueva versión de CMake.',
-  'Un novicio fue sorprendido añadiendo el Makefile a las dependencias. Se le impuso penitencia.',
-  'El Arzobispo bendijo tres binarios recién compilados sin ningún warning.',
-  'Se ha encontrado un `touch Makefile` olvidado en un pasillo. Nadie lo reclama.',
-  'La biblioteca del Capítulo adquirió un ejemplar original del primer `-Wall -Wextra -Werror`.',
-  'Un hermano confesó haber usado `make -B` "solo una vez, por curiosidad".',
-  'Las campanas del Capítulo repicaron: alguien logró un build limpio a la primera.',
-  'Se celebró la Vigilia del Linker, en silencio, esperando que no se ejecutara innecesariamente.',
-  'Un peregrino llegó desde otro campus preguntando por la diferencia entre recompilar y relinkar.',
-  'El Consejo debate si `make re` en mitad de la noche cuenta como herejía o como penitencia.',
-  'Un hermano juró haber visto un `Makefile.bak` moverse solo entre los archivos.',
-  'Se avistó a un novicio leyendo la documentación de GNU Make a la luz de una vela.',
-  'El Capítulo celebró un minuto de silencio por cada `rm -rf` ejecutado sin confirmación.',
-  'Alguien propuso sustituir las campanas por el sonido de un build exitoso. Fue rechazado por unanimidad.',
-  'Un hermano fue visto susurrándole a su terminal antes de ejecutar `make`.',
-  'Se ha encontrado una inscripción antigua: "El que relinka sin necesidad, relinka en vano".',
-  'El Arzobispo declaró el jueves como el día oficial de revisión de `.gitignore`.',
-  'Un peregrino llegó pidiendo perdón por haber usado un IDE con autocompletado de Makefiles.',
-  'Se rumorea que en las catacumbas del Capítulo hay un `Makefile` sin una sola tabulación mal puesta.',
-  'Tres hermanos discutieron durante horas sobre si `.PHONY` es dogma o simple recomendación.',
-  'El Consejo aprobó una nueva vidriera dedicada a la memoria del primer `Segmentation fault` bien depurado.',
-  'Un novicio preguntó qué es el linker. El silencio que siguió fue considerado respuesta suficiente.',
-  'Se celebró una vigilia nocturna esperando que terminara una compilación particularmente larga.',
-  'Un hermano fue sorprendido comentando código en inglés y hablando de él en español. Se le perdonó.',
-  'El Capítulo adquirió una réplica exacta del primer terminal que mostró "Segmentation fault (core dumped)".',
-  'Se debate si escribir `make clean && make` antes de dormir cuenta como oración nocturna.',
-];
+// How many phrase VARIANTS exist per event type — must stay in sync with
+// how many "community.<type>.N" keys actually exist in each of
+// frontend/src/i18n/locales/{es,en,ar}.json. The phrase TEXT itself no
+// longer lives on the backend at all — only this count, needed to pick a
+// valid random index.
+const TEMPLATE_POOL_SIZES: Record<string, number> = {
+  USER_REGISTERED: 3,
+  ROLE_CHANGED: 3,
+  FRIENDSHIP_ACCEPTED: 6,
+  FRIENDSHIP_BROKEN: 5,
+  ARTICLE_PUBLISHED: 3,
+  ARTICLE_EDITED: 2,
+  ARTICLE_DELETED: 2,
+  FICTIONAL_STATIC: 26,
+};
+
+function randomIndex(type: string): number {
+  const size = TEMPLATE_POOL_SIZES[type] ?? 1;
+  return Math.floor(Math.random() * size);
+}
 
 // Massively increased frequency compared to earlier drafts — the ticker
 // on /celda cycles every few seconds, so a sparse pool of events felt
 // stale very quickly. Static events are free (no external API call), so
 // they can run often; AI-generated ones stay more conservative to avoid
-// burning through Groq's quota.
+// burning through Groq's quota (especially now that each one costs
+// THREE calls instead of one, one per language).
 const AI_EVENTS_PER_DAY = 48; // roughly every 30 minutes
 const STATIC_EVENTS_PER_DAY = 288; // roughly every 5 minutes
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const FRIENDSHIP_ACCEPTED_TEMPLATES: Array<(a: string, b: string) => string> = [
-  (a, b) => `**${a}** y **${b}** han jurado hermandad ante el Verdadero Relink.`,
-  (a, b) => `**${a}** y **${b}** han sellado un pacto de hermandad ante el altar del Makefile.`,
-  (a, b) => `Se ha registrado un nuevo vínculo fraternal entre **${a}** y **${b}**.`,
-  (a, b) => `**${a}** y **${b}** compartieron pan y un \`git diff\` en señal de hermandad.`,
-  (a, b) => `El Capítulo da la bienvenida a la nueva hermandad entre **${a}** y **${b}**.`,
-  (a, b) => `**${a}** y **${b}** han jurado no relinkar el uno contra el otro, jamás.`,
-];
-
-const FRIENDSHIP_BROKEN_TEMPLATES: Array<(a: string, b: string) => string> = [
-  (a, b) => `**${a}** y **${b}** han roto su hermandad. Se rumorea que fue por un \`touch Makefile\`.`,
-  (a, b) => `El vínculo entre **${a}** y **${b}** se ha disuelto ante el Capítulo, en silencio.`,
-  (a, b) => `**${a}** y **${b}** ya no se consideran hermanos. Nadie pregunta por qué.`,
-  (a, b) => `Se ha declarado el cisma entre **${a}** y **${b}**. Que el linker los perdone.`,
-  (a, b) => `**${a}** y **${b}** han decidido seguir caminos separados dentro del Capítulo.`,
-];
-
-const ROLE_CHANGED_TEMPLATES: Array<(name: string, role: string) => string> = [
-  (name, role) => `**${name}** ha alcanzado el rango de ${role}.`,
-  (name, role) => `El Capítulo reconoce a **${name}** con el rango de ${role}.`,
-  (name, role) => `**${name}** asciende a ${role} ante la mirada de sus hermanos.`,
-];
-
-const USER_REGISTERED_TEMPLATES: Array<(name: string) => string> = [
-  (name) => `**${name}** ha llamado a las puertas del Verdadero Relink y ha sido recibido como novicio.`,
-  (name) => `Un nuevo novicio, **${name}**, se ha unido al Capítulo.`,
-  (name) => `**${name}** ha jurado nunca más relinkar innecesariamente. Bienvenido seas.`,
-];
-
-const ARTICLE_PUBLISHED_TEMPLATES: Array<(name: string, title: string) => string> = [
-  (name, title) => `**${name}** ha publicado un nuevo tratado: "${title}".`,
-  (name, title) => `El Capítulo da la bienvenida a una nueva homilía de **${name}**: "${title}".`,
-  (name, title) => `**${name}** ha dejado su huella en la biblioteca con "${title}".`,
-];
-
-const ARTICLE_EDITED_TEMPLATES: Array<(name: string, title: string) => string> = [
-  (name, title) => `**${name}** ha revisado el tratado "${title}".`,
-  (name, title) => `El tratado "${title}" ha sido corregido por **${name}**.`,
-];
-
-const ARTICLE_DELETED_TEMPLATES: Array<(name: string, title: string) => string> = [
-  (name, title) => `**${name}** ha retirado el tratado "${title}" de la biblioteca.`,
-  (name, title) => `El tratado "${title}" ha sido quemado por orden de **${name}**.`,
-];
-
-function pickRandom<T>(items: T[]): T {
-  return items[Math.floor(Math.random() * items.length)];
-}
+// One prompt per language — each asks the model to generate FRESH
+// creative content directly in that language, rather than generating
+// once and mechanically translating afterward (translation would risk
+// losing the joke/tone in languages structurally very different from
+// Spanish, like Arabic).
+const FICTIONAL_PROMPTS: Record<string, string> = {
+  es: `Genera UNA sola frase corta (máximo 20 palabras), en español,
+sobre un evento cotidiano, ficticio y humorístico de "La Iglesia del
+Verdadero Relink", una comunidad satírica de estudiantes de 42 Barcelona
+obsesionada con Makefiles y el relinkado correcto. Tono solemne pero
+absurdo. Responde SOLO con la frase, sin comillas ni explicaciones.`,
+  en: `Generate ONE short sentence (max 20 words), in English, about an
+everyday, fictional, humorous event from "La Iglesia del Verdadero
+Relink", a satirical community of 42 Barcelona students obsessed with
+Makefiles and proper relinking. Solemn but absurd tone. Reply ONLY with
+the sentence, no quotes or explanations.`,
+  ar: `أنشئ جملة واحدة قصيرة فقط (بحد أقصى 20 كلمة)، باللغة العربية، عن
+حدث يومي خيالي وفكاهي في "كنيسة إعادة الربط الحقيقية" (La Iglesia del
+Verdadero Relink)، وهي مجتمع ساخر لطلاب 42 برشلونة المهووسين بملفات
+Makefile وإعادة الربط الصحيحة. نبرة جادة لكن عبثية. أجب فقط بالجملة، دون
+علامات اقتباس أو تفسيرات.`,
+};
 
 @Injectable()
 export class CommunityService implements OnModuleInit {
@@ -121,10 +84,10 @@ export class CommunityService implements OnModuleInit {
     }, staticIntervalMs);
   }
 
-  async createEvent(type: string, message: string) {
-    const event = await this.prisma.communityEvent.create({ data: { type, message } });
-    // Live push to everyone currently connected — the feed updates on
-    // screen without anyone needing to reload or re-fetch
+  async createEvent(type: string, templateIndex: number | null, params: Record<string, string>) {
+    const event = await this.prisma.communityEvent.create({
+      data: { type, templateIndex, params },
+    });
     this.chatGateway.broadcastToAll('communityEventCreated', event);
     return event;
   }
@@ -136,9 +99,6 @@ export class CommunityService implements OnModuleInit {
     });
   }
 
-  // Only events from today (local server midnight onward) — used by the
-  // ticker on /celda, which shows "what's happening today", not the
-  // full historical chronicle
   async getTodayEvents() {
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
@@ -149,68 +109,65 @@ export class CommunityService implements OnModuleInit {
   }
 
   async createUserRegisteredEvent(name: string) {
-    return this.createEvent('USER_REGISTERED', pickRandom(USER_REGISTERED_TEMPLATES)(name));
+    return this.createEvent('USER_REGISTERED', randomIndex('USER_REGISTERED'), { name });
   }
 
-  async createRoleChangedEvent(name: string, role: string) {
-    return this.createEvent('ROLE_CHANGED', pickRandom(ROLE_CHANGED_TEMPLATES)(name, role));
+  async createRoleChangedEvent(name: string, role: string, gender: string) {
+    return this.createEvent('ROLE_CHANGED', randomIndex('ROLE_CHANGED'), { name, role, gender });
   }
 
   async createArticlePublishedEvent(name: string, title: string) {
-    return this.createEvent(
-      'ARTICLE_PUBLISHED',
-      pickRandom(ARTICLE_PUBLISHED_TEMPLATES)(name, title),
-    );
+    return this.createEvent('ARTICLE_PUBLISHED', randomIndex('ARTICLE_PUBLISHED'), {
+      name,
+      title,
+    });
   }
 
   async createArticleEditedEvent(name: string, title: string) {
-    return this.createEvent('ARTICLE_EDITED', pickRandom(ARTICLE_EDITED_TEMPLATES)(name, title));
+    return this.createEvent('ARTICLE_EDITED', randomIndex('ARTICLE_EDITED'), { name, title });
   }
 
   async createArticleDeletedEvent(name: string, title: string) {
-    return this.createEvent(
-      'ARTICLE_DELETED',
-      pickRandom(ARTICLE_DELETED_TEMPLATES)(name, title),
-    );
+    return this.createEvent('ARTICLE_DELETED', randomIndex('ARTICLE_DELETED'), { name, title });
   }
 
   async createFriendshipAcceptedEvent(nameA: string, nameB: string) {
-    return this.createEvent(
-      'FRIENDSHIP_ACCEPTED',
-      pickRandom(FRIENDSHIP_ACCEPTED_TEMPLATES)(nameA, nameB),
-    );
+    return this.createEvent('FRIENDSHIP_ACCEPTED', randomIndex('FRIENDSHIP_ACCEPTED'), {
+      nameA,
+      nameB,
+    });
   }
 
   async createFriendshipBrokenEvent(nameA: string, nameB: string) {
-    return this.createEvent(
-      'FRIENDSHIP_BROKEN',
-      pickRandom(FRIENDSHIP_BROKEN_TEMPLATES)(nameA, nameB),
-    );
+    return this.createEvent('FRIENDSHIP_BROKEN', randomIndex('FRIENDSHIP_BROKEN'), {
+      nameA,
+      nameB,
+    });
   }
 
   async createStaticFictionalEvent() {
-    const message = FICTIONAL_EVENTS[Math.floor(Math.random() * FICTIONAL_EVENTS.length)];
-    return this.createEvent('FICTIONAL', message);
+    return this.createEvent('FICTIONAL_STATIC', randomIndex('FICTIONAL_STATIC'), {});
   }
 
   private async generateAiFictionalEvent() {
-    const completion = await this.groq.chat.completions.create({
-      model: process.env.GROQ_MODEL ?? 'openai/gpt-oss-20b',
-      messages: [
-        {
-          role: 'system',
-          content: `Genera UNA sola frase corta (máximo 20 palabras), en español,
-sobre un evento cotidiano, ficticio y humorístico de "La Iglesia del
-Verdadero Relink", una comunidad satírica de estudiantes de 42 Barcelona
-obsesionada con Makefiles y el relinkado correcto. Tono solemne pero
-absurdo. Responde SOLO con la frase, sin comillas ni explicaciones.`,
-        },
-      ],
-    });
+    const languages = ['es', 'en', 'ar'] as const;
 
-    const message = completion.choices[0]?.message?.content?.trim();
-    if (message) {
-      await this.createEvent('FICTIONAL', message);
+    const results = await Promise.all(
+      languages.map((lang) =>
+        this.groq.chat.completions
+          .create({
+            model: process.env.GROQ_MODEL ?? 'openai/gpt-oss-20b',
+            messages: [{ role: 'system', content: FICTIONAL_PROMPTS[lang] }],
+          })
+          .then((completion) => completion.choices[0]?.message?.content?.trim() ?? ''),
+      ),
+    );
+
+    const [es, en, ar] = results;
+    if (!es || !en || !ar) {
+      return;
     }
+
+    await this.createEvent('FICTIONAL_AI', null, { es, en, ar });
   }
 }

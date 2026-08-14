@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { ROUTES } from '../routes';
 import { useAuth } from '../context/AuthContext';
 import { validateEmail, validatePassword, validateDisplayName } from '../utils/validation';
-import { PageContainer, Card, Input, Button, FieldError } from '../components/ui';
+import { PageContainer, Card, Input, Button, FieldError, BackLink } from '../components/ui';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 type Gender = 'MASCULINO' | 'FEMENINO';
 
@@ -61,7 +62,12 @@ export function RegisterPage() {
 
   return (
     <PageContainer className="flex items-center justify-center px-4">
-      <Card className="w-full max-w-sm">
+      <div className="w-full max-w-sm">
+        <div className="flex justify-between items-center mb-3">
+          <BackLink to={ROUTES.LANDING} />
+          <LanguageSwitcher />
+        </div>
+        <Card>
         <h1 className="text-2xl font-semibold text-cream-100 mb-6 text-center">
           {t('register.title')}
         </h1>
@@ -164,7 +170,8 @@ export function RegisterPage() {
             {t('register.login')}
           </Link>
         </p>
-      </Card>
+        </Card>
+      </div>
     </PageContainer>
   );
 }

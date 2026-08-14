@@ -4,11 +4,24 @@ import { useSocket } from '../context/SocketContext';
 import { getTodayCommunityFeed } from '../api/community';
 import type { CommunityEvent } from '../api/community';
 import { Card } from './ui';
+import { getGenderedRole } from '../utils/genderedRole';
 
 const CYCLE_MS = 7000;
 const FADE_MS = 1500;
 
-// Fisher-Yates shuffle — returns a new array, doesn't mutate the original
+// Maps the backend's event "type" string to the corresponding namespace
+// under the "community" key in the translation JSON files
+const TYPE_TO_NAMESPACE: Record<string, string> = {
+  USER_REGISTERED: 'userRegistered',
+  ROLE_CHANGED: 'roleChanged',
+  FRIENDSHIP_ACCEPTED: 'friendshipAccepted',
+  FRIENDSHIP_BROKEN: 'friendshipBroken',
+  ARTICLE_PUBLISHED: 'articlePublished',
+  ARTICLE_EDITED: 'articleEdited',
+  ARTICLE_DELETED: 'articleDeleted',
+  FICTIONAL_STATIC: 'fictionalStatic',
+};
+
 function shuffle<T>(items: T[]): T[] {
   const result = [...items];
   for (let i = result.length - 1; i > 0; i--) {
@@ -18,9 +31,6 @@ function shuffle<T>(items: T[]): T[] {
   return result;
 }
 
-// Splits a message on **bold** markers (backend wraps brothers' names
-// with them) and renders those parts in gold and bold, the rest as
-// normal text
 function renderMessage(message: string) {
   const parts = message.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, i) => {
@@ -36,7 +46,7 @@ function renderMessage(message: string) {
 }
 
 export function ActivityTicker() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { socket } = useSocket();
   const [events, setEvents] = useState<CommunityEvent[]>([]);
   const [index, setIndex] = useState(0);
@@ -75,6 +85,25 @@ export function ActivityTicker() {
 
   const current = events[index % events.length];
 
+  function renderEvent(event: CommunityEvent): string {
+    if (event.type === 'FICTIONAL_AI') {
+      const params = event.params ?? {};
+      return params[i18n.language] ?? params.es ?? '';
+    }
+
+    const namespace = TYPE_TO_NAMESPACE[event.type];
+    if (!namespace || event.templateIndex === null) {
+      return '';
+    }
+
+    const params: Record<string, string> = { ...(event.params ?? {}) };
+    if (event.type === 'ROLE_CHANGED' && params.role && params.gender) {
+      params.role = getGenderedRole(params.role, params.gender, i18n.language);
+    }
+
+    return t(`community.${namespace}.${event.templateIndex}`, params);
+  }
+
   return (
     <Card className="mb-6 text-center min-h-[96px] flex flex-col items-center justify-center">
       <h2 className="text-xs uppercase tracking-wide text-gold-500 mb-3">
@@ -87,7 +116,7 @@ export function ActivityTicker() {
           }`}
           style={{ transitionDuration: `${FADE_MS}ms` }}
         >
-          {renderMessage(current.message)}
+          {renderMessage(renderEvent(current))}
         </p>
       ) : (
         <p className="text-sm text-cream-400">{t('widgets.activityEmpty')}</p>

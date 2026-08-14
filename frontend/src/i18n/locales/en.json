@@ -171,5 +171,73 @@
     "termsS5Body": "As this is an academic project, continuous availability and freedom from errors are not guaranteed. The service is provided \"as is\", without any warranties.",
     "termsS6Title": "6. Changes to these terms",
     "termsS6Body": "These terms may be updated as the project evolves. Significant changes will be reflected in the last-updated date shown above."
+  },
+  "community": {
+    "userRegistered": {
+      "0": "**{{name}}** has come knocking at the gates of the True Relink and been welcomed as a novice.",
+      "1": "A new novice, **{{name}}**, has joined the Chapter.",
+      "2": "**{{name}}** has sworn never to relink unnecessarily again. Welcome."
+    },
+    "roleChanged": {
+      "0": "**{{name}}** has reached the rank of {{role}}.",
+      "1": "The Chapter recognizes **{{name}}** with the rank of {{role}}.",
+      "2": "**{{name}}** rises to {{role}} before the eyes of the brethren."
+    },
+    "friendshipAccepted": {
+      "0": "**{{nameA}}** and **{{nameB}}** have sworn brotherhood before the True Relink.",
+      "1": "**{{nameA}}** and **{{nameB}}** have sealed a pact of brotherhood before the altar of the Makefile.",
+      "2": "A new fraternal bond has been recorded between **{{nameA}}** and **{{nameB}}**.",
+      "3": "**{{nameA}}** and **{{nameB}}** shared bread and a `git diff` as a sign of brotherhood.",
+      "4": "The Chapter welcomes the new brotherhood between **{{nameA}}** and **{{nameB}}**.",
+      "5": "**{{nameA}}** and **{{nameB}}** have sworn never to relink against one another."
+    },
+    "friendshipBroken": {
+      "0": "**{{nameA}}** and **{{nameB}}** have broken their brotherhood. Rumor says it was over a `touch Makefile`.",
+      "1": "The bond between **{{nameA}}** and **{{nameB}}** has dissolved before the Chapter, in silence.",
+      "2": "**{{nameA}}** and **{{nameB}}** no longer consider each other brothers. No one asks why.",
+      "3": "A schism has been declared between **{{nameA}}** and **{{nameB}}**. May the linker forgive them.",
+      "4": "**{{nameA}}** and **{{nameB}}** have decided to go their separate ways within the Chapter."
+    },
+    "articlePublished": {
+      "0": "**{{name}}** has published a new treatise: \"{{title}}\".",
+      "1": "The Chapter welcomes a new homily from **{{name}}**: \"{{title}}\".",
+      "2": "**{{name}}** has left their mark on the library with \"{{title}}\"."
+    },
+    "articleEdited": {
+      "0": "**{{name}}** has revised the treatise \"{{title}}\".",
+      "1": "The treatise \"{{title}}\" has been corrected by **{{name}}**."
+    },
+    "articleDeleted": {
+      "0": "**{{name}}** has withdrawn the treatise \"{{title}}\" from the library.",
+      "1": "The treatise \"{{title}}\" has been burned by order of **{{name}}**."
+    },
+    "fictionalStatic": {
+      "0": "The brothers held a procession in honor of the new CMake release.",
+      "1": "A novice was caught adding the Makefile to the dependencies. Penance was imposed.",
+      "2": "The Archbishop blessed three freshly compiled binaries, not a single warning among them.",
+      "3": "A forgotten `touch Makefile` was found in a hallway. No one claims it.",
+      "4": "The Chapter's library acquired an original copy of the first `-Wall -Wextra -Werror`.",
+      "5": "A brother confessed to using `make -B` \"just once, out of curiosity\".",
+      "6": "The Chapter's bells rang out: someone got a clean build on the first try.",
+      "7": "The Vigil of the Linker was held in silence, hoping it wouldn't run unnecessarily.",
+      "8": "A pilgrim arrived from another campus asking about the difference between recompiling and relinking.",
+      "9": "The Council debates whether running `make re` at midnight counts as heresy or penance.",
+      "10": "A brother swore he saw a `Makefile.bak` move on its own among the files.",
+      "11": "A novice was spotted reading the GNU Make documentation by candlelight.",
+      "12": "The Chapter held a minute of silence for every `rm -rf` run without confirmation.",
+      "13": "Someone proposed replacing the bells with the sound of a successful build. Rejected unanimously.",
+      "14": "A brother was seen whispering to his terminal before running `make`.",
+      "15": "An ancient inscription was found: \"He who relinks without need, relinks in vain\".",
+      "16": "The Archbishop declared Thursday the official day for reviewing `.gitignore`.",
+      "17": "A pilgrim arrived seeking forgiveness for using an IDE with Makefile autocomplete.",
+      "18": "Rumor has it that somewhere in the Chapter's catacombs lies a `Makefile` without a single misplaced tab.",
+      "19": "Three brothers argued for hours over whether `.PHONY` is dogma or mere recommendation.",
+      "20": "The Council approved a new stained-glass window in memory of the first well-debugged `Segmentation fault`.",
+      "21": "A novice asked what a linker is. The silence that followed was considered answer enough.",
+      "22": "A night vigil was held, waiting for a particularly long compilation to finish.",
+      "23": "A brother was caught commenting code in English while discussing it in Spanish. He was forgiven.",
+      "24": "The Chapter acquired an exact replica of the first terminal to display \"Segmentation fault (core dumped)\".",
+      "25": "There's debate over whether typing `make clean && make` before bed counts as a night prayer."
+    }
   }
 }

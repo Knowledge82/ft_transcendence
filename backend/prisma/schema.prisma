@@ -147,11 +147,18 @@ model Notification {
 // Public, community-wide chronicle entry — no owner, no read state. Some
 // of these mirror real actions (a new adept joined, a rank changed), some
 // are purely flavorful/fictional filler for atmosphere.
+// The phrase itself is no longer stored pre-rendered — only the type,
+// which template variant was picked, and the raw interpolation data.
+// The actual sentence (in whichever language the viewer has selected)
+// is assembled on the frontend at display time. This is what makes the
+// chronicle genuinely multi-language, instead of permanently "frozen"
+// in whatever language was active when the event happened.
 model CommunityEvent {
-  id        Int      @id @default(autoincrement())
-  type      String
-  message   String
-  createdAt DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  type          String
+  templateIndex Int?
+  params        Json?
+  createdAt     DateTime @default(now())
 }
 
 // Only ever created already-approved — there's no draft state, since
