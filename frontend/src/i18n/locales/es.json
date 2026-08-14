@@ -239,5 +239,21 @@
       "24": "El Capítulo adquirió una réplica exacta del primer terminal que mostró \"Segmentation fault (core dumped)\".",
       "25": "Se debate si escribir `make clean && make` antes de dormir cuenta como oración nocturna."
     }
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "markAllRead": "Marcar todas",
+    "empty": "No tienes notificaciones.",
+    "friendRequestReceived": "{{name}} te ha enviado una solicitud de hermandad.",
+    "friendRequestAccepted": "{{name}} ha aceptado tu solicitud de hermandad.",
+    "friendshipBroken": "{{name}} ha puesto fin a vuestra hermandad.",
+    "roleChanged": "Tu rango ha cambiado a {{role}}."
+  },
+  "errors": {
+    "oracleRateLimited": "El Oráculo está ocupado con otros asuntos. Inténtalo de nuevo en unos minutos.",
+    "confessorRateLimited": "El Confesor ha agotado su cuota gratuita de consultas a la IA por ahora. Inténtalo de nuevo en unos minutos.",
+    "emptyMakefile": "Debes enviar el contenido del Makefile.",
+    "makefileTooLong": "El Makefile es demasiado largo (máximo {{max}} caracteres).",
+    "streamingNotSupported": "Tu navegador no admite streaming de respuestas."
   }
 }

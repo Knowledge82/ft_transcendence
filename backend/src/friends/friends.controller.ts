@@ -50,7 +50,7 @@ export class FriendsController {
     await this.notificationsService.createNotification(
       addresseeId,
       'FRIEND_REQUEST_RECEIVED',
-      `${requesterName} te ha enviado una solicitud de hermandad.`,
+      { name: requesterName },
     );
 
     return friendship;
@@ -73,7 +73,7 @@ export class FriendsController {
     await this.notificationsService.createNotification(
       requesterId,
       'FRIEND_REQUEST_ACCEPTED',
-      `${accepterName} ha aceptado tu solicitud de hermandad.`,
+      { name: accepterName },
     );
 
     return friendship;
@@ -96,7 +96,7 @@ export class FriendsController {
       await this.notificationsService.createNotification(
         otherUserId,
         'FRIENDSHIP_BROKEN',
-        `${nameA} ha puesto fin a vuestra hermandad.`,
+        { name: nameA },
       );
     }
   }

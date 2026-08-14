@@ -137,7 +137,7 @@ model Notification {
   id        Int      @id @default(autoincrement())
   userId    Int
   type      String
-  message   String
+  params    Json?
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 

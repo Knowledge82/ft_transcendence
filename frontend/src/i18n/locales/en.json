@@ -239,5 +239,21 @@
       "24": "The Chapter acquired an exact replica of the first terminal to display \"Segmentation fault (core dumped)\".",
       "25": "There's debate over whether typing `make clean && make` before bed counts as a night prayer."
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "empty": "You have no notifications.",
+    "friendRequestReceived": "{{name}} has sent you a brotherhood request.",
+    "friendRequestAccepted": "{{name}} has accepted your brotherhood request.",
+    "friendshipBroken": "{{name}} has ended your brotherhood.",
+    "roleChanged": "Your rank has changed to {{role}}."
+  },
+  "errors": {
+    "oracleRateLimited": "The Oracle is busy with other matters. Try again in a few minutes.",
+    "confessorRateLimited": "The Confessor has exhausted its free AI query quota for now. Try again in a few minutes.",
+    "emptyMakefile": "You must send the Makefile content.",
+    "makefileTooLong": "The Makefile is too long (maximum {{max}} characters).",
+    "streamingNotSupported": "Your browser doesn't support response streaming."
   }
 }

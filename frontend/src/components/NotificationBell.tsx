@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSocket } from '../context/SocketContext';
 import {
   getNotifications,
@@ -7,8 +8,17 @@ import {
   markAllNotificationsAsRead,
 } from '../api/notifications';
 import type { Notification } from '../api/notifications';
+import { getGenderedRole } from '../utils/genderedRole';
+
+const TYPE_TO_KEY: Record<string, string> = {
+  FRIEND_REQUEST_RECEIVED: 'friendRequestReceived',
+  FRIEND_REQUEST_ACCEPTED: 'friendRequestAccepted',
+  FRIENDSHIP_BROKEN: 'friendshipBroken',
+  ROLE_CHANGED: 'roleChanged',
+};
 
 export function NotificationBell() {
+  const { t, i18n } = useTranslation();
   const { socket } = useSocket();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -63,6 +73,20 @@ export function NotificationBell() {
     setUnreadCount(0);
   }
 
+  function renderNotification(n: Notification): string {
+    const key = TYPE_TO_KEY[n.type];
+    if (!key) {
+      return '';
+    }
+
+    const params: Record<string, string> = { ...(n.params ?? {}) };
+    if (n.type === 'ROLE_CHANGED' && params.role && params.gender) {
+      params.role = getGenderedRole(params.role, params.gender, i18n.language);
+    }
+
+    return t(`notifications.${key}`, params);
+  }
+
   return (
     <div className="relative" ref={panelRef}>
       <button
@@ -72,7 +96,7 @@ export function NotificationBell() {
             ? 'text-cream-400/40 hover:text-cream-400'
             : 'text-cream-100 hover:text-gold-500'
         }`}
-        aria-label="Notificaciones"
+        aria-label={t('notifications.title')}
       >
         🔔
         {unreadCount > 0 && (
@@ -85,19 +109,21 @@ export function NotificationBell() {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-72 bg-ink-900 border border-ink-800 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
           <div className="flex justify-between items-center px-3 py-2 border-b border-ink-800">
-            <span className="text-xs uppercase tracking-wide text-gold-500">Notificaciones</span>
+            <span className="text-xs uppercase tracking-wide text-gold-500">
+              {t('notifications.title')}
+            </span>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllRead}
                 className="text-xs text-cream-400 hover:text-cream-100"
               >
-                Marcar todas
+                {t('notifications.markAllRead')}
               </button>
             )}
           </div>
 
           {notifications.length === 0 ? (
-            <p className="text-sm text-cream-400 p-3">No tienes notificaciones.</p>
+            <p className="text-sm text-cream-400 p-3">{t('notifications.empty')}</p>
           ) : (
             notifications.map((n) => (
               <button
@@ -107,7 +133,7 @@ export function NotificationBell() {
                   n.isRead ? 'text-cream-400' : 'text-cream-100 bg-ink-800/40'
                 }`}
               >
-                {n.message}
+                {renderNotification(n)}
               </button>
             ))
           )}

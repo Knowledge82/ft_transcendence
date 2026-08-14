@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { streamConfession } from '../api/ai';
+import { streamConfession, ApiError } from '../api/ai';
 import { PageContainer, Card, Textarea, Button, BackLink } from '../components/ui';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { ROUTES } from '../routes';
+import { translateApiError } from '../utils/apiErrors';
 
 const MAX_LENGTH = 1000; // must stay in sync with MAX_INPUT_LENGTH in backend/src/ai/ai.service.ts
 // How slowly the text "speaks" on screen, independent of how fast the
@@ -53,10 +54,11 @@ export function ConfesionarioPage() {
       }
     } catch (err) {
       if (err instanceof Error && err.name !== 'AbortError') {
-        // This message comes from the backend (e.g. the Confesor's own
-        // quota/error messages) — not yet part of the frontend's i18n
-        // system, same open question as the CommunityEvent chronicle text
-        setError(err.message);
+        if (err instanceof ApiError) {
+          setError(translateApiError(err.data ?? undefined, t, err.message));
+        } else {
+          setError(err.message);
+        }
       }
     } finally {
       setIsFetching(false);

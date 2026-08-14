@@ -111,7 +111,7 @@ export class AiService {
       const status = (error as { status?: number })?.status;
       if (status === 429) {
         throw new HttpException(
-          'El Oráculo está ocupado con otros asuntos. Inténtalo de nuevo en unos minutos.',
+          { code: 'ORACLE_RATE_LIMITED' },
           HttpStatus.TOO_MANY_REQUESTS,
         );
       }
@@ -121,12 +121,10 @@ export class AiService {
 
   async *streamConfession(makefileContent: string): AsyncGenerator<string> {
     if (!makefileContent || !makefileContent.trim()) {
-      throw new BadRequestException('Debes enviar el contenido del Makefile');
+      throw new BadRequestException({ code: 'EMPTY_MAKEFILE' });
     }
     if (makefileContent.length > MAX_INPUT_LENGTH) {
-      throw new BadRequestException(
-        `El Makefile es demasiado largo (máximo ${MAX_INPUT_LENGTH} caracteres)`,
-      );
+      throw new BadRequestException({ code: 'MAKEFILE_TOO_LONG', max: MAX_INPUT_LENGTH });
     }
 
     try {
@@ -152,7 +150,7 @@ export class AiService {
 
       if (status === 429) {
         throw new HttpException(
-          'El Confesor ha agotado su cuota gratuita de consultas a la IA por ahora. Inténtalo de nuevo en unos minutos.',
+          { code: 'CONFESSOR_RATE_LIMITED' },
           HttpStatus.TOO_MANY_REQUESTS,
         );
       }

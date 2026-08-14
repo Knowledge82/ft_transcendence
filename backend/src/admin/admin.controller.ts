@@ -15,7 +15,6 @@ import { AdminService } from './admin.service';
 import { ChatGateway } from '../chat/chat.gateway';
 import { CommunityService } from '../community/community.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { getGenderedRole } from '../common/gendered-role';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -38,18 +37,15 @@ export class AdminController {
     const updated = await this.adminService.changeRole(id, role);
     this.chatGateway.notifyUser(id, 'roleChanged', { role: updated.role });
 
-    const genderedRole = getGenderedRole(updated.role, updated.gender);
     const name = updated.displayName ?? `Usuario ${updated.id}`;
-    // The community chronicle now stores the RAW role+gender — the
-    // frontend genders it per the viewer's own language at display time.
-    // The personal notification below is a separate system, still
-    // pre-rendered in Spanish for now (not yet part of this refactor).
+    // Both the chronicle and the personal notification now store RAW
+    // role+gender — each viewer's own frontend genders it in their own
+    // active language at display time.
     await this.communityService.createRoleChangedEvent(name, updated.role, updated.gender);
-    await this.notificationsService.createNotification(
-      id,
-      'ROLE_CHANGED',
-      `Tu rango ha cambiado a ${genderedRole}.`,
-    );
+    await this.notificationsService.createNotification(id, 'ROLE_CHANGED', {
+      role: updated.role,
+      gender: updated.gender,
+    });
 
     return updated;
   }

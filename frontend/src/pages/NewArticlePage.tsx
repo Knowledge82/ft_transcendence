@@ -6,6 +6,7 @@ import { apiClient } from '../api/client';
 import { ROUTES } from '../routes';
 import { PageContainer, Card, LoadingScreen, BackLink, Input, Textarea, Button } from '../components/ui';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { translateApiError } from '../utils/apiErrors';
 
 const MODERATOR_ROLES = ['INQUISIDOR', 'ARZOBISPO'];
 const MAX_TITLE_LENGTH = 150;
@@ -57,13 +58,9 @@ export function NewArticlePage() {
         : await createArticle(title.trim(), content.trim());
       navigate(ROUTES.ARTICLE(article.id));
     } catch (err) {
-      // Same open question as the Confesor's error messages — this comes
-      // straight from the backend (the Oráculo's rejection text), not
-      // yet integrated with the frontend's i18n system
-      const message =
-        (err as { response?: { data?: { message?: string | string[] } } })?.response?.data
-          ?.message ?? t('articles.defaultRejection');
-      setError(Array.isArray(message) ? message.join(', ') : message);
+      const data = (err as { response?: { data?: { code?: string; message?: string | string[] } } })
+        ?.response?.data;
+      setError(translateApiError(data, t, t('articles.defaultRejection')));
     } finally {
       setIsPublishing(false);
     }

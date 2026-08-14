@@ -239,5 +239,21 @@
       "24": "اقتنى الفصل نسخة طبق الأصل من أول طرفية عرضت \"Segmentation fault (core dumped)\".",
       "25": "يُتناقش حول ما إذا كانت كتابة `make clean && make` قبل النوم تُعد صلاة ليلية."
     }
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "markAllRead": "تعليم الكل كمقروء",
+    "empty": "ليس لديك أي إشعارات.",
+    "friendRequestReceived": "أرسل لك {{name}} طلب أخوة.",
+    "friendRequestAccepted": "قبل {{name}} طلب الأخوة الخاص بك.",
+    "friendshipBroken": "أنهى {{name}} أخوتكما.",
+    "roleChanged": "تغيّرت رتبتك إلى {{role}}."
+  },
+  "errors": {
+    "oracleRateLimited": "الأوراكل مشغول بأمور أخرى. حاول مرة أخرى بعد بضع دقائق.",
+    "confessorRateLimited": "استنفد المعترف حصته المجانية من استعلامات الذكاء الاصطناعي حاليًا. حاول مرة أخرى بعد بضع دقائق.",
+    "emptyMakefile": "يجب عليك إرسال محتوى Makefile.",
+    "makefileTooLong": "ملف Makefile طويل جدًا (الحد الأقصى {{max}} حرفًا).",
+    "streamingNotSupported": "متصفحك لا يدعم بث الردود."
   }
 }
