@@ -1,4 +1,5 @@
 import { getAccessToken } from './client';
+import i18n from '../i18n/i18n';
 
 interface ApiErrorData {
   code?: string;
@@ -33,6 +34,7 @@ export async function* streamConfession(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Accept-Language': i18n.language,
       Authorization: `Bearer ${getAccessToken()}`,
     },
     body: JSON.stringify({ makefile }),

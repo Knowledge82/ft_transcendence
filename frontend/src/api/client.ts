@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import i18n from '../i18n/i18n';
 
 export const apiClient = axios.create({
   baseURL: '/api',
@@ -25,11 +26,18 @@ export function setOnSessionExpired(callback: () => void) {
   onSessionExpired = callback;
 }
 
-// Attach the access token to every outgoing request automatically
+// Attach the access token AND the current UI language to every outgoing
+// request automatically — this is what lets backend endpoints that
+// generate language-aware content (the Confesor, the Oráculo) know which
+// language to respond in, without every single API function having to
+// remember to pass it manually. We import the i18n instance directly
+// (not the useTranslation hook) because this is a plain module, not a
+// React component — i18next's instance works fine outside of React too.
 apiClient.interceptors.request.use((config) => {
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
+  config.headers['Accept-Language'] = i18n.language;
   return config;
 });
 

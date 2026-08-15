@@ -8,6 +8,7 @@ import {
   Param,
   ParseIntPipe,
   Query,
+  Headers,
   Request,
   UseGuards,
   BadRequestException,
@@ -54,11 +55,15 @@ export class ArticlesController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles('INQUISIDOR', 'ARZOBISPO')
-  async create(@Request() req, @Body() dto: CreateArticleDto) {
+  async create(
+    @Request() req,
+    @Body() dto: CreateArticleDto,
+    @Headers('accept-language') language: string,
+  ) {
     // The AI check happens BEFORE anything is saved — a rejected article
     // never touches the database at all, only the stern rejection
     // message is sent back
-    const check = await this.aiService.checkArticleRelevance(dto.title, dto.content);
+    const check = await this.aiService.checkArticleRelevance(dto.title, dto.content, language);
     if (!check.approved) {
       throw new BadRequestException(check.rejectionMessage);
     }
@@ -80,6 +85,7 @@ export class ArticlesController {
     @Request() req,
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: CreateArticleDto,
+    @Headers('accept-language') language: string,
   ) {
     const existing = await this.articlesService.getArticleById(id);
     const isAuthor = existing.authorId === req.user.userId;
@@ -92,7 +98,7 @@ export class ArticlesController {
 
     // Editing is treated as "republishing" — the content changed, so it
     // goes through the same relevance check again before being saved
-    const check = await this.aiService.checkArticleRelevance(dto.title, dto.content);
+    const check = await this.aiService.checkArticleRelevance(dto.title, dto.content, language);
     if (!check.approved) {
       throw new BadRequestException(check.rejectionMessage);
     }

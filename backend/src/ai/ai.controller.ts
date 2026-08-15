@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Res, UseGuards, HttpException } from '@nestjs/common';
+import { Controller, Post, Body, Headers, Res, UseGuards, HttpException } from '@nestjs/common';
 import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AiService } from './ai.service';
@@ -11,24 +11,27 @@ export class AiController {
 
   @Post('confess')
   @UseGuards(UserThrottlerGuard)
-  async confess(@Body('makefile') makefile: string, @Res() res: Response) {
+  async confess(
+    @Body('makefile') makefile: string,
+    @Headers('accept-language') language: string,
+    @Res() res: Response,
+  ) {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('X-Accel-Buffering', 'no');
 
     try {
-      for await (const chunk of this.aiService.streamConfession(makefile)) {
+      for await (const chunk of this.aiService.streamConfession(makefile, language)) {
         res.write(chunk);
       }
       res.end();
     } catch (error) {
-      // Log the real error server-side — the client only ever sees a
-      // generic message, but we need to actually see what happened
       console.error('Error en /ai/confess:', error);
 
       if (!res.headersSent) {
         const status = error instanceof HttpException ? error.getStatus() : 500;
-        const message = error instanceof HttpException ? error.message : 'Error interno';
-        res.status(status).json({ statusCode: status, message });
+        const body =
+          error instanceof HttpException ? error.getResponse() : { statusCode: 500, message: 'Error interno' };
+        res.status(status).json(body);
       } else {
         res.write('\n\n[Error: no se pudo completar la respuesta]');
         res.end();
