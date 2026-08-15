@@ -108,7 +108,7 @@ export function NewArticlePage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value.slice(0, MAX_TITLE_LENGTH))}
               />
-              <span className="text-xs text-cream-400">
+              <span className="text-xs text-cream-400" dir="ltr">
                 {title.length}/{MAX_TITLE_LENGTH}
               </span>
             </div>
@@ -123,7 +123,7 @@ export function NewArticlePage() {
                 value={content}
                 onChange={(e) => setContent(e.target.value.slice(0, MAX_CONTENT_LENGTH))}
               />
-              <span className="text-xs text-cream-400">
+              <span className="text-xs text-cream-400" dir="ltr">
                 {content.length}/{MAX_CONTENT_LENGTH}
               </span>
             </div>

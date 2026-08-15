@@ -89,10 +89,11 @@ export function ConfesionarioPage() {
             value={makefile}
             onChange={(e) => setMakefile(e.target.value.slice(0, MAX_LENGTH))}
             placeholder={'all:\n\tgcc main.c -o program'}
+            dir="ltr"
             rows={10}
           />
           <div className="flex justify-between items-center text-xs text-cream-400">
-            <span>{makefile.length}/{MAX_LENGTH}</span>
+            <span dir="ltr">{makefile.length}/{MAX_LENGTH}</span>
           </div>
 
           <div className="flex gap-3">

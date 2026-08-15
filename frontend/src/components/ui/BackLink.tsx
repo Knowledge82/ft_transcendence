@@ -9,13 +9,18 @@ interface BackLinkProps {
 
 export function BackLink({ to, label, className = '' }: BackLinkProps) {
   const { t } = useTranslation();
-  // Falls back to the translated default only if the caller didn't
-  // explicitly override it (some pages pass a custom label, like
-  // "← Volver a la Biblioteca") — those custom labels are handled
-  // separately wherever they're used, this component only owns the
-  // generic default.
   return (
-    <Link to={to} className={`text-sm text-gold-500 hover:text-gold-400 ${className}`}>
+    <Link
+      to={to}
+      className={`text-sm text-gold-500 hover:text-gold-400 inline-flex items-center gap-1 ${className}`}
+    >
+      {/* The arrow is rendered separately from the translated text, and
+          flipped via CSS (not baked into any translation string) — this
+          way it correctly mirrors for RTL without mixing content and
+          layout concerns, unlike our earlier stopgap approach */}
+      <span aria-hidden="true" className="rtl:scale-x-[-1]">
+        ←
+      </span>
       {label ?? t('common.back')}
     </Link>
   );

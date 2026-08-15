@@ -1,6 +1,6 @@
 {
   "common": {
-    "back": "← Back",
+    "back": "Back",
     "loading": "Loading...",
     "cancel": "Cancel",
     "save": "Save",
@@ -124,7 +124,7 @@
     "title": "Library",
     "writeButton": "Write a treatise",
     "empty": "No treatise has been written yet.",
-    "backToLibrary": "← Back to the Library",
+    "backToLibrary": "Back to the Library",
     "notFound": "Treatise not found",
     "loadError": "Couldn't find this treatise",
     "edit": "Edit",

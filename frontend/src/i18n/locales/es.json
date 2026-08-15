@@ -1,6 +1,6 @@
 {
   "common": {
-    "back": "← Volver",
+    "back": "Volver",
     "loading": "Cargando...",
     "cancel": "Cancelar",
     "save": "Guardar",
@@ -124,7 +124,7 @@
     "title": "Biblioteca",
     "writeButton": "Escribir un tratado",
     "empty": "Todavía no se ha escrito ningún tratado.",
-    "backToLibrary": "← Volver a la Biblioteca",
+    "backToLibrary": "Volver a la Biblioteca",
     "notFound": "Tratado no encontrado",
     "loadError": "No se pudo encontrar este tratado",
     "edit": "Editar",

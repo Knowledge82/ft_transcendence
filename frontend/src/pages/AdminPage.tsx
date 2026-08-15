@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { apiClient } from '../api/client';
 import { listAllUsers, changeUserRole, deleteUser } from '../api/admin';
@@ -49,9 +48,7 @@ export function AdminPage() {
     return (
       <PageContainer className="flex flex-col items-center justify-center gap-4">
         <p className="text-cream-100">{t('admin.notAllowed')}</p>
-        <Link to={ROUTES.HOME} className="text-gold-500 hover:text-gold-400">
-          {t('admin.backHome')}
-        </Link>
+        <BackLink to={ROUTES.HOME} />
       </PageContainer>
     );
   }
@@ -71,7 +68,7 @@ export function AdminPage() {
         <div className="bg-ink-900 border border-ink-800 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-ink-800 text-cream-400 text-left">
+              <tr className="border-b border-ink-800 text-cream-400 text-start">
                 <th className="px-4 py-3">{t('admin.user')}</th>
                 <th className="px-4 py-3">{t('admin.email')}</th>
                 <th className="px-4 py-3">{t('admin.rank')}</th>

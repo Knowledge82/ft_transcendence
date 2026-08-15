@@ -147,11 +147,20 @@ export function HomePage() {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingAvatar}
-              className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-gold-500 text-gold-on text-xs flex items-center justify-center hover:bg-gold-400 disabled:opacity-50"
+              className="absolute bottom-0 end-0 w-7 h-7 rounded-full bg-gold-500 text-gold-on text-xs flex items-center justify-center hover:bg-gold-400 disabled:opacity-50"
               title={t('home.changeAvatar')}
             >
               ✎
             </button>
+            {profile.avatarUrl && !isUploadingAvatar && (
+              <button
+                onClick={handleRemoveAvatar}
+                className="absolute bottom-0 start-0 w-7 h-7 rounded-full bg-ink-900 border border-error-500 text-error-500 text-xs flex items-center justify-center hover:bg-error-500/10"
+                title={t('home.removeAvatar')}
+              >
+                ✕
+              </button>
+            )}
             <input
               ref={fileInputRef}
               type="file"
@@ -162,14 +171,6 @@ export function HomePage() {
           </div>
           {isUploadingAvatar && <p className="text-xs text-cream-400 mb-2">{t('home.uploading')}</p>}
           {avatarError && <p className="text-xs text-error-500 mb-2">{avatarError}</p>}
-          {profile.avatarUrl && !isUploadingAvatar && (
-            <button
-              onClick={handleRemoveAvatar}
-              className="text-xs text-cream-400 hover:text-error-500 transition-colors mb-2"
-            >
-              {t('home.removeAvatar')}
-            </button>
-          )}
 
           {isEditingName ? (
             <form onSubmit={handleSaveName} className="mb-2">

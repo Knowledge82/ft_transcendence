@@ -10,6 +10,7 @@ import { useSocket } from '../context/SocketContext';
 import { LoadingScreen, StatusDot, IconButton, Input, Button, PageContainer, BackLink } from '../components/ui';
 import { ROUTES } from '../routes';
 import { getGenderedRole } from '../utils/genderedRole';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 export function ChatPage() {
   const { t, i18n } = useTranslation();
@@ -323,9 +324,11 @@ export function ChatPage() {
   return (
     <PageContainer className="flex flex-col" showFrame={false}>
       <header className="grid grid-cols-3 items-center px-4 py-2 bg-ink-900 border-b border-ink-800">
-        <div />
+        <div>
+          <LanguageSwitcher />
+        </div>
         <span className="text-sm text-gold-500 font-medium text-center">{headerLabel}</span>
-        <span className="text-sm text-cream-400 text-right">
+        <span className="text-sm text-cream-400 text-end">
           {t('chat.loggedInAs')}{' '}
           <span className="text-gold-500 font-medium">
             {ownDisplayName ?? userFallback(ownUserId ?? undefined)}
@@ -334,7 +337,7 @@ export function ChatPage() {
       </header>
 
       <div className="flex flex-1">
-      <aside className="w-64 bg-ink-900 border-r border-ink-800 flex flex-col">
+      <aside className="w-64 bg-ink-900 border-e border-ink-800 flex flex-col">
         <div className="p-4 border-b border-ink-800">
           <BackLink to={ROUTES.HOME} />
         </div>
@@ -344,7 +347,7 @@ export function ChatPage() {
           {generalChannel && (
             <button
               onClick={() => generalChannel && selectConversation(generalChannel.id, null)}
-              className={`w-full text-left px-3 py-2 rounded-md mb-1 transition-colors ${
+              className={`w-full text-start px-3 py-2 rounded-md mb-1 transition-colors ${
                 selectedConversationId === generalChannel.id
                   ? 'bg-gold-500 text-gold-on'
                   : 'text-cream-100 hover:bg-ink-800'
@@ -366,7 +369,7 @@ export function ChatPage() {
                 <button
                   key={conv.id}
                   onClick={() => selectConversation(conv.id, conv.otherUser)}
-                  className={`w-full flex items-center gap-2 text-left px-3 py-2 rounded-md mb-1 transition-colors ${
+                  className={`w-full flex items-center gap-2 text-start px-3 py-2 rounded-md mb-1 transition-colors ${
                     selectedConversationId === conv.id
                       ? 'bg-gold-500 text-gold-on'
                       : 'text-cream-100 hover:bg-ink-800'
@@ -422,7 +425,7 @@ export function ChatPage() {
               <StatusDot isOnline={friend.isOnline} />
               <Link
                 to={`/perfil/${friend.id}`}
-                className="flex-1 text-left text-sm text-cream-100 truncate hover:underline"
+                className="flex-1 text-start text-sm text-cream-100 truncate hover:underline"
               >
                 {friend.displayName ?? userFallback(friend.id)}
               </Link>
@@ -519,7 +522,7 @@ export function ChatPage() {
                       onClick={() => handleDeleteMessage(message.id)}
                       title={t('chat.flagHeresy')}
                       className={`absolute -top-2 ${
-                        isOwn ? '-left-2' : '-right-2'
+                        isOwn ? '-start-2' : '-end-2'
                       } w-5 h-5 rounded-full bg-ink-950 border border-ink-800 text-error-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center`}
                     >
                       ✕
@@ -594,7 +597,7 @@ export function ChatPage() {
         </form>
       </main>
 
-      <aside className="w-56 bg-ink-900 border-l border-ink-800 p-4 overflow-y-auto">
+      <aside className="w-56 bg-ink-900 border-s border-ink-800 p-4 overflow-y-auto">
         <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">
           {t('chat.membersHeader', {
             online: members.filter((m) => m.isOnline).length,

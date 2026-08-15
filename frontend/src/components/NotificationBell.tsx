@@ -100,14 +100,14 @@ export function NotificationBell() {
       >
         🔔
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-error-500 text-white text-[10px] leading-none rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">
+          <span className="absolute -top-1 -end-1 bg-error-500 text-white text-[10px] leading-none rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-72 bg-ink-900 border border-ink-800 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+        <div className="absolute end-0 mt-2 w-72 bg-ink-900 border border-ink-800 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
           <div className="flex justify-between items-center px-3 py-2 border-b border-ink-800">
             <span className="text-xs uppercase tracking-wide text-gold-500">
               {t('notifications.title')}
@@ -129,7 +129,7 @@ export function NotificationBell() {
               <button
                 key={n.id}
                 onClick={() => handleMarkRead(n)}
-                className={`w-full text-left px-3 py-2 border-b border-ink-800 last:border-0 text-sm transition-colors ${
+                className={`w-full text-start px-3 py-2 border-b border-ink-800 last:border-0 text-sm transition-colors ${
                   n.isRead ? 'text-cream-400' : 'text-cream-100 bg-ink-800/40'
                 }`}
               >
