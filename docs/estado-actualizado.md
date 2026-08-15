@@ -31,13 +31,11 @@
 
 | Requisito | Estado | Puntos |
 |---|---|---|
-| Major: Cumplimiento WCAG 2.1 AA completo | ⏳ | 0 |
-| Minor: Soporte multi-idioma (3+ idiomas, i18n, selector) | ⏳ | 0 |
-| Minor: Soporte RTL | ⏳ | 0 |
-| Minor: Compatibilidad con navegadores adicionales | ⏳ | 0 |
-| Subtotal Accessibility/i18n | | 0 |
-
-Módulo completamente sin empezar. Pendiente decidir si se aborda antes de la defensa.
+| Major: Cumplimiento WCAG 2.1 AA completo | ⏳ (solo verificado el contraste de color matemáticamente; falta auditoría real de teclado/ARIA/lector de pantalla) | 0 |
+| Minor: Soporte multi-idioma (3+ idiomas, i18n, selector) | ✅ (español/inglés/árabe — interfaz completa, crónica pública, notificaciones, códigos de error, y respuestas de la IA generadas en el idioma activo) | 1 |
+| Minor: Soporte RTL | ✅ (espejado completo auditado en todas las páginas y componentes — propiedades lógicas de CSS, excepciones documentadas para controles de utilidad persistentes y contenido no localizable) | 1 |
+| Minor: Compatibilidad con navegadores adicionales | ⏳ (sin probar aún en Firefox/Safari/Edge) | 0 |
+| Subtotal Accessibility/i18n | | 2 |
 
 ---
 
@@ -77,10 +75,10 @@ Módulo completamente sin empezar. Pendiente decidir si se aborda antes de la de
 | Módulo | Puntos conseguidos |
 |---|---|
 | Web | 11 |
-| Accessibility/i18n | 0 |
+| Accessibility/i18n | 2 |
 | User Management | 4 |
 | Artificial Intelligence | 3 |
-| Total | 18 |
+| Total | 20 |
 
 ## Decisiones conscientes de no implementar (🚫)
 
@@ -88,4 +86,10 @@ Módulo completamente sin empezar. Pendiente decidir si se aborda antes de la de
 - Funcionalidades colaborativas en tiempo real (Web, Minor): no hay ninguna funcionalidad del proyecto que se preste a edición compartida en vivo.
 - SSR (Web, Minor): habría exigido una reestructuración arquitectónica grande para un beneficio marginal en este proyecto.
 - Búsqueda avanzada (Web, Minor): no se identificó ningún caso de uso lo bastante genuino como para justificarla por sí sola.
+- Estadísticas de juego e historial de partidas (User Management, Minor): no existe ningún módulo de juego en el proyecto.
 
+## Huecos abiertos más relevantes de cara a la defensa
+
+1. WCAG 2.1 AA — el Major con más peso pendiente en Accessibility/i18n; requiere una auditoría real de navegación por teclado, ARIA, y lector de pantalla (más allá del contraste de color, ya verificado).
+2. Organizaciones (User Management, Major, 2 puntos) — no se ha empezado.
+3. Compatibilidad con navegadores adicionales — pendiente de pruebas reales en Firefox/Safari/Edge.
