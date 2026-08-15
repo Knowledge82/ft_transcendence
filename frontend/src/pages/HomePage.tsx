@@ -149,6 +149,7 @@ export function HomePage() {
               disabled={isUploadingAvatar}
               className="absolute bottom-0 end-0 w-7 h-7 rounded-full bg-gold-500 text-gold-on text-xs flex items-center justify-center hover:bg-gold-400 disabled:opacity-50"
               title={t('home.changeAvatar')}
+              aria-label={t('home.changeAvatar')}
             >
               ✎
             </button>
@@ -157,6 +158,7 @@ export function HomePage() {
                 onClick={handleRemoveAvatar}
                 className="absolute bottom-0 start-0 w-7 h-7 rounded-full bg-ink-900 border border-error-500 text-error-500 text-xs flex items-center justify-center hover:bg-error-500/10"
                 title={t('home.removeAvatar')}
+                aria-label={t('home.removeAvatar')}
               >
                 ✕
               </button>

@@ -429,13 +429,18 @@ export function ChatPage() {
               >
                 {friend.displayName ?? userFallback(friend.id)}
               </Link>
-              <IconButton onClick={() => openDirectConversation(friend)} title={t('chat.sendMessage')}>
+              <IconButton
+                onClick={() => openDirectConversation(friend)}
+                title={t('chat.sendMessage')}
+                aria-label={t('chat.sendMessage')}
+              >
                 ✉
               </IconButton>
               <IconButton
                 tone="danger"
                 onClick={() => handleRemoveFriend(friend.id)}
                 title={t('chat.removeFriend')}
+                aria-label={t('chat.removeFriend')}
               >
                 ✕
               </IconButton>
@@ -521,6 +526,7 @@ export function ChatPage() {
                     <button
                       onClick={() => handleDeleteMessage(message.id)}
                       title={t('chat.flagHeresy')}
+                      aria-label={t('chat.flagHeresy')}
                       className={`absolute -top-2 ${
                         isOwn ? '-start-2' : '-end-2'
                       } w-5 h-5 rounded-full bg-ink-950 border border-ink-800 text-error-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center`}
@@ -580,6 +586,7 @@ export function ChatPage() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 title={t('chat.attachFile')}
+                aria-label={t('chat.attachFile')}
                 className="text-cream-400 hover:text-gold-500 transition-colors px-2"
               >
                 📎
