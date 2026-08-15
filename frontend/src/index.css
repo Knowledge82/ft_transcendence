@@ -19,6 +19,19 @@ body {
   margin: 0;
 }
 
+/* Global, theme-consistent keyboard focus indicator — required for WCAG
+   2.4.7 (Focus Visible). Uses :focus-visible instead of :focus so it only
+   appears for keyboard navigation (Tab), not on mouse clicks — avoids the
+   common complaint of "ugly ring on every click" while still guaranteeing
+   every focusable element has a clearly visible indicator when tabbing.
+   Applies globally, to every interactive element, without needing to
+   touch each component individually. */
+:focus-visible {
+  outline: 2px solid var(--color-gold-500);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 @keyframes pulse-glow {
   0%, 100% {
     box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.5);

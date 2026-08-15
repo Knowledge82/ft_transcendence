@@ -200,12 +200,14 @@ export function HomePage() {
               {nameError && <p className="text-xs text-error-500 mt-1">{nameError}</p>}
             </form>
           ) : (
-            <h1
-              onClick={() => setIsEditingName(true)}
-              className="text-2xl font-semibold text-gold-500 mb-1 cursor-pointer hover:underline"
-              title={t('home.editNameHint')}
-            >
-              {profile.displayName ?? t('home.noName')}
+            <h1 className="text-2xl font-semibold mb-1">
+              <button
+                onClick={() => setIsEditingName(true)}
+                className="bg-transparent border-0 p-0 text-2xl font-semibold text-gold-500 cursor-pointer hover:underline"
+                title={t('home.editNameHint')}
+              >
+                {profile.displayName ?? t('home.noName')}
+              </button>
             </h1>
           )}
 
