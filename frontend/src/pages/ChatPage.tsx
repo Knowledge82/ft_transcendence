@@ -327,7 +327,7 @@ export function ChatPage() {
         <div>
           <LanguageSwitcher />
         </div>
-        <span className="text-sm text-gold-500 font-medium text-center">{headerLabel}</span>
+        <h1 className="text-sm text-gold-500 font-medium text-center">{headerLabel}</h1>
         <span className="text-sm text-cream-400 text-end">
           {t('chat.loggedInAs')}{' '}
           <span className="text-gold-500 font-medium">
@@ -423,12 +423,9 @@ export function ChatPage() {
               className="flex items-center gap-2 px-3 py-2 rounded-md mb-1 hover:bg-ink-800 transition-colors"
             >
               <StatusDot isOnline={friend.isOnline} />
-              <Link
-                to={`/perfil/${friend.id}`}
-                className="flex-1 text-start text-sm text-cream-100 truncate hover:underline"
-              >
+              <span className="flex-1 text-start text-sm text-cream-100 truncate">
                 {friend.displayName ?? userFallback(friend.id)}
-              </Link>
+              </span>
               <IconButton
                 onClick={() => openDirectConversation(friend)}
                 title={t('chat.sendMessage')}
@@ -533,7 +530,7 @@ export function ChatPage() {
                       aria-label={t('chat.flagHeresy')}
                       className={`absolute -top-2 ${
                         isOwn ? '-start-2' : '-end-2'
-                      } w-5 h-5 rounded-full bg-ink-950 border border-ink-800 text-error-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center`}
+                      } w-11 h-11 rounded-full bg-ink-950 border border-ink-800 text-error-500 text-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center`}
                     >
                       ✕
                     </button>
@@ -591,7 +588,7 @@ export function ChatPage() {
                 onClick={() => fileInputRef.current?.click()}
                 title={t('chat.attachFile')}
                 aria-label={t('chat.attachFile')}
-                className="text-cream-400 hover:text-gold-500 transition-colors px-2"
+                className="text-cream-400 hover:text-gold-500 transition-colors inline-flex items-center justify-center min-w-[44px] min-h-[44px]"
               >
                 📎
               </button>

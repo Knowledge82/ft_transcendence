@@ -133,6 +133,12 @@ export function HomePage() {
 
   return (
     <PageContainer className="flex flex-col">
+      {/* Visually hidden — the true page-level heading, placed before
+          any other heading in DOM order (WCAG 2.4.6 / 1.3.1). The
+          visible profile-name heading below is demoted to h2, since it
+          now correctly sits as a sibling section alongside the ticker
+          and library widgets, not the page's top-level heading. */}
+      <h1 className="sr-only">{t('home.pageTitle')}</h1>
       <div className="flex-1 px-4 py-10">
         <div className="max-w-md mx-auto">
           <div className="flex justify-between items-center mb-2">
@@ -142,12 +148,12 @@ export function HomePage() {
           <ActivityTicker />
           <RandomArticles />
           <Card className="text-center">
-          <div className="relative w-24 h-24 mx-auto mb-4">
-            <Avatar avatarUrl={profile.avatarUrl} fallbackText={profile.displayName ?? profile.email} size={96} />
+          <div className="relative w-36 h-36 mx-auto mb-4">
+            <Avatar avatarUrl={profile.avatarUrl} fallbackText={profile.displayName ?? profile.email} size={144} />
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingAvatar}
-              className="absolute bottom-0 end-0 w-7 h-7 rounded-full bg-gold-500 text-gold-on text-xs flex items-center justify-center hover:bg-gold-400 disabled:opacity-50"
+              className="absolute bottom-0 end-0 w-11 h-11 rounded-full bg-gold-500 text-gold-on text-sm flex items-center justify-center hover:bg-gold-400 disabled:opacity-50"
               title={t('home.changeAvatar')}
               aria-label={t('home.changeAvatar')}
             >
@@ -156,7 +162,7 @@ export function HomePage() {
             {profile.avatarUrl && !isUploadingAvatar && (
               <button
                 onClick={handleRemoveAvatar}
-                className="absolute bottom-0 start-0 w-7 h-7 rounded-full bg-ink-900 border border-error-500 text-error-500 text-xs flex items-center justify-center hover:bg-error-500/10"
+                className="absolute bottom-0 start-0 w-11 h-11 rounded-full bg-ink-900 border border-error-500 text-error-500 text-sm flex items-center justify-center hover:bg-error-500/10"
                 title={t('home.removeAvatar')}
                 aria-label={t('home.removeAvatar')}
               >
@@ -202,7 +208,7 @@ export function HomePage() {
               {nameError && <p role="alert" className="text-xs text-error-500 mt-1">{nameError}</p>}
             </form>
           ) : (
-            <h1 className="text-2xl font-semibold mb-1">
+            <h2 className="text-2xl font-semibold mb-1">
               <button
                 onClick={() => setIsEditingName(true)}
                 className="bg-transparent border-0 p-0 text-2xl font-semibold text-gold-500 cursor-pointer hover:underline"
@@ -210,7 +216,7 @@ export function HomePage() {
               >
                 {profile.displayName ?? t('home.noName')}
               </button>
-            </h1>
+            </h2>
           )}
 
           <p className="text-sm text-cream-400 mb-2">{profile.email}</p>

@@ -111,7 +111,7 @@ export function LandingPage() {
             {TITLE.slice(0, visibleChars)}
           </h1>
         </div>
-        <p className="absolute bottom-12 left-0 right-0 text-center text-sm uppercase tracking-widest text-cream-400 animate-pulse">
+        <p className="absolute bottom-12 left-0 right-0 text-center text-sm uppercase tracking-widest text-cream-400 animate-text-pulse-safe">
           {t('landing.loading')}
         </p>
       </div>

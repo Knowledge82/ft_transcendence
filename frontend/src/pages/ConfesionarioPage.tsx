@@ -125,7 +125,7 @@ export function ConfesionarioPage() {
             </p>
             <p className="text-cream-100 leading-relaxed whitespace-pre-wrap">
               {visibleResponse}
-              {isStreaming && <span className="animate-pulse">▌</span>}
+              {isStreaming && <span className="animate-text-pulse-safe">▌</span>}
             </p>
           </Card>
         )}

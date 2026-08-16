@@ -12,7 +12,7 @@ export function BackLink({ to, label, className = '' }: BackLinkProps) {
   return (
     <Link
       to={to}
-      className={`text-sm text-gold-500 hover:text-gold-400 inline-flex items-center gap-1 ${className}`}
+      className={`text-base text-gold-500 hover:text-gold-400 inline-flex items-center gap-1 ${className}`}
     >
       {/* The arrow is rendered separately from the translated text, and
           flipped via CSS (not baked into any translation string) — this
