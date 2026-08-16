@@ -129,7 +129,7 @@ export function NewArticlePage() {
             </div>
 
             {error && (
-              <div className="bg-ink-950 border border-error-500 rounded-md p-3">
+              <div role="alert" className="bg-ink-950 border border-error-500 rounded-md p-3">
                 <p className="text-sm text-error-500">🔥 {error}</p>
               </div>
             )}

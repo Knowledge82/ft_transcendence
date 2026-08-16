@@ -113,7 +113,7 @@ export function ConfesionarioPage() {
         </form>
 
         {error && (
-          <div className="mt-6 bg-ink-900 border border-error-500 rounded-lg p-4">
+          <div role="alert" className="mt-6 bg-ink-900 border border-error-500 rounded-lg p-4">
             <p className="text-error-500 text-sm">{error}</p>
           </div>
         )}

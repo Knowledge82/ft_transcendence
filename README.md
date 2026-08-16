@@ -412,7 +412,14 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [+ RTL support](./docs/docs-rtl-mirroring.md)
 
+
+### WCAG 2.1 AA
+
 [WCAG AA: keyboard navigation](./docs/WCAG-AA-keyboard-navigation.md)
+[WCAG AA: aria-labels](./docs/WCAG-AA-aria-labels.md)
+[WCAG AA: aria-live](./docs/WCAG-AA-aria-live.md)
+
+
 
 ## 5. Verificación end-to-end
 

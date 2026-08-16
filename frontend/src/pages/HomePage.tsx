@@ -172,7 +172,7 @@ export function HomePage() {
             />
           </div>
           {isUploadingAvatar && <p className="text-xs text-cream-400 mb-2">{t('home.uploading')}</p>}
-          {avatarError && <p className="text-xs text-error-500 mb-2">{avatarError}</p>}
+          {avatarError && <p role="alert" className="text-xs text-error-500 mb-2">{avatarError}</p>}
 
           {isEditingName ? (
             <form onSubmit={handleSaveName} className="mb-2">
@@ -199,7 +199,7 @@ export function HomePage() {
                   {t('common.cancel')}
                 </button>
               </div>
-              {nameError && <p className="text-xs text-error-500 mt-1">{nameError}</p>}
+              {nameError && <p role="alert" className="text-xs text-error-500 mt-1">{nameError}</p>}
             </form>
           ) : (
             <h1 className="text-2xl font-semibold mb-1">

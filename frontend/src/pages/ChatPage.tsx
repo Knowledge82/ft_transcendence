@@ -450,7 +450,11 @@ export function ChatPage() {
       </aside>
 
       <main className="flex-1 flex flex-col">
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div
+          className="flex-1 overflow-y-auto p-4 space-y-3"
+          aria-live="polite"
+          aria-relevant="additions"
+        >
           {messages.map((message) => {
             const isOwn = message.senderId === ownUserId;
             const isDeleted = message.deletedAt !== null;
@@ -542,7 +546,7 @@ export function ChatPage() {
         </div>
 
         {uploadError && (
-          <div className="px-4 pt-3">
+          <div role="alert" className="px-4 pt-3">
             <p className="text-sm text-error-500">{uploadError}</p>
           </div>
         )}

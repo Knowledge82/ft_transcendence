@@ -101,6 +101,12 @@ export function NotificationBell() {
 
   return (
     <div className="relative" ref={panelRef}>
+      {/* Visually hidden, but announced by screen readers whenever the
+          unread count changes — the badge itself is purely visual and
+          wouldn't otherwise be noticed without manually re-checking it */}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {unreadCount > 0 ? `${unreadCount} ${t('notifications.title')}` : ''}
+      </span>
       <button
         onClick={() => setIsOpen((prev) => !prev)}
         className={`relative text-xl transition-colors ${

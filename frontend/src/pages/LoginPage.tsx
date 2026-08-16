@@ -94,7 +94,7 @@ export function LoginPage() {
           </div>
 
           {submitError && (
-            <p className="text-sm text-error-500 text-center">{submitError}</p>
+            <p role="alert" className="text-sm text-error-500 text-center">{submitError}</p>
           )}
 
           <Button type="submit" disabled={isSubmitting} className="w-full">
