@@ -418,6 +418,7 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 [WCAG AA: keyboard navigation](./docs/WCAG-AA-keyboard-navigation.md)
 [WCAG AA: aria-labels](./docs/WCAG-AA-aria-labels.md)
 [WCAG AA: aria-live](./docs/WCAG-AA-aria-live.md)
+[WCAG AA: alt text](./docs/WCAG-AA-alt-text.md)
 
 
 

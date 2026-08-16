@@ -7,13 +7,13 @@ interface AvatarProps {
 // No more letter-in-a-circle fallback — every user gets a real default
 // avatar image whenever avatarUrl is null (either they never uploaded
 // one, or they used "Eliminar avatar" to go back to the default).
-export function Avatar({ avatarUrl, size = 96 }: AvatarProps) {
+export function Avatar({ avatarUrl, fallbackText, size = 96 }: AvatarProps) {
   const style = { width: size, height: size };
 
   return (
     <img
       src={avatarUrl ?? '/default-avatar.png'}
-      alt="Avatar"
+      alt={fallbackText}
       style={style}
       className="rounded-full object-cover border-2 border-gold-500"
     />
