@@ -323,7 +323,7 @@ export function ChatPage() {
 
   return (
     <PageContainer className="flex flex-col" showFrame={false}>
-      <header className="grid grid-cols-3 items-center px-4 py-2 bg-ink-900 border-b border-ink-800">
+      <header className="grid grid-cols-3 items-center px-4 py-2 bg-ink-900 border-b border-border-default">
         <div>
           <LanguageSwitcher />
         </div>
@@ -337,8 +337,8 @@ export function ChatPage() {
       </header>
 
       <div className="flex flex-1">
-      <aside className="w-64 bg-ink-900 border-e border-ink-800 flex flex-col">
-        <div className="p-4 border-b border-ink-800">
+      <aside className="w-64 bg-ink-900 border-e border-border-default flex flex-col">
+        <div className="p-4 border-b border-border-default">
           <BackLink to={ROUTES.HOME} />
         </div>
 
@@ -359,7 +359,7 @@ export function ChatPage() {
         </div>
 
         {directConversations.length > 0 && (
-          <div className="p-4 border-t border-ink-800">
+          <div className="p-4 border-t border-border-default">
             <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">
               {t('chat.conversations')}
             </h2>
@@ -384,7 +384,7 @@ export function ChatPage() {
         )}
 
         {pendingRequests.length > 0 && (
-          <div className="p-4 border-t border-ink-800">
+          <div className="p-4 border-t border-border-default">
             <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">
               {t('chat.pendingRequests')}
             </h2>
@@ -463,7 +463,7 @@ export function ChatPage() {
                 <div
                   className={`max-w-xs rounded-lg px-3 py-2 relative ${
                     isDeleted
-                      ? 'bg-ink-950 border border-ink-800 text-cream-400 italic'
+                      ? 'bg-ink-950 border border-border-default text-cream-400 italic'
                       : isOwn
                       ? 'bg-gold-500 text-gold-on'
                       : 'bg-ink-900 text-cream-100'
@@ -530,7 +530,7 @@ export function ChatPage() {
                       aria-label={t('chat.flagHeresy')}
                       className={`absolute -top-2 ${
                         isOwn ? '-start-2' : '-end-2'
-                      } w-11 h-11 rounded-full bg-ink-950 border border-ink-800 text-error-500 text-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center`}
+                      } w-11 h-11 rounded-full bg-ink-950 border border-border-default text-error-500 text-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center`}
                     >
                       ✕
                     </button>
@@ -550,7 +550,7 @@ export function ChatPage() {
 
         {pendingAttachment && (
           <div className="px-4 pt-3 flex items-center gap-2 text-sm text-cream-100">
-            <span className="bg-ink-900 border border-ink-800 rounded-md px-2 py-1 truncate max-w-xs">
+            <span className="bg-ink-900 border border-border-default rounded-md px-2 py-1 truncate max-w-xs">
               📎 {pendingAttachment.name}
             </span>
             <button
@@ -573,7 +573,7 @@ export function ChatPage() {
           </div>
         )}
 
-        <form onSubmit={handleSend} className="p-4 border-t border-ink-800 flex gap-2">
+        <form onSubmit={handleSend} className="p-4 border-t border-border-default flex gap-2">
           {!isGeneralChannelSelected && (
             <>
               <input
@@ -605,7 +605,7 @@ export function ChatPage() {
         </form>
       </main>
 
-      <aside className="w-56 bg-ink-900 border-s border-ink-800 p-4 overflow-y-auto">
+      <aside className="w-56 bg-ink-900 border-s border-border-default p-4 overflow-y-auto">
         <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">
           {t('chat.membersHeader', {
             online: members.filter((m) => m.isOnline).length,

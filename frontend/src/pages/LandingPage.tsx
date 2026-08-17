@@ -66,7 +66,7 @@ export function LandingPage() {
     </p>,
     <pre
       key="p3"
-      className="bg-ink-900 border border-ink-800 rounded-lg p-4 text-cream-400 text-sm overflow-x-auto"
+      className="bg-ink-900 border border-border-default rounded-lg p-4 text-cream-400 text-sm overflow-x-auto"
       dir="ltr"
     >
       make: Nothing to be done for 'all'.

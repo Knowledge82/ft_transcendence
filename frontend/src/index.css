@@ -5,6 +5,14 @@
   --color-ink-900: #17151d;
   --color-ink-800: #2a2732;
 
+  /* Same hue family as ink-800, but lightened specifically to clear the
+     3:1 non-text contrast threshold (WCAG 1.4.11) against both ink-950
+     and ink-900 backgrounds — ink-800 itself measured at only ~1.3:1
+     against those, meaning borders/outlines built from it were nearly
+     invisible, not just "subtle". Use this for any border/outline that
+     needs to be genuinely visible; keep ink-800 for backgrounds/fills. */
+  --color-border-default: #726b8a;
+
   --color-gold-400: #e8c766;
   --color-gold-500: #d4af37;
   --color-gold-on: #2c2205;

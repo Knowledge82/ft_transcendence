@@ -1,6 +1,7 @@
 {
   "common": {
     "back": "Volver",
+    "skipToContent": "Saltar al contenido principal",
     "loading": "Cargando...",
     "cancel": "Cancelar",
     "save": "Guardar",

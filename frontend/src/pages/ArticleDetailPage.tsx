@@ -90,7 +90,7 @@ export function ArticleDetailPage() {
         <Card className="mt-6">
           <h1 className="text-2xl font-semibold text-gold-500 mb-4">{article.title}</h1>
 
-          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-ink-800">
+          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-border-default">
             <Avatar
               avatarUrl={article.author.avatarUrl}
               fallbackText={article.author.displayName ?? '?'}

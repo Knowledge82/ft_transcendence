@@ -424,6 +424,7 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 - [WCAG AA: alt text](./docs/WCAG-AA-alt-text.md)
 
+- [WCAG AA: summary](./docs/WCAG-AA-summary.md)
 
 
 ## 5. Verificación end-to-end

@@ -31,11 +31,11 @@
 
 | Requisito | Estado | Puntos |
 |---|---|---|
-| Major: Cumplimiento WCAG 2.1 AA completo | ⏳ (solo verificado el contraste de color matemáticamente; falta auditoría real de teclado/ARIA/lector de pantalla) | 0 |
+| Major: Cumplimiento WCAG 2.1 AA completo | ✅ (auditoría completa: teclado/foco, ARIA, regiones en vivo, alt, jerarquía de encabezados, contraste de texto y no textual, tamaño de zonas táctiles, autocomplete, enlace de salto — verificado con Lighthouse) | 2 |
 | Minor: Soporte multi-idioma (3+ idiomas, i18n, selector) | ✅ (español/inglés/árabe — interfaz completa, crónica pública, notificaciones, códigos de error, y respuestas de la IA generadas en el idioma activo) | 1 |
 | Minor: Soporte RTL | ✅ (espejado completo auditado en todas las páginas y componentes — propiedades lógicas de CSS, excepciones documentadas para controles de utilidad persistentes y contenido no localizable) | 1 |
-| Minor: Compatibilidad con navegadores adicionales | ⏳ (sin probar aún en Firefox/Safari/Edge) | 0 |
-| Subtotal Accessibility/i18n | | 2 |
+| Minor: Compatibilidad con navegadores adicionales | ⏳ (Firefox probado y verificado sin problemas; Safari y Edge pendientes) | 0 |
+| Subtotal Accessibility/i18n | | 4 |
 
 ---
 
@@ -75,10 +75,10 @@
 | Módulo | Puntos conseguidos |
 |---|---|
 | Web | 11 |
-| Accessibility/i18n | 2 |
+| Accessibility/i18n | 4 |
 | User Management | 4 |
 | Artificial Intelligence | 3 |
-| Total | 20 |
+| Total | 22 |
 
 ## Decisiones conscientes de no implementar (🚫)
 
@@ -90,6 +90,6 @@
 
 ## Huecos abiertos más relevantes de cara a la defensa
 
-1. WCAG 2.1 AA — el Major con más peso pendiente en Accessibility/i18n; requiere una auditoría real de navegación por teclado, ARIA, y lector de pantalla (más allá del contraste de color, ya verificado).
-2. Organizaciones (User Management, Major, 2 puntos) — no se ha empezado.
-3. Compatibilidad con navegadores adicionales — pendiente de pruebas reales en Firefox/Safari/Edge.
+1. Organizaciones (User Management, Major, 2 puntos) — no se ha empezado.
+2. Compatibilidad con navegadores adicionales — Firefox ya verificado; falta Safari y Edge.
+3. Resize/Reflow (dentro de WCAG, pero pospuesto deliberadamente) — se abordará junto con el diseño responsive del proyecto.

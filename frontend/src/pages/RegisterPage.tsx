@@ -164,7 +164,7 @@ export function RegisterPage() {
             <span className="block text-sm font-medium text-cream-400 mb-1">
               {t('register.gender')}
             </span>
-            <div className="inline-flex w-full rounded-full border border-ink-800 bg-ink-950 p-1">
+            <div className="inline-flex w-full rounded-full border border-border-default bg-ink-950 p-1">
               <label
                 className={`flex-1 text-center py-1.5 rounded-full cursor-pointer transition-all duration-200 text-sm focus-within:outline focus-within:outline-2 focus-within:outline-gold-500 focus-within:outline-offset-2 ${
                   gender === 'MASCULINO'

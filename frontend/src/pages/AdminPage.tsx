@@ -65,10 +65,10 @@ export function AdminPage() {
           {t('admin.title')}
         </h1>
 
-        <div className="bg-ink-900 border border-ink-800 rounded-xl overflow-hidden">
+        <div className="bg-ink-900 border border-border-default rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-ink-800 text-cream-400 text-start">
+              <tr className="border-b border-border-default text-cream-400 text-start">
                 <th className="px-4 py-3">{t('admin.user')}</th>
                 <th className="px-4 py-3">{t('admin.email')}</th>
                 <th className="px-4 py-3">{t('admin.rank')}</th>
@@ -77,7 +77,7 @@ export function AdminPage() {
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user.id} className="border-b border-ink-800 last:border-0">
+                <tr key={user.id} className="border-b border-border-default last:border-0">
                   <td className="px-4 py-3 text-cream-100">
                     {user.displayName ?? `${t('common.user')} ${user.id}`}
                   </td>
@@ -86,7 +86,7 @@ export function AdminPage() {
                     <select
                       value={user.role}
                       onChange={(e) => handleRoleChange(user.id, e.target.value as Role)}
-                      className="bg-ink-950 border border-ink-800 rounded-md px-2 py-1 text-cream-100 focus:outline-none focus:ring-2 focus:ring-gold-500"
+                      className="bg-ink-950 border border-border-default rounded-md px-2 py-1 text-cream-100 focus:outline-none focus:ring-2 focus:ring-gold-500"
                     >
                       {ROLES.map((role) => (
                         <option key={role} value={role}>
