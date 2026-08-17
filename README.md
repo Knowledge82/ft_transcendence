@@ -442,7 +442,7 @@ Todo el ciclo se probó manualmente con `curl` (con flags `-k` para el certifica
 ---
 
 ## 6. Estado actual y los puntos acumulados.
-[Estado actualizado para 15.07.26](./docs/estado-actualizado.md)
+[Estado actualizado para 17.07.26](./docs/estado-actualizado.md)
 
 ## 7. Deudas.
 [CommunityEvent. LLM and DB](./docs/docs-deuda-community-event.md)
