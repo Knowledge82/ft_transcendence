@@ -60,6 +60,8 @@
   },
   "chat": {
     "generalChannel": "الفصل",
+    "arzobispoOnline": "دخل **{{name}}** الفصل.",
+    "arzobispoOffline": "غادر **{{name}}** الفصل.",
     "loggedInAs": "متصل باسم",
     "channels": "القنوات",
     "conversations": "المحادثات",

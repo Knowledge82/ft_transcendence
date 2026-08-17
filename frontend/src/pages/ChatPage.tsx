@@ -12,6 +12,23 @@ import { ROUTES } from '../routes';
 import { getGenderedRole } from '../utils/genderedRole';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
+// Same parsing used in ActivityTicker/NotificationBell — turns
+// **name** markers into bold gold spans, for the ephemeral system
+// announcements rendered inline in the general channel
+function renderMessage(message: string) {
+  const parts = message.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return (
+        <span key={i} className="text-gold-500 font-semibold">
+          {part.slice(2, -2)}
+        </span>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
 export function ChatPage() {
   const { t, i18n } = useTranslation();
   const { socket } = useSocket();
@@ -31,6 +48,9 @@ export function ChatPage() {
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [systemAnnouncements, setSystemAnnouncements] = useState<{ id: string; text: string }[]>(
+    [],
+  );
   const [draft, setDraft] = useState('');
   const [ownUserId, setOwnUserId] = useState<number | null>(null);
   const [ownDisplayName, setOwnDisplayName] = useState<string | null>(null);
@@ -183,12 +203,23 @@ export function ChatPage() {
       setMessages((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
     }
 
+    // Kept as a separate, lightweight array — not merged into `messages`
+    // itself, since these are purely live/ephemeral (never part of
+    // message history) and don't share its shape (no sender, no id from
+    // the database, etc.)
+    function handleArzobispoPresence(data: { name: string; isOnline: boolean }) {
+      const key = data.isOnline ? 'chat.arzobispoOnline' : 'chat.arzobispoOffline';
+      const text = t(key, { name: data.name });
+      setSystemAnnouncements((prev) => [...prev, { id: `${Date.now()}-${Math.random()}`, text }]);
+    }
+
     socket.on('newMessage', handleNewMessage);
     socket.on('userStatusChanged', handleStatusChanged);
     socket.on('memberJoined', handleMemberJoined);
     socket.on('friendRequestReceived', handleFriendRequestReceived);
     socket.on('friendRequestAccepted', handleFriendRequestAccepted);
     socket.on('messageUpdated', handleMessageUpdated);
+    socket.on('arzobispoPresenceChanged', handleArzobispoPresence);
 
     return () => {
       socket.off('newMessage', handleNewMessage);
@@ -197,6 +228,7 @@ export function ChatPage() {
       socket.off('friendRequestReceived', handleFriendRequestReceived);
       socket.off('friendRequestAccepted', handleFriendRequestAccepted);
       socket.off('messageUpdated', handleMessageUpdated);
+      socket.off('arzobispoPresenceChanged', handleArzobispoPresence);
     };
   }, [socket, selectedConversationId]);
 
@@ -539,6 +571,12 @@ export function ChatPage() {
               </div>
             );
           })}
+          {!activeDmTarget &&
+            systemAnnouncements.map((announcement) => (
+              <p key={announcement.id} className="text-center text-xs text-cream-400 italic py-1">
+                {renderMessage(announcement.text)}
+              </p>
+            ))}
           <div ref={bottomRef} />
         </div>
 

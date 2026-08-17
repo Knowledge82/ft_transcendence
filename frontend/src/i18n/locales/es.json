@@ -60,6 +60,8 @@
   },
   "chat": {
     "generalChannel": "Capítulo",
+    "arzobispoOnline": "**{{name}}** ha entrado en el Capítulo.",
+    "arzobispoOffline": "**{{name}}** ha abandonado el Capítulo.",
     "loggedInAs": "Conectado como",
     "channels": "Canales",
     "conversations": "Conversaciones",
