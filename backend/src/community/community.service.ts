@@ -17,6 +17,7 @@ const TEMPLATE_POOL_SIZES: Record<string, number> = {
   ARTICLE_EDITED: 2,
   ARTICLE_DELETED: 2,
   FICTIONAL_STATIC: 26,
+  USER_EXECUTED: 3,
 };
 
 function randomIndex(type: string): number {
@@ -147,6 +148,16 @@ export class CommunityService implements OnModuleInit {
 
   async createStaticFictionalEvent() {
     return this.createEvent('FICTIONAL_STATIC', randomIndex('FICTIONAL_STATIC'), {});
+  }
+
+  // Fired when a user is deleted (Option C from our design discussion):
+  // the account and all its content are genuinely gone — no tombstone
+  // profile, no preserved messages/articles — but the FACT that it
+  // happened is preserved publicly in the chronicle, the same way an
+  // auto-da-fé was a public spectacle meant to be remembered, even
+  // though the condemned themselves left nothing behind.
+  async createUserExecutedEvent(name: string) {
+    return this.createEvent('USER_EXECUTED', randomIndex('USER_EXECUTED'), { name });
   }
 
   private async generateAiFictionalEvent() {

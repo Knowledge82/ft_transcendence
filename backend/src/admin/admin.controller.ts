@@ -52,6 +52,8 @@ export class AdminController {
 
   @Delete('users/:id')
   async deleteUser(@Param('id', ParseIntPipe) id: number) {
-    await this.adminService.deleteUser(id);
+    const deleted = await this.adminService.deleteUser(id);
+    const name = deleted.displayName ?? `Usuario ${deleted.id}`;
+    await this.communityService.createUserExecutedEvent(name);
   }
 }

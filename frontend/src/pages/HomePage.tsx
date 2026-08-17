@@ -184,6 +184,7 @@ export function HomePage() {
             <form onSubmit={handleSaveName} className="mb-2">
               <Input
                 type="text"
+                autoComplete="nickname"
                 value={nameDraft}
                 onChange={(e) => setNameDraft(e.target.value)}
                 autoFocus

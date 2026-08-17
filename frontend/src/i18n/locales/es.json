@@ -33,6 +33,7 @@
     "ctaLogin": "Ya soy hermano — iniciar sesión"
   },
   "home": {
+    "pageTitle": "Tu Celda",
     "friends": "Amigos",
     "online": "En línea",
     "goToChat": "Ir al chat",
@@ -86,10 +87,12 @@
   "register": {
     "title": "Registro",
     "name": "Nombre",
-    "gender": "Género",
+    "gender": "Soy",
     "genderRequired": "Debes elegir Hermano o Hermana",
     "hermano": "Hermano",
     "hermana": "Hermana",
+    "emailTaken": "Ya existe una cuenta con este email.",
+    "nameTaken": "Ese nombre ya está en uso. Prueba con uno de estos, o elige otro:",
     "submitting": "Enviando...",
     "submit": "Registrarse",
     "hasAccount": "¿Ya tienes cuenta?",
@@ -238,6 +241,11 @@
       "23": "Un hermano fue sorprendido comentando código en inglés y hablando de él en español. Se le perdonó.",
       "24": "El Capítulo adquirió una réplica exacta del primer terminal que mostró \"Segmentation fault (core dumped)\".",
       "25": "Se debate si escribir `make clean && make` antes de dormir cuenta como oración nocturna."
+    },
+    "userExecuted": {
+      "0": "**{{name}}** ha sido juzgado y ejecutado por herejía.",
+      "1": "El Capítulo ha purgado a **{{name}}** de sus filas. Que esto sirva de advertencia.",
+      "2": "**{{name}}** arde en la hoguera por sus pecados contra el Makefile."
     }
   },
   "notifications": {

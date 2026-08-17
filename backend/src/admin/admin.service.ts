@@ -45,5 +45,6 @@ export class AdminService {
       throw new NotFoundException('Usuario no encontrado');
     }
     await this.prisma.user.delete({ where: { id: userId } });
+    return user;
   }
 }

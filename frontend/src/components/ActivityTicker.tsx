@@ -20,6 +20,7 @@ const TYPE_TO_NAMESPACE: Record<string, string> = {
   ARTICLE_EDITED: 'articleEdited',
   ARTICLE_DELETED: 'articleDeleted',
   FICTIONAL_STATIC: 'fictionalStatic',
+  USER_EXECUTED: 'userExecuted',
 };
 
 function shuffle<T>(items: T[]): T[] {

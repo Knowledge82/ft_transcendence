@@ -16,6 +16,11 @@ interface FieldErrors {
   gender?: string;
 }
 
+interface ApiErrorData {
+  code?: string;
+  suggestions?: string[];
+}
+
 export function RegisterPage() {
   const { t } = useTranslation();
 
@@ -24,6 +29,7 @@ export function RegisterPage() {
   const [displayName, setDisplayName] = useState('');
   const [gender, setGender] = useState<Gender | ''>('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -41,9 +47,23 @@ export function RegisterPage() {
     return Object.values(errors).every((error) => error === undefined);
   }
 
+  function handleNameChange(value: string) {
+    setDisplayName(value);
+    if (nameSuggestions.length > 0) {
+      setNameSuggestions([]);
+    }
+  }
+
+  function applySuggestion(name: string) {
+    setDisplayName(name);
+    setNameSuggestions([]);
+    setFieldErrors((prev) => ({ ...prev, displayName: undefined }));
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setSubmitError(null);
+    setNameSuggestions([]);
 
     if (!validate() || !gender) {
       return;
@@ -54,7 +74,16 @@ export function RegisterPage() {
       await register(email, password, displayName, gender);
       navigate(ROUTES.HOME);
     } catch (err) {
-      setSubmitError(t('register.submitError'));
+      const data = (err as { response?: { data?: ApiErrorData } })?.response?.data;
+
+      if (data?.code === 'DISPLAY_NAME_TAKEN') {
+        setFieldErrors((prev) => ({ ...prev, displayName: t('register.nameTaken') }));
+        setNameSuggestions(data.suggestions ?? []);
+      } else if (data?.code === 'EMAIL_TAKEN') {
+        setFieldErrors((prev) => ({ ...prev, email: t('register.emailTaken') }));
+      } else {
+        setSubmitError(t('register.submitError'));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -80,10 +109,25 @@ export function RegisterPage() {
             <Input
               id="displayName"
               type="text"
+              autoComplete="nickname"
               value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
             />
             <FieldError>{fieldErrors.displayName}</FieldError>
+            {nameSuggestions.length > 0 && (
+              <div className="flex justify-around w-full mt-2">
+                {nameSuggestions.map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => applySuggestion(name)}
+                    className="text-xs px-3 py-1 rounded-full border border-gold-500 text-gold-500 hover:bg-gold-500 hover:text-gold-on transition-colors"
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>
@@ -94,6 +138,7 @@ export function RegisterPage() {
               id="email"
               type="email"
               dir="ltr"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -108,6 +153,7 @@ export function RegisterPage() {
               id="password"
               type="password"
               dir="ltr"
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -120,7 +166,7 @@ export function RegisterPage() {
             </span>
             <div className="inline-flex w-full rounded-full border border-ink-800 bg-ink-950 p-1">
               <label
-                className={`flex-1 text-center py-1.5 rounded-full cursor-pointer transition-all duration-200 text-sm ${
+                className={`flex-1 text-center py-1.5 rounded-full cursor-pointer transition-all duration-200 text-sm focus-within:outline focus-within:outline-2 focus-within:outline-gold-500 focus-within:outline-offset-2 ${
                   gender === 'MASCULINO'
                     ? 'bg-gold-500 text-gold-on font-medium shadow-sm'
                     : 'text-cream-400 hover:text-cream-100'
@@ -137,7 +183,7 @@ export function RegisterPage() {
                 {t('register.hermano')}
               </label>
               <label
-                className={`flex-1 text-center py-1.5 rounded-full cursor-pointer transition-all duration-200 text-sm ${
+                className={`flex-1 text-center py-1.5 rounded-full cursor-pointer transition-all duration-200 text-sm focus-within:outline focus-within:outline-2 focus-within:outline-gold-500 focus-within:outline-offset-2 ${
                   gender === 'FEMENINO'
                     ? 'bg-gold-500 text-gold-on font-medium shadow-sm'
                     : 'text-cream-400 hover:text-cream-100'

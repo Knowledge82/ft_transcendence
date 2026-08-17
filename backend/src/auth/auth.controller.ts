@@ -4,6 +4,7 @@ import {
   Post,
   HttpCode,
   HttpStatus,
+  Headers,
   Res,
   Req,
 } from '@nestjs/common';
@@ -22,9 +23,10 @@ export class AuthController {
   @Post('register')
   async register(
     @Body() dto: RegisterDto,
+    @Headers('accept-language') language: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken } = await this.authService.register(dto);
+    const { accessToken, refreshToken } = await this.authService.register(dto, language);
     this.setRefreshCookie(res, refreshToken);
     return { accessToken };
   }

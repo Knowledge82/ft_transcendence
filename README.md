@@ -412,6 +412,7 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [+ RTL support](./docs/docs-rtl-mirroring.md)
 
+[+ Unique names, user delete](./docs/docs-unique-names-user-execution.md)
 
 ### WCAG 2.1 AA
 

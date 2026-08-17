@@ -33,6 +33,7 @@
     "ctaLogin": "I'm already a brother — log in"
   },
   "home": {
+    "pageTitle": "Your Cell",
     "friends": "Friends",
     "online": "Online",
     "goToChat": "Go to chat",
@@ -86,10 +87,12 @@
   "register": {
     "title": "Register",
     "name": "Name",
-    "gender": "Gender",
+    "gender": "I am",
     "genderRequired": "You must choose Brother or Sister",
     "hermano": "Brother",
     "hermana": "Sister",
+    "emailTaken": "An account with this email already exists.",
+    "nameTaken": "That name is already taken. Try one of these, or choose another:",
     "submitting": "Submitting...",
     "submit": "Sign up",
     "hasAccount": "Already have an account?",
@@ -238,6 +241,11 @@
       "23": "A brother was caught commenting code in English while discussing it in Spanish. He was forgiven.",
       "24": "The Chapter acquired an exact replica of the first terminal to display \"Segmentation fault (core dumped)\".",
       "25": "There's debate over whether typing `make clean && make` before bed counts as a night prayer."
+    },
+    "userExecuted": {
+      "0": "**{{name}}** has been tried and executed for heresy.",
+      "1": "The Chapter has purged **{{name}}** from its ranks. Let this serve as a warning.",
+      "2": "**{{name}}** burns at the stake for their sins against the Makefile."
     }
   },
   "notifications": {

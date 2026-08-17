@@ -10,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { CommunityService } from '../community/community.service';
+import { suggestAvailableNames } from './display-name-suggestions';
 
 const SALT_ROUNDS = 12;
 const ACCESS_TOKEN_TTL = '15m';
@@ -23,13 +24,22 @@ export class AuthService {
     private readonly communityService: CommunityService,
   ) {}
 
-  async register(dto: RegisterDto) {
+  async register(dto: RegisterDto, language?: string) {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
 
     if (existingUser) {
-      throw new ConflictException('Ya existe una cuenta con este email');
+      throw new ConflictException({ code: 'EMAIL_TAKEN' });
+    }
+
+    const existingName = await this.prisma.user.findFirst({
+      where: { displayName: { equals: dto.displayName, mode: 'insensitive' } },
+    });
+
+    if (existingName) {
+      const suggestions = await suggestAvailableNames(this.prisma, language, dto.gender);
+      throw new ConflictException({ code: 'DISPLAY_NAME_TAKEN', suggestions });
     }
 
     const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
