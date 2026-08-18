@@ -8,6 +8,7 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { ROUTES } from '../routes';
 import { getGenderedRole } from '../utils/genderedRole';
 import { useConfirm } from '../context/ConfirmContext';
+import { translateApiError } from '../utils/apiErrors';
 
 const ROLES: Role[] = ['HERMANO', 'INQUISIDOR', 'ARZOBISPO'];
 
@@ -17,29 +18,46 @@ export function AdminPage() {
   const [ownRole, setOwnRole] = useState<Role | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
-    apiClient.get<{ role: Role }>('/users/me').then(async (me) => {
+    apiClient.get<{ id: number; role: Role }>('/users/me').then(async (me) => {
       setOwnRole(me.data.role);
       if (me.data.role === 'ARZOBISPO') {
         const allUsers = await listAllUsers();
-        setUsers(allUsers);
+        // Never show your own row — you can't change your own role or
+        // delete your own account from here anyway (enforced on the
+        // backend), so an editable control for yourself would just be
+        // confusing, always-failing UI
+        setUsers(allUsers.filter((u) => u.id !== me.data.id));
       }
       setIsLoading(false);
     });
   }, []);
 
   async function handleRoleChange(userId: number, newRole: Role) {
-    const updated = await changeUserRole(userId, newRole);
-    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: updated.role } : u)));
+    setRoleChangeError(null);
+    try {
+      const updated = await changeUserRole(userId, newRole);
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: updated.role } : u)));
+    } catch (err) {
+      const data = (err as { response?: { data?: { code?: string } } })?.response?.data;
+      setActionError(translateApiError(data, t, t('admin.roleChangeError')));
+    }
   }
 
   async function handleDelete(userId: number) {
     if (!(await confirm(t('admin.confirmDelete')))) {
       return;
     }
-    await deleteUser(userId);
-    setUsers((prev) => prev.filter((u) => u.id !== userId));
+    setActionError(null);
+    try {
+      await deleteUser(userId);
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+    } catch (err) {
+      const data = (err as { response?: { data?: { code?: string } } })?.response?.data;
+      setActionError(translateApiError(data, t, t('admin.roleChangeError')));
+    }
   }
 
   if (isLoading) {
@@ -66,6 +84,12 @@ export function AdminPage() {
         <h1 className="text-3xl font-semibold text-gold-500 mt-4 mb-8">
           {t('admin.title')}
         </h1>
+
+        {actionError && (
+          <p role="alert" className="text-sm text-error-500 mb-4">
+            {actionError}
+          </p>
+        )}
 
         <div className="bg-ink-900 border border-border-default rounded-xl overflow-hidden">
           <table className="w-full text-sm">

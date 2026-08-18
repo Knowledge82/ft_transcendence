@@ -5,6 +5,7 @@ import {
   Delete,
   Param,
   Body,
+  Request,
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
@@ -33,8 +34,12 @@ export class AdminController {
   }
 
   @Patch('users/:id/role')
-  async changeRole(@Param('id', ParseIntPipe) id: number, @Body('role') role: string) {
-    const updated = await this.adminService.changeRole(id, role);
+  async changeRole(
+    @Request() req,
+    @Param('id', ParseIntPipe) id: number,
+    @Body('role') role: string,
+  ) {
+    const updated = await this.adminService.changeRole(req.user.userId, id, role);
     this.chatGateway.notifyUser(id, 'roleChanged', { role: updated.role });
 
     const name = updated.displayName ?? `Usuario ${updated.id}`;
@@ -51,8 +56,8 @@ export class AdminController {
   }
 
   @Delete('users/:id')
-  async deleteUser(@Param('id', ParseIntPipe) id: number) {
-    const deleted = await this.adminService.deleteUser(id);
+  async deleteUser(@Request() req, @Param('id', ParseIntPipe) id: number) {
+    const deleted = await this.adminService.deleteUser(req.user.userId, id);
     const name = deleted.displayName ?? `Usuario ${deleted.id}`;
     await this.communityService.createUserExecutedEvent(name);
   }

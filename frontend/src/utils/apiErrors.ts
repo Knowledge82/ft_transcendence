@@ -4,6 +4,8 @@ const CODE_TO_KEY: Record<string, string> = {
   EMPTY_MAKEFILE: 'emptyMakefile',
   MAKEFILE_TOO_LONG: 'makefileTooLong',
   STREAMING_NOT_SUPPORTED: 'streamingNotSupported',
+  CANNOT_CHANGE_OWN_ROLE: 'cannotChangeOwnRole',
+  CANNOT_DELETE_OWN_ACCOUNT: 'cannotDeleteOwnAccount',
 };
 
 interface ApiErrorData {
@@ -12,11 +14,6 @@ interface ApiErrorData {
   max?: number;
 }
 
-// Backend errors now come in two shapes: a fixed, translatable CODE
-// (rate limits, validation) which we translate here, or free creative
-// text written by the LLM itself (e.g. the Oráculo's specific rejection
-// reason) — shown as-is for now, still an open question until the
-// language-aware prompt work is done.
 export function translateApiError(
   data: ApiErrorData | undefined,
   t: (key: string, params?: Record<string, unknown>) => string,

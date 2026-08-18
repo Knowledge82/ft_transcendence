@@ -119,7 +119,8 @@
     "email": "Email",
     "rank": "Rango",
     "delete": "Eliminar",
-    "confirmDelete": "¿Seguro que quieres eliminar esta cuenta? Esta acción no se puede deshacer."
+    "confirmDelete": "¿Seguro que quieres eliminar esta cuenta? Esta acción no se puede deshacer.",
+    "roleChangeError": "No se pudo cambiar el rango."
   },
   "profile": {
     "notFound": "No se pudo encontrar a este hermano",
@@ -275,6 +276,8 @@
     "confessorRateLimited": "El Confesor ha agotado su cuota gratuita de consultas a la IA por ahora. Inténtalo de nuevo en unos minutos.",
     "emptyMakefile": "Debes enviar el contenido del Makefile.",
     "makefileTooLong": "El Makefile es demasiado largo (máximo {{max}} caracteres).",
-    "streamingNotSupported": "Tu navegador no admite streaming de respuestas."
+    "streamingNotSupported": "Tu navegador no admite streaming de respuestas.",
+    "cannotChangeOwnRole": "No puedes cambiar tu propio rango — pide a otro Arzobispo que lo haga.",
+    "cannotDeleteOwnAccount": "No puedes eliminar tu propia cuenta — pide a otro Arzobispo que lo haga."
   }
 }

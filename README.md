@@ -418,7 +418,7 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [+ default confirm() window -> our custom window](./docs/docs-custom-confirm-dialog.md)
 
-
+[+ Self protection of the last admin](./docs/docs-santuario-self-protection.md)
 
 ### WCAG 2.1 AA
 

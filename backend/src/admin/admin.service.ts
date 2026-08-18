@@ -22,9 +22,17 @@ export class AdminService {
     });
   }
 
-  async changeRole(userId: number, role: string) {
+  async changeRole(requestingUserId: number, userId: number, role: string) {
     if (!VALID_ROLES.includes(role)) {
       throw new BadRequestException(`El rango debe ser uno de: ${VALID_ROLES.join(', ')}`);
+    }
+
+    // Self-service privilege changes are disallowed on principle, not
+    // just to prevent an accidental lockout — a role change should
+    // always come from someone ELSE'S action, both for a cleaner audit
+    // trail and to remove any chance of a misclick on your own row.
+    if (requestingUserId === userId) {
+      throw new BadRequestException({ code: 'CANNOT_CHANGE_OWN_ROLE' });
     }
 
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
@@ -39,7 +47,11 @@ export class AdminService {
     });
   }
 
-  async deleteUser(userId: number) {
+  async deleteUser(requestingUserId: number, userId: number) {
+    if (requestingUserId === userId) {
+      throw new BadRequestException({ code: 'CANNOT_DELETE_OWN_ACCOUNT' });
+    }
+
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
