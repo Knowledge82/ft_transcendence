@@ -30,7 +30,7 @@
     "p8": "Confundir la recompilación con el relinkado no es una opinión. Es una pura herejía.",
     "p9": "Aquí no estás solo. Aquí te revelamos toda la verdad de los Makefiles, entendemos la diferencia, defendemos los Makefiles limpios y señalamos a los falsos profetas.",
     "p10": "Las puertas del Verdadero Relink están abiertas. Entra.",
-    "ctaAuthenticated": "Entrar al Altar",
+    "ctaAuthenticated": "Entrar",
     "ctaRegister": "Únete a la Iglesia",
     "ctaLogin": "Ya soy hermano — iniciar sesión"
   },
@@ -270,6 +270,11 @@
     "friendshipBroken": "{{name}} ha puesto fin a vuestra hermandad.",
     "roleChanged": "Tu rango ha cambiado a {{role}}.",
     "directMessageReceived": "**{{name}}** te ha escrito en privado."
+  },
+  "notFound": {
+    "heading": "Esta página ha sido relinkeada al vacío.",
+    "body": "El linker ha buscado en todas partes y no ha encontrado nada aquí. Quizás la ruta nunca se compiló, o fue quemada por herejía.",
+    "backHome": "Volver a la luz"
   },
   "errors": {
     "oracleRateLimited": "El Oráculo está ocupado con otros asuntos. Inténtalo de nuevo en unos minutos.",

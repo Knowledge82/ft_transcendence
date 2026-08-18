@@ -30,7 +30,7 @@
     "p8": "Confusing recompilation with relinking is not an opinion. It's pure heresy.",
     "p9": "You are not alone here. Here we reveal the whole truth about Makefiles, we understand the difference, we defend clean Makefiles, and we call out the false prophets.",
     "p10": "The gates of the True Relink are open. Come in.",
-    "ctaAuthenticated": "Enter the Altar",
+    "ctaAuthenticated": "Enter",
     "ctaRegister": "Join the Church",
     "ctaLogin": "I'm already a brother — log in"
   },
@@ -270,6 +270,11 @@
     "friendshipBroken": "{{name}} has ended your brotherhood.",
     "roleChanged": "Your rank has changed to {{role}}.",
     "directMessageReceived": "**{{name}}** has sent you a private message."
+  },
+  "notFound": {
+    "heading": "This page has been relinked into the void.",
+    "body": "The linker has searched everywhere and found nothing here. Maybe the route never compiled, or was burned for heresy.",
+    "backHome": "Back to the light"
   },
   "errors": {
     "oracleRateLimited": "The Oracle is busy with other matters. Try again in a few minutes.",
