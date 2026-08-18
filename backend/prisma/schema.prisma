@@ -32,7 +32,15 @@ enum Gender {
 model User {
   id           Int      @id @default(autoincrement())
   email        String   @unique
-  passwordHash String
+  // Optional now — accounts created via 42 OAuth never set a password;
+  // they can only log in by going through 42 again. login() checks for
+  // a null passwordHash explicitly and rejects cleanly, instead of
+  // handing bcrypt.compare a null value.
+  passwordHash String?
+  // Links this account to a specific 42 intranet user id, used to
+  // recognize a returning OAuth login — null for anyone who registered
+  // the normal way and never connected their 42 account.
+  intraId      Int?     @unique
   displayName  String?  @unique
   avatarUrl    String?
   role         Role     @default(HERMANO)
@@ -78,20 +86,16 @@ model Friendship {
   @@unique([requesterId, addresseeId])
 }
 
-// A conversation is either a DIRECT chat (exactly 2 participants) or a
-// CHANNEL (many participants, e.g. the general chat everyone joins).
-// Both share the same message history model below.
 model Conversation {
   id        Int              @id @default(autoincrement())
   type      ConversationType
-  name      String?          // only meaningful for CHANNEL type
+  name      String?
   createdAt DateTime         @default(now())
 
   participants ConversationParticipant[]
   messages     Message[]
 }
 
-// Join table: which users belong to which conversation
 model ConversationParticipant {
   id             Int      @id @default(autoincrement())
   conversationId Int
@@ -109,20 +113,11 @@ model Message {
   conversationId Int
   senderId       Int
   content        String
-  // Attachment fields — all optional, since most messages have no file.
-  // attachmentFilename is the name on disk (used to look the file up when
-  // serving it); attachmentName is the ORIGINAL filename, kept separately
-  // for display purposes (users see their real filename, not a UUID).
   attachmentFilename String?
   attachmentType     String?
   attachmentName     String?
   createdAt      DateTime @default(now())
 
-  // Soft delete: a "deleted" message is NOT removed from the database —
-  // its content stays hidden and a tombstone ("Herejía eliminada por...")
-  // is shown instead, permanently, to everyone. deletedById uses SetNull
-  // (not Cascade) so the tombstone survives even if the moderator who
-  // deleted it later has their own account removed.
   deletedAt   DateTime?
   deletedById Int?
 
@@ -131,8 +126,6 @@ model Message {
   deletedBy    User?        @relation("MessageDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
 }
 
-// Personal, targeted notification — belongs to exactly one user, has a
-// read/unread state. This is the "inbox" half of the system.
 model Notification {
   id        Int      @id @default(autoincrement())
   userId    Int
@@ -144,15 +137,6 @@ model Notification {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// Public, community-wide chronicle entry — no owner, no read state. Some
-// of these mirror real actions (a new adept joined, a rank changed), some
-// are purely flavorful/fictional filler for atmosphere.
-// The phrase itself is no longer stored pre-rendered — only the type,
-// which template variant was picked, and the raw interpolation data.
-// The actual sentence (in whichever language the viewer has selected)
-// is assembled on the frontend at display time. This is what makes the
-// chronicle genuinely multi-language, instead of permanently "frozen"
-// in whatever language was active when the event happened.
 model CommunityEvent {
   id            Int      @id @default(autoincrement())
   type          String
@@ -161,9 +145,6 @@ model CommunityEvent {
   createdAt     DateTime @default(now())
 }
 
-// Only ever created already-approved — there's no draft state, since
-// publishing itself IS the moment the AI relevance check runs. If it
-// fails the check, nothing is ever written here at all.
 model Article {
   id        Int      @id @default(autoincrement())
   title     String

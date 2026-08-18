@@ -1,20 +1,25 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   HttpCode,
   HttpStatus,
   Headers,
   Res,
   Req,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import type { FortyTwoProfile } from './strategies/oauth-fortytwo.strategy';
 
 const REFRESH_COOKIE_NAME = 'refreshToken';
 const REFRESH_COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days, must match REFRESH_TOKEN_TTL_DAYS in auth.service.ts
+const FRONTEND_URL = process.env.FRONTEND_URL ?? 'https://localhost:8443';
 
 @Controller('auth')
 export class AuthController {
@@ -38,6 +43,41 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { accessToken, refreshToken } = await this.authService.login(dto);
+    this.setRefreshCookie(res, refreshToken);
+    return { accessToken };
+  }
+
+  @Get('oauth/42')
+  @UseGuards(AuthGuard('fortytwo'))
+  async fortyTwoLogin() {}
+
+  @Get('oauth/42/callback')
+  @UseGuards(AuthGuard('fortytwo'))
+  async fortyTwoCallback(@Req() req: Request & { user: FortyTwoProfile }, @Res() res: Response) {
+    const result = await this.authService.handleFortyTwoLogin(req.user);
+
+    if (!result.isNewAccount) {
+      this.setRefreshCookie(res, result.refreshToken);
+      return res.redirect(`${FRONTEND_URL}/oauth/exito`);
+    }
+
+    return res.redirect(`${FRONTEND_URL}/oauth/completar?token=${result.pendingToken}`);
+  }
+
+  @Post('oauth/complete')
+  async completeOAuth(
+    @Body('pendingToken') pendingToken: string,
+    @Body('gender') gender: string,
+    @Body('displayName') displayName: string,
+    @Headers('accept-language') language: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, refreshToken } = await this.authService.completeOAuthRegistration(
+      pendingToken,
+      gender,
+      displayName,
+      language,
+    );
     this.setRefreshCookie(res, refreshToken);
     return { accessToken };
   }

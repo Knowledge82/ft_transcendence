@@ -17,6 +17,8 @@ import { ArticlesListPage } from './pages/ArticlesListPage';
 import { ArticleDetailPage } from './pages/ArticleDetailPage';
 import { NewArticlePage } from './pages/NewArticlePage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { OAuthSuccessPage } from './pages/OAuthSuccessPage';
+import { OAuthCompletePage } from './pages/OAuthCompletePage';
 function App() {
   return (
     <BrowserRouter>
@@ -105,6 +107,8 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="/oauth/exito" element={<OAuthSuccessPage />} />
+              <Route path="/oauth/completar" element={<OAuthCompletePage />} />
               {/* Catch-all — MUST stay last, React Router matches routes in
                   declaration order and "*" would otherwise swallow every
                   other path declared after it */}

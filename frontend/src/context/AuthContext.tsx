@@ -5,6 +5,7 @@ import {
   registerRequest,
   refreshRequest,
   logoutRequest,
+  completeOAuthRegistrationRequest,
 } from '../api/auth';
 
 interface AuthContextValue {
@@ -16,6 +17,11 @@ interface AuthContextValue {
     password: string,
     displayName: string,
     gender: 'MASCULINO' | 'FEMENINO',
+  ) => Promise<void>;
+  completeOAuthRegistration: (
+    pendingToken: string,
+    gender: 'MASCULINO' | 'FEMENINO',
+    displayName: string,
   ) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -62,6 +68,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(true);
   }
 
+  async function completeOAuthRegistration(
+    pendingToken: string,
+    gender: 'MASCULINO' | 'FEMENINO',
+    displayName: string,
+  ) {
+    const { accessToken } = await completeOAuthRegistrationRequest(
+      pendingToken,
+      gender,
+      displayName,
+    );
+    setClientAccessToken(accessToken);
+    setIsAuthenticated(true);
+  }
+
   async function logout() {
     await logoutRequest();
     setClientAccessToken(null);
@@ -69,7 +89,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        isLoading,
+        login,
+        register,
+        completeOAuthRegistration,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

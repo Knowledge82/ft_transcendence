@@ -420,6 +420,8 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [+ Self protection of the last admin](./docs/docs-santuario-self-protection.md)
 
+[+ Autenticación remota con OAuth 2.0 — Inicio de sesión con 42](./docs/docs-oauth-42.md)
+
 ### WCAG 2.1 AA
 
 - [WCAG AA: keyboard navigation](./docs/WCAG-AA-keyboard-navigation.md)

@@ -16,7 +16,9 @@
     "submit": "Entrar",
     "noAccount": "¿No tienes cuenta?",
     "register": "Regístrate",
-    "invalidCredentials": "Email o contraseña incorrectos."
+    "invalidCredentials": "Email o contraseña incorrectos.",
+    "with42": "Entrar con 42",
+    "orDivider": "o"
   },
   "landing": {
     "loading": "Cargando",
@@ -109,7 +111,10 @@
     "submit": "Registrarse",
     "hasAccount": "¿Ya tienes cuenta?",
     "login": "Inicia sesión",
-    "submitError": "No se pudo completar el registro. Comprueba los datos."
+    "submitError": "No se pudo completar el registro. Comprueba los datos.",
+    "completeTitle": "Completa tu registro",
+    "completeSubmit": "Finalizar registro",
+    "oauthExpired": "El enlace de registro ha expirado. Vuelve a intentarlo desde el inicio de sesión."
   },
   "admin": {
     "title": "Santuario — Administración",

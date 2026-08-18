@@ -40,6 +40,13 @@ services:
       # esté definida en el archivo .env
       GROQ_API_KEY: ${GROQ_API_KEY}
       GROQ_MODEL: ${GROQ_MODEL}
+      # Credenciales de la aplicación OAuth registrada en la intra de 42
+      # (https://profile.intra.42.fr/oauth/applications/new) — sin esto,
+      # el inicio de sesión con 42 no puede funcionar en absoluto
+      FORTYTWO_CLIENT_ID: ${FORTYTWO_CLIENT_ID}
+      FORTYTWO_CLIENT_SECRET: ${FORTYTWO_CLIENT_SECRET}
+      FORTYTWO_CALLBACK_URL: ${FORTYTWO_CALLBACK_URL}
+      FRONTEND_URL: ${FRONTEND_URL}
     volumes:
       - ./backend:/app
       - /app/node_modules

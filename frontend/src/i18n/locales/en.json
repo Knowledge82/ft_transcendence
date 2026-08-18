@@ -16,7 +16,9 @@
     "submit": "Log in",
     "noAccount": "Don't have an account?",
     "register": "Sign up",
-    "invalidCredentials": "Incorrect email or password."
+    "invalidCredentials": "Incorrect email or password.",
+    "with42": "Sign in with 42",
+    "orDivider": "or"
   },
   "landing": {
     "loading": "Loading",
@@ -109,7 +111,10 @@
     "submit": "Sign up",
     "hasAccount": "Already have an account?",
     "login": "Log in",
-    "submitError": "Couldn't complete the registration. Check your details."
+    "submitError": "Couldn't complete the registration. Check your details.",
+    "completeTitle": "Complete your registration",
+    "completeSubmit": "Finish registration",
+    "oauthExpired": "The registration link has expired. Try again from the login page."
   },
   "admin": {
     "title": "Sanctuary — Administration",
