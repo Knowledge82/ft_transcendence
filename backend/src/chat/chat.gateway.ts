@@ -10,6 +10,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ChatService } from './chat.service';
 
 interface JwtPayload {
@@ -35,6 +36,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly jwtService: JwtService,
     private readonly chatService: ChatService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   private onlineUsers = new Map<number, Set<string>>();
@@ -67,12 +69,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (isFirstConnection) {
       this.server.emit('userStatusChanged', { userId: payload.sub, isOnline: true });
-      console.log(`[DEBUG] Primera conexión de userId=${payload.sub}, llamando announceIfArzobispo`);
       // Fire-and-forget — this is a "nice to have" chat announcement, not
       // something the connection flow itself should ever wait on or fail over
-      this.announceIfArzobispo(payload.sub, general.id, true).catch((err) =>
-        console.error('[DEBUG] Error en announceIfArzobispo (connect):', err),
-      );
+      this.announceIfArzobispo(payload.sub, general.id, true).catch(() => {});
     }
 
     const isNewMember = await this.chatService.ensureParticipant(general.id, payload.sub);
@@ -92,17 +91,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleDisconnect(client: Socket) {
     const userId = client.data.userId as number | undefined;
-    console.log(`[DEBUG] handleDisconnect llamado, userId=${userId}, socket=${client.id}`);
     if (!userId) {
-      console.log('[DEBUG] handleDisconnect: sin userId, saliendo');
       return;
     }
 
     const sockets = this.onlineUsers.get(userId);
     sockets?.delete(client.id);
-    console.log(
-      `[DEBUG] handleDisconnect: sockets restantes para userId=${userId}: ${sockets?.size}`,
-    );
 
     if (sockets && sockets.size === 0) {
       this.onlineUsers.delete(userId);
@@ -110,10 +104,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       console.log(`User ${userId} is now offline`);
 
       this.chatService.getOrCreateGeneralChannel().then((general) => {
-        console.log(`[DEBUG] Llamando announceIfArzobispo para userId=${userId}, isOnline=false`);
-        this.announceIfArzobispo(userId, general.id, false).catch((err) =>
-          console.error('[DEBUG] Error en announceIfArzobispo (disconnect):', err),
-        );
+        this.announceIfArzobispo(userId, general.id, false).catch(() => {});
       });
     }
   }
@@ -124,23 +115,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // noise. Ephemeral by design: not persisted anywhere, only broadcast
   // live to whoever currently has the general channel open.
   private async announceIfArzobispo(userId: number, generalChannelId: number, isOnline: boolean) {
-    const role = await this.chatService.getUserRole(userId);
-    console.log(
-      `[DEBUG] announceIfArzobispo: userId=${userId}, role="${role}", isOnline=${isOnline}`,
-    );
-    if (role !== 'ARZOBISPO') {
-      console.log('[DEBUG] announceIfArzobispo: rol no es ARZOBISPO, saliendo');
+    const info = await this.chatService.getUserRoleAndGender(userId);
+    if (info?.role !== 'ARZOBISPO') {
       return;
     }
-    const user = await this.chatService.getUserBasicInfo(userId);
-    const payload = {
-      name: user?.displayName ?? `Usuario ${userId}`,
-      isOnline,
-    };
-    console.log(
-      `[DEBUG] Emitiendo arzobispoPresenceChanged a room=${roomName(generalChannelId)}:`,
-      payload,
-    );
+    const payload = { gender: info.gender, isOnline };
     this.server.to(roomName(generalChannelId)).emit('arzobispoPresenceChanged', payload);
   }
 
@@ -213,6 +192,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     this.server.to(roomName(payload.conversationId)).emit('newMessage', message);
+
+    // Only for private conversations — the general channel is far too
+    // busy to notify on every single message sent there
+    const general = await this.chatService.getOrCreateGeneralChannel();
+    if (payload.conversationId !== general.id) {
+      const recipientId = await this.chatService.getOtherParticipantId(
+        payload.conversationId,
+        senderId,
+      );
+      if (recipientId) {
+        const senderName = message.sender.displayName ?? `Usuario ${senderId}`;
+        // Emitted, not called directly — ChatGateway has no idea who (if
+        // anyone) is listening for this. NotificationsService happens to
+        // be, but ChatModule never needs to import NotificationsModule
+        // to make that work, which is exactly what breaks the circular
+        // dependency the direct-injection approach had.
+        this.eventEmitter.emit('directMessage.sent', { recipientId, senderName });
+      }
+    }
 
     return message;
   }

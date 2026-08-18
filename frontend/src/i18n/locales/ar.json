@@ -60,8 +60,16 @@
   },
   "chat": {
     "generalChannel": "الفصل",
-    "arzobispoOnline": "دخل **{{name}}** الفصل.",
-    "arzobispoOffline": "غادر **{{name}}** الفصل.",
+    "arzobispoOnline": {
+      "0": "حضور **{{role}}** ملموس بيننا.",
+      "1": "يتوهج حضور **{{role}}** بين الإخوة.",
+      "2": "لا يخفى حضور **{{role}}** بيننا."
+    },
+    "arzobispoOffline": {
+      "0": "يخفت حضور **{{role}}**، الآن.",
+      "1": "ينحسر حضور **{{role}}** مؤقتًا.",
+      "2": "غاب حضور **{{role}}** عنا، الآن."
+    },
     "loggedInAs": "متصل باسم",
     "channels": "القنوات",
     "conversations": "المحادثات",
@@ -258,7 +266,8 @@
     "friendRequestReceived": "أرسل لك {{name}} طلب أخوة.",
     "friendRequestAccepted": "قبل {{name}} طلب الأخوة الخاص بك.",
     "friendshipBroken": "أنهى {{name}} أخوتكما.",
-    "roleChanged": "تغيّرت رتبتك إلى {{role}}."
+    "roleChanged": "تغيّرت رتبتك إلى {{role}}.",
+    "directMessageReceived": "راسلك **{{name}}** بشكل خاص."
   },
   "errors": {
     "oracleRateLimited": "الأوراكل مشغول بأمور أخرى. حاول مرة أخرى بعد بضع دقائق.",

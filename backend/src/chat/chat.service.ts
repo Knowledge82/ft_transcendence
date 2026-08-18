@@ -9,9 +9,6 @@ const DELETED_MESSAGE_SELECT = {
   deletedBy: { select: { id: true, displayName: true, role: true, gender: true } },
 };
 
-// Converts the filename stored on disk into the URL the frontend actually
-// fetches from — kept as a small pure helper so both saveMessage and
-// getMessageHistory build it the exact same way
 function toAttachmentUrl(filename: string | null): string | null {
   return filename ? `/api/chat/attachments/${filename}` : null;
 }
@@ -63,9 +60,6 @@ export class ChatService {
     });
   }
 
-  // Direct messages are a privilege of friendship in this community —
-  // everyone can talk in the general channel regardless, but private
-  // conversations are reserved for people who've actually become "hermanos"
   async findOrCreateDirectConversation(userIdA: number, userIdB: number) {
     const friendship = await this.prisma.friendship.findFirst({
       where: {
@@ -111,10 +105,6 @@ export class ChatService {
     return rows.map((r) => r.conversationId);
   }
 
-  // DIRECT conversations only, with the OTHER participant's info attached,
-  // and only those that already have at least one message — an empty
-  // conversation (just created, nobody wrote yet) has no place in a
-  // sidebar of "ongoing conversations"
   async getUserDirectConversations(userId: number) {
     const conversations = await this.prisma.conversation.findMany({
       where: {
@@ -158,9 +148,6 @@ export class ChatService {
       throw new ForbiddenException('You are not part of this conversation');
     }
 
-    // Attachments are a privilege of private conversations, same spirit
-    // as DMs themselves being reserved for friends — keeps the shared
-    // public channel free of clutter and easier to moderate
     if (attachment) {
       const conversation = await this.prisma.conversation.findUnique({
         where: { id: conversationId },
@@ -208,27 +195,16 @@ export class ChatService {
     return this.prisma.message.findUnique({ where: { id: messageId } });
   }
 
-  // Used by the authenticated attachment-serving endpoint to figure out
-  // which conversation a given file belongs to, so we can check whether
-  // the requester is actually allowed to see it
   async findMessageByAttachment(filename: string) {
     return this.prisma.message.findFirst({ where: { attachmentFilename: filename } });
   }
 
-  // SOFT delete: the row stays in the database forever — only its
-  // content is cleared and a tombstone (who deleted it, and when) is
-  // recorded. This is what lets the frontend show "Herejía eliminada
-  // por <rango> <nombre>" in place of the original message, for everyone,
-  // permanently — not just remove it from view for people currently online.
   async deleteMessage(messageId: number, deletedById: number) {
     const message = await this.prisma.message.findUnique({ where: { id: messageId } });
     if (!message) {
       throw new NotFoundException('Message not found');
     }
 
-    // The physical file is still removed from disk — the tombstone only
-    // needs to say "something was here and got removed", not keep the
-    // actual (possibly heretical) file sitting around
     if (message.attachmentFilename) {
       const filePath = join(process.cwd(), 'uploads', 'attachments', message.attachmentFilename);
       unlink(filePath).catch(() => {});
@@ -254,5 +230,29 @@ export class ChatService {
       select: { role: true },
     });
     return user?.role ?? null;
+  }
+
+  // Used specifically for the "an Arzobispo entered/left the chat"
+  // announcement — needs gender too, so the frontend can pick the
+  // correct grammatical form of the role word in whichever language
+  // each viewer currently has active (same principle as the
+  // ROLE_CHANGED chronicle event)
+  async getUserRoleAndGender(userId: number): Promise<{ role: string; gender: string } | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true, gender: true },
+    });
+    return user ? { role: user.role, gender: user.gender } : null;
+  }
+
+  // Used to figure out WHO to notify after a private message is sent —
+  // the other person in a DIRECT conversation, whoever that is, since
+  // the sender obviously doesn't need to be notified about their own message
+  async getOtherParticipantId(conversationId: number, excludingUserId: number): Promise<number | null> {
+    const participant = await this.prisma.conversationParticipant.findFirst({
+      where: { conversationId, userId: { not: excludingUserId } },
+      select: { userId: true },
+    });
+    return participant?.userId ?? null;
   }
 }

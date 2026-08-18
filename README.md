@@ -414,6 +414,8 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [+ Unique names, user delete](./docs/docs-unique-names-user-execution.md)
 
+[+ Admin presence notification in chat, notification about private msg](./docs/docs-admin-presence-private-msg-notification.md)
+
 ### WCAG 2.1 AA
 
 - [WCAG AA: keyboard navigation](./docs/WCAG-AA-keyboard-navigation.md)

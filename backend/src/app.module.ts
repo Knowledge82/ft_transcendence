@@ -1,6 +1,7 @@
 //Module - is a system decorator that turns this class into a Root Module. 
 //Any NestJS application must have at least one such main module, which NestJS begins reading the entire project from when Docker starts
 import { Module } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 //AppController and AppService are the default files that are created automatically when the project is generated (usually they just return the line "Hello World!" on the main page).
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -24,7 +25,13 @@ import { ArticlesModule } from './articles/articles.module';
   //What's going on under the hood here: When NestJS runs inside a Docker container, it goes into this array and sees:
   //1) PrismaModule: NestJS goes there, sees the @Global() decorator, starts PrismaService, opens one pure connection to Postgres and makes it available to the entire application.
   //2) AuthModule: NestJS goes into it, sees the token settings (15 minutes of life, secret key), registers registration/login endpoints and runs security strategies.
-  imports: [PrismaModule, AuthModule, UsersModule, FriendsModule, ChatModule, AdminModule, AiModule, CommunityModule, NotificationsModule, ArticlesModule],
+  // EventEmitterModule.forRoot() is registered globally, once, here at the
+  // root — this is what lets ChatGateway and NotificationsService talk to
+  // each other WITHOUT importing each other's module directly, breaking
+  // the circular dependency (ChatModule <-> NotificationsModule) that
+  // came from ChatGateway needing NotificationsService and
+  // NotificationsService needing ChatGateway at the same time.
+  imports: [EventEmitterModule.forRoot(), PrismaModule, AuthModule, UsersModule, FriendsModule, ChatModule, AdminModule, AiModule, CommunityModule, NotificationsModule, ArticlesModule],
   //controllers and providers — the standard core application files remain here (AppController for top-level routes and AppService for their logic).
   //export class AppModule {} — the root class itself, which NestJS will pick up in the main.ts file when starting the server.
   controllers: [AppController],

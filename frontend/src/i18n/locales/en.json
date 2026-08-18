@@ -60,8 +60,16 @@
   },
   "chat": {
     "generalChannel": "Chapter",
-    "arzobispoOnline": "**{{name}}** has entered the Chapter.",
-    "arzobispoOffline": "**{{name}}** has left the Chapter.",
+    "arzobispoOnline": {
+      "0": "**{{role}}** graces us with their presence.",
+      "1": "**{{role}}** now watches over the Chapter.",
+      "2": "The presence of **{{role}}** can be felt among us."
+    },
+    "arzobispoOffline": {
+      "0": "**{{role}}** withdraws, for now.",
+      "1": "The presence of **{{role}}** fades.",
+      "2": "**{{role}}** steps away from their vigil, for the moment."
+    },
     "loggedInAs": "Logged in as",
     "channels": "Channels",
     "conversations": "Conversations",
@@ -258,7 +266,8 @@
     "friendRequestReceived": "{{name}} has sent you a brotherhood request.",
     "friendRequestAccepted": "{{name}} has accepted your brotherhood request.",
     "friendshipBroken": "{{name}} has ended your brotherhood.",
-    "roleChanged": "Your rank has changed to {{role}}."
+    "roleChanged": "Your rank has changed to {{role}}.",
+    "directMessageReceived": "**{{name}}** has sent you a private message."
   },
   "errors": {
     "oracleRateLimited": "The Oracle is busy with other matters. Try again in a few minutes.",

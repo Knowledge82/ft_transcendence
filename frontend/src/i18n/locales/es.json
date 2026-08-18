@@ -60,8 +60,16 @@
   },
   "chat": {
     "generalChannel": "Capítulo",
-    "arzobispoOnline": "**{{name}}** ha entrado en el Capítulo.",
-    "arzobispoOffline": "**{{name}}** ha abandonado el Capítulo.",
+    "arzobispoOnline": {
+      "0": "**{{role}}** nos honra con su presencia.",
+      "1": "**{{role}}** vela ahora sobre el Capítulo.",
+      "2": "Se percibe la presencia de **{{role}}** entre nosotros."
+    },
+    "arzobispoOffline": {
+      "0": "**{{role}}** se aleja, por ahora.",
+      "1": "La presencia de **{{role}}** se desvanece.",
+      "2": "**{{role}}** deja su vigilia, de momento."
+    },
     "loggedInAs": "Conectado como",
     "channels": "Canales",
     "conversations": "Conversaciones",
@@ -258,7 +266,8 @@
     "friendRequestReceived": "{{name}} te ha enviado una solicitud de hermandad.",
     "friendRequestAccepted": "{{name}} ha aceptado tu solicitud de hermandad.",
     "friendshipBroken": "{{name}} ha puesto fin a vuestra hermandad.",
-    "roleChanged": "Tu rango ha cambiado a {{role}}."
+    "roleChanged": "Tu rango ha cambiado a {{role}}.",
+    "directMessageReceived": "**{{name}}** te ha escrito en privado."
   },
   "errors": {
     "oracleRateLimited": "El Oráculo está ocupado con otros asuntos. Inténtalo de nuevo en unos minutos.",

@@ -1,4 +1,5 @@
 import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma/prisma.service';
 import { ChatGateway } from '../chat/chat.gateway';
 
@@ -15,6 +16,17 @@ export class NotificationsService {
     });
     this.chatGateway.notifyUser(userId, 'notificationCreated', notification);
     return notification;
+  }
+
+  // Listens for the event ChatGateway emits after a private message is
+  // sent — this is what lets ChatModule trigger a notification WITHOUT
+  // ChatModule ever importing NotificationsModule directly, avoiding the
+  // circular dependency the direct-injection approach created.
+  @OnEvent('directMessage.sent')
+  async handleDirectMessageSent(payload: { recipientId: number; senderName: string }) {
+    await this.createNotification(payload.recipientId, 'DIRECT_MESSAGE_RECEIVED', {
+      name: payload.senderName,
+    });
   }
 
   async getNotifications(userId: number, limit = 30) {

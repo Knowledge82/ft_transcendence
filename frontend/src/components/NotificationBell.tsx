@@ -15,6 +15,7 @@ const TYPE_TO_KEY: Record<string, string> = {
   FRIEND_REQUEST_ACCEPTED: 'friendRequestAccepted',
   FRIENDSHIP_BROKEN: 'friendshipBroken',
   ROLE_CHANGED: 'roleChanged',
+  DIRECT_MESSAGE_RECEIVED: 'directMessageReceived',
 };
 
 export function NotificationBell() {
@@ -52,9 +53,6 @@ export function NotificationBell() {
         setIsOpen(false);
       }
     }
-    // Mouse-only closing left keyboard users with no way to close the
-    // panel at all (WCAG 2.1.2 — no keyboard trap) — Escape closes it
-    // the same way it would close any native dropdown/dialog
     function handleEscape(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         setIsOpen(false);
@@ -101,9 +99,6 @@ export function NotificationBell() {
 
   return (
     <div className="relative" ref={panelRef}>
-      {/* Visually hidden, but announced by screen readers whenever the
-          unread count changes — the badge itself is purely visual and
-          wouldn't otherwise be noticed without manually re-checking it */}
       <span className="sr-only" aria-live="polite" aria-atomic="true">
         {unreadCount > 0 ? `${unreadCount} ${t('notifications.title')}` : ''}
       </span>

@@ -206,10 +206,14 @@ export function ChatPage() {
     // Kept as a separate, lightweight array — not merged into `messages`
     // itself, since these are purely live/ephemeral (never part of
     // message history) and don't share its shape (no sender, no id from
-    // the database, etc.)
-    function handleArzobispoPresence(data: { name: string; isOnline: boolean }) {
-      const key = data.isOnline ? 'chat.arzobispoOnline' : 'chat.arzobispoOffline';
-      const text = t(key, { name: data.name });
+    // the database, etc.). We receive raw role/gender, not a finished
+    // phrase — same principle as the community chronicle — so it renders
+    // correctly regardless of which language each viewer currently has active.
+    function handleArzobispoPresence(data: { gender: string; isOnline: boolean }) {
+      const namespace = data.isOnline ? 'arzobispoOnline' : 'arzobispoOffline';
+      const variantIndex = Math.floor(Math.random() * 3);
+      const genderedRole = getGenderedRole('ARZOBISPO', data.gender, i18n.language);
+      const text = t(`chat.${namespace}.${variantIndex}`, { role: genderedRole });
       setSystemAnnouncements((prev) => [...prev, { id: `${Date.now()}-${Math.random()}`, text }]);
     }
 
@@ -230,7 +234,7 @@ export function ChatPage() {
       socket.off('messageUpdated', handleMessageUpdated);
       socket.off('arzobispoPresenceChanged', handleArzobispoPresence);
     };
-  }, [socket, selectedConversationId]);
+  }, [socket, selectedConversationId, i18n.language]);
 
   // Central place that changes which conversation is selected — updates
   // all the related state AND syncs the URL (?c=<id>) in one call, so
