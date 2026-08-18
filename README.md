@@ -416,6 +416,10 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [+ Admin presence notification in chat, notification about private msg](./docs/docs-admin-presence-private-msg-notification.md)
 
+[+ default confirm() window -> our custom window](./docs/docs-custom-confirm-dialog.md)
+
+
+
 ### WCAG 2.1 AA
 
 - [WCAG AA: keyboard navigation](./docs/WCAG-AA-keyboard-navigation.md)

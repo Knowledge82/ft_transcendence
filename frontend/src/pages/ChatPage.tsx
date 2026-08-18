@@ -11,6 +11,7 @@ import { LoadingScreen, StatusDot, IconButton, Input, Button, PageContainer, Bac
 import { ROUTES } from '../routes';
 import { getGenderedRole } from '../utils/genderedRole';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { useConfirm } from '../context/ConfirmContext';
 
 // Same parsing used in ActivityTicker/NotificationBell — turns
 // **name** markers into bold gold spans, for the ephemeral system
@@ -35,6 +36,7 @@ function renderMessage(message: string) {
 export function ChatPage() {
   const { t, i18n } = useTranslation();
   const { socket } = useSocket();
+  const confirm = useConfirm();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
 
@@ -281,7 +283,7 @@ export function ChatPage() {
   }
 
   async function handleRemoveFriend(userId: number) {
-    if (!confirm(t('chat.confirmRemoveFriend'))) {
+    if (!(await confirm(t('chat.confirmRemoveFriend')))) {
       return;
     }
     await removeFriend(userId);
@@ -313,7 +315,7 @@ export function ChatPage() {
   }
 
   async function handleDeleteMessage(messageId: number) {
-    if (!confirm(t('chat.confirmDeleteMessage'))) {
+    if (!(await confirm(t('chat.confirmDeleteMessage')))) {
       return;
     }
     const updated = await deleteMessage(messageId);

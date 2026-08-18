@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
+import { ConfirmProvider } from './context/ConfirmContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
@@ -20,89 +21,91 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <SocketProvider>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/privacy" element={<PrivacyPolicyPage />} />
-            <Route path="/terms" element={<TermsOfServicePage />} />
-            <Route
-              path="/celda"
-              element={
-                <ProtectedRoute>
-                  <HomePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/chat"
-              element={
-                <ProtectedRoute>
-                  <ChatPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/santuario"
-              element={
-                <ProtectedRoute>
-                  <AdminPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/confesionario"
-              element={
-                <ProtectedRoute>
-                  <ConfesionarioPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/perfil/:id"
-              element={
-                <ProtectedRoute>
-                  <UserProfilePage />
-                </ProtectedRoute>
-              }
-            />
-            {/* IMPORTANT: /biblioteca/nueva must stay declared BEFORE
-                /biblioteca/:id — otherwise "nueva" would be captured by
-                the :id param, same route-ordering rule we've hit before
-                on the backend controllers */}
-            <Route
-              path="/biblioteca"
-              element={
-                <ProtectedRoute>
-                  <ArticlesListPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/biblioteca/nueva"
-              element={
-                <ProtectedRoute>
-                  <NewArticlePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/biblioteca/:id/editar"
-              element={
-                <ProtectedRoute>
-                  <NewArticlePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/biblioteca/:id"
-              element={
-                <ProtectedRoute>
-                  <ArticleDetailPage />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
+          <ConfirmProvider>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              <Route path="/terms" element={<TermsOfServicePage />} />
+              <Route
+                path="/celda"
+                element={
+                  <ProtectedRoute>
+                    <HomePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/chat"
+                element={
+                  <ProtectedRoute>
+                    <ChatPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/santuario"
+                element={
+                  <ProtectedRoute>
+                    <AdminPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/confesionario"
+                element={
+                  <ProtectedRoute>
+                    <ConfesionarioPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/perfil/:id"
+                element={
+                  <ProtectedRoute>
+                    <UserProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              {/* IMPORTANT: /biblioteca/nueva must stay declared BEFORE
+                  /biblioteca/:id — otherwise "nueva" would be captured by
+                  the :id param, same route-ordering rule we've hit before
+                  on the backend controllers */}
+              <Route
+                path="/biblioteca"
+                element={
+                  <ProtectedRoute>
+                    <ArticlesListPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/biblioteca/nueva"
+                element={
+                  <ProtectedRoute>
+                    <NewArticlePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/biblioteca/:id/editar"
+                element={
+                  <ProtectedRoute>
+                    <NewArticlePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/biblioteca/:id"
+                element={
+                  <ProtectedRoute>
+                    <ArticleDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </ConfirmProvider>
         </SocketProvider>
       </AuthProvider>
     </BrowserRouter>

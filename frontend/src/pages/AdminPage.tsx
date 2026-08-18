@@ -7,11 +7,13 @@ import { PageContainer, LoadingScreen, IconButton, BackLink } from '../component
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { ROUTES } from '../routes';
 import { getGenderedRole } from '../utils/genderedRole';
+import { useConfirm } from '../context/ConfirmContext';
 
 const ROLES: Role[] = ['HERMANO', 'INQUISIDOR', 'ARZOBISPO'];
 
 export function AdminPage() {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const [ownRole, setOwnRole] = useState<Role | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +35,7 @@ export function AdminPage() {
   }
 
   async function handleDelete(userId: number) {
-    if (!confirm(t('admin.confirmDelete'))) {
+    if (!(await confirm(t('admin.confirmDelete')))) {
       return;
     }
     await deleteUser(userId);

@@ -9,11 +9,13 @@ import { PageContainer, Card, LoadingScreen, BackLink, Avatar, IconButton } from
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { getGenderedRole } from '../utils/genderedRole';
 import { getDateLocale } from '../utils/dateLocale';
+import { useConfirm } from '../context/ConfirmContext';
 
 export function ArticleDetailPage() {
   const { t, i18n } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const confirm = useConfirm();
 
   const [article, setArticle] = useState<Article | null>(null);
   const [ownUserId, setOwnUserId] = useState<number | null>(null);
@@ -42,7 +44,7 @@ export function ArticleDetailPage() {
 
   async function handleDelete() {
     if (!article) return;
-    if (!confirm(t('articles.confirmDelete'))) {
+    if (!(await confirm(t('articles.confirmDelete')))) {
       return;
     }
     await deleteArticle(article.id);
