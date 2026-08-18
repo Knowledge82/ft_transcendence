@@ -45,12 +45,12 @@
 |---|---|---|
 | Major: Gestión estándar de usuario (perfil editable, avatar con default, amigos + estado online, página de perfil) | ✅ | 2 |
 | Minor: Estadísticas de juego e historial de partidas | 🚫 | 0 |
-| Minor: Autenticación remota OAuth 2.0 | ⏳ | 0 |
+| Minor: Autenticación remota OAuth 2.0 | ✅ (inicio de sesión con 42 — flujo completo, incluida la finalización de registro para elegir género en el primer acceso) | 1 |
 | Major: Sistema de permisos avanzado (CRUD de usuarios, gestión de roles, vistas/acciones según rol) | ✅ | 2 |
 | Major: Sistema de organizaciones (crear/editar/eliminar, añadir/quitar usuarios, acciones dentro de la organización) | ⏳ | 0 |
 | Minor: 2FA completo | ⏳ | 0 |
 | Minor: Panel de analíticas de actividad de usuario | ⏳ | 0 |
-| Subtotal User Management | | 4 |
+| Subtotal User Management | | 5 |
 
 ---
 
@@ -58,14 +58,14 @@
 
 | Requisito | Estado | Puntos |
 |---|---|---|
-| Major: IA oponente para juegos | ⏳/N-A (requiere un módulo de juego) | 0 |
-| Major: Sistema RAG completo | ⏳ | 0 |
+| Major: IA oponente para juegos | 🚫 (no existe ningún módulo de juego en el proyecto) | 0 |
+| Major: Sistema RAG completo | 🚫 | 0 |
 | Major: Interfaz completa de sistema LLM (texto/streaming, manejo de errores, rate limiting) | ✅ (el Confesor, sobre Groq) | 2 |
-| Major: Sistema de recomendación con ML | ⏳ | 0 |
+| Major: Sistema de recomendación con ML | 🚫 | 0 |
 | Minor: Moderación de contenido por IA | ✅ (el Oráculo, revisión de artículos) | 1 |
-| Minor: Integración de voz/habla | ⏳ | 0 |
-| Minor: Análisis de sentimiento | ⏳ | 0 |
-| Minor: Reconocimiento y etiquetado de imágenes | ⏳ | 0 |
+| Minor: Integración de voz/habla | 🚫 | 0 |
+| Minor: Análisis de sentimiento | 🚫 | 0 |
+| Minor: Reconocimiento y etiquetado de imágenes | 🚫 | 0 |
 | Subtotal AI | | 3 |
 
 ---
@@ -76,9 +76,9 @@
 |---|---|
 | Web | 11 |
 | Accessibility/i18n | 4 |
-| User Management | 4 |
+| User Management | 5 |
 | Artificial Intelligence | 3 |
-| Total | 22 |
+| Total | 23 |
 
 ## Decisiones conscientes de no implementar (🚫)
 
@@ -87,9 +87,15 @@
 - SSR (Web, Minor): habría exigido una reestructuración arquitectónica grande para un beneficio marginal en este proyecto.
 - Búsqueda avanzada (Web, Minor): no se identificó ningún caso de uso lo bastante genuino como para justificarla por sí sola.
 - Estadísticas de juego e historial de partidas (User Management, Minor): no existe ningún módulo de juego en el proyecto.
+- IA oponente para juegos (AI, Major): mismo motivo — no existe ningún módulo de juego que necesite un oponente.
+- Sistema RAG completo (AI, Major): no se identificó un caso de uso genuino en el proyecto que requiera recuperación de documentos externos; el Oráculo y el Confesor ya cubren las necesidades reales de IA del proyecto sin necesitarlo.
+- Sistema de recomendación con ML (AI, Major): no hay volumen de datos de usuario suficiente para que un sistema de recomendación tenga sentido real, más allá de un ejercicio artificial.
+- Integración de voz/habla (AI, Minor): no encaja con la naturaleza basada en texto del proyecto (chat escrito, artículos, confesiones escritas).
+- Análisis de sentimiento (AI, Minor): no hay ninguna funcionalidad concreta del proyecto que se beneficiara de él de forma genuina.
+- Reconocimiento y etiquetado de imágenes (AI, Minor): el único contenido visual del proyecto son los avatares de perfil, que ya se gestionan sin necesidad de IA.
 
 ## Huecos abiertos más relevantes de cara a la defensa
 
-1. Organizaciones (User Management, Major, 2 puntos) — no se ha empezado.
+1. Organizaciones (User Management, Major, 2 puntos) — no se ha empezado. Es el Major con más peso pendiente de todo el proyecto.
 2. Compatibilidad con navegadores adicionales — Firefox ya verificado; falta Safari y Edge.
 3. Resize/Reflow (dentro de WCAG, pero pospuesto deliberadamente) — se abordará junto con el diseño responsive del proyecto.
