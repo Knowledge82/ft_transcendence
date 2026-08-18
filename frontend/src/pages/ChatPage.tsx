@@ -15,6 +15,9 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 // Same parsing used in ActivityTicker/NotificationBell — turns
 // **name** markers into bold gold spans, for the ephemeral system
 // announcements rendered inline in the general channel
+// Must stay in sync with MAX_MESSAGE_LENGTH in backend/src/chat/chat.service.ts
+const MAX_MESSAGE_LENGTH = 500;
+
 function renderMessage(message: string) {
   const parts = message.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, i) => {
@@ -615,7 +618,13 @@ export function ChatPage() {
           </div>
         )}
 
-        <form onSubmit={handleSend} className="p-4 border-t border-border-default flex gap-2">
+        <div className="px-4 pt-2 text-end">
+          <span className="text-xs text-cream-400" dir="ltr">
+            {draft.length}/{MAX_MESSAGE_LENGTH}
+          </span>
+        </div>
+
+        <form onSubmit={handleSend} className="p-4 pt-1 border-t border-border-default flex gap-2">
           {!isGeneralChannelSelected && (
             <>
               <input
@@ -639,8 +648,9 @@ export function ChatPage() {
           <Input
             type="text"
             value={draft}
-            onChange={(e) => setDraft(e.target.value)}
+            onChange={(e) => setDraft(e.target.value.slice(0, MAX_MESSAGE_LENGTH))}
             placeholder={t('chat.messagePlaceholder')}
+            maxLength={MAX_MESSAGE_LENGTH}
             className="flex-1"
           />
           <Button type="submit">{t('chat.send')}</Button>

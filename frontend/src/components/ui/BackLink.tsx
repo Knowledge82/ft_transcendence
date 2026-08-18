@@ -1,27 +1,45 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 interface BackLinkProps {
-  to: string;
+  to?: string;
   label?: string;
   className?: string;
 }
 
-export function BackLink({ to, label, className = '' }: BackLinkProps) {
-  const { t } = useTranslation();
+function ArrowAndLabel({ label }: { label: string }) {
   return (
-    <Link
-      to={to}
-      className={`text-base text-gold-500 hover:text-gold-400 inline-flex items-center gap-1 ${className}`}
-    >
-      {/* The arrow is rendered separately from the translated text, and
-          flipped via CSS (not baked into any translation string) — this
-          way it correctly mirrors for RTL without mixing content and
-          layout concerns, unlike our earlier stopgap approach */}
+    <>
       <span aria-hidden="true" className="rtl:scale-x-[-1]">
         ←
       </span>
-      {label ?? t('common.back')}
+      {label}
+    </>
+  );
+}
+
+export function BackLink({ to, label, className = '' }: BackLinkProps) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const resolvedLabel = label ?? t('common.back');
+  const sharedClassName = `text-base text-gold-500 hover:text-gold-400 inline-flex items-center gap-1 ${className}`;
+
+  // When no fixed destination is given, this becomes a REAL "go back"
+  // button (browser history), instead of always landing on one hardcoded
+  // page regardless of where the person actually came from — used on
+  // pages reachable from more than one place, like Privacy/Terms (linked
+  // from the landing page AND from the footer on other pages).
+  if (!to) {
+    return (
+      <button onClick={() => navigate(-1)} className={sharedClassName}>
+        <ArrowAndLabel label={resolvedLabel} />
+      </button>
+    );
+  }
+
+  return (
+    <Link to={to} className={sharedClassName}>
+      <ArrowAndLabel label={resolvedLabel} />
     </Link>
   );
 }

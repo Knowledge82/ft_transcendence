@@ -4,6 +4,11 @@ import { unlink } from 'fs/promises';
 import { join } from 'path';
 
 const GENERAL_CHANNEL_NAME = 'general';
+// Keep in sync with MAX_MESSAGE_LENGTH in frontend/src/pages/ChatPage.tsx —
+// the frontend enforces this via the input's maxLength (so a normal user
+// physically can't type or paste past it), this check exists purely as a
+// backstop against anyone bypassing the frontend and hitting the socket directly
+const MAX_MESSAGE_LENGTH = 500;
 const DELETED_MESSAGE_SELECT = {
   sender: { select: { id: true, displayName: true, avatarUrl: true } },
   deletedBy: { select: { id: true, displayName: true, role: true, gender: true } },
@@ -146,6 +151,12 @@ export class ChatService {
     const allowed = await this.isParticipant(conversationId, senderId);
     if (!allowed) {
       throw new ForbiddenException('You are not part of this conversation');
+    }
+
+    if (content.length > MAX_MESSAGE_LENGTH) {
+      throw new ForbiddenException(
+        `El mensaje es demasiado largo (máximo ${MAX_MESSAGE_LENGTH} caracteres)`,
+      );
     }
 
     if (attachment) {

@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next';
-import { ROUTES } from '../routes';
 import { PageContainer, BackLink } from '../components/ui';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { getDateLocale } from '../utils/dateLocale';
@@ -12,7 +11,7 @@ export function TermsOfServicePage() {
     <PageContainer className="px-4 py-16">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center">
-          <BackLink to={ROUTES.LANDING} />
+          <BackLink />
           <LanguageSwitcher />
         </div>
 
