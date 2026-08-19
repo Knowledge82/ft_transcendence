@@ -85,3 +85,61 @@ body {
 .animate-text-pulse-safe {
   animation: text-pulse-safe 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Custom scrollbar, matching the project's dark/gold palette instead of
+   the browser's default (which clashed badly with the theme). Uses the
+   same CSS variables already defined in the @theme block above, so it
+   automatically stays in sync if the palette ever changes. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-ink-950);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-default);
+  border-radius: 9999px;
+  border: 2px solid var(--color-ink-950);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-500);
+}
+
+/* Firefox uses a completely different (non-pseudo-element) API */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-default) var(--color-ink-950);
+}
+
+/* Custom scrollbar, matching the project's dark/gold palette instead of
+   the browser's default (which clashed badly with the theme). Uses the
+   same CSS variables already defined in the @theme block above, so it
+   automatically stays in sync if the palette ever changes. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-ink-950);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-default);
+  border-radius: 9999px;
+  border: 2px solid var(--color-ink-950);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-500);
+}
+
+/* Firefox uses a completely different (non-pseudo-element) API */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-default) var(--color-ink-950);
+}

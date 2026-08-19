@@ -44,6 +44,7 @@
     "confessional": "غرفة الاعتراف",
     "library": "المكتبة",
     "sanctuary": "الملاذ",
+    "organizations": "الفصائل",
     "logout": "تسجيل الخروج",
     "changeAvatar": "تغيير الصورة الرمزية",
     "uploading": "جارٍ الرفع...",
@@ -163,6 +164,37 @@
     "notAllowedEdit": "فقط الكاتب أو أسقف يمكنه تصحيح هذه الرسالة.",
     "notAllowedNew": "ليس لديك الرتبة اللازمة لكتابة الرسائل.",
     "defaultRejection": "رفض الأوراكل هذا الطلب."
+  },
+  "organizations": {
+    "title": "الفصائل",
+    "createButton": "تأسيس فصيل",
+    "empty": "لا يوجد أي فصيل بعد.",
+    "memberCount_one": "عضو واحد",
+    "memberCount_other": "{{count}} عضو",
+    "noManifesto": "لا يوجد لهذا الفصيل بيان بعد.",
+    "notAllowedCreate": "ليس لديك الرتبة اللازمة لتأسيس فصيل.",
+    "createHeading": "تأسيس فصيل جديد",
+    "nameLabel": "الاسم",
+    "colorLabel": "اللون",
+    "creating": "جارٍ التأسيس...",
+    "createSubmit": "تأسيس",
+    "createError": "تعذر تأسيس الفصيل.",
+    "notFound": "الفصيل غير موجود",
+    "manifestoHeading": "البيان",
+    "editManifesto": "تعديل البيان",
+    "editName": "تعديل",
+    "membersHeading": "الأعضاء",
+    "leaderBadge": "القائد",
+    "removeMember": "طرد",
+    "join": "انضمام",
+    "joining": "جارٍ الانضمام...",
+    "leave": "مغادرة",
+    "confirmLeave": "هل أنت متأكد أنك تريد مغادرة هذا الفصيل؟",
+    "confirmRemoveMember": "هل أنت متأكد أنك تريد طرد هذا العضو من الفصيل؟",
+    "confirmDelete": "هل أنت متأكد أنك تريد حل هذا الفصيل؟ لا يمكن التراجع عن هذا الإجراء.",
+    "deleteButton": "حل الفصيل",
+    "updateError": "تعذر حفظ التغيير.",
+    "joinError": "تعذر الانضمام إلى الفصيل."
   },
   "legal": {
     "lastUpdated": "آخر تحديث: {{date}}",
@@ -288,6 +320,8 @@
     "makefileTooLong": "ملف Makefile طويل جدًا (الحد الأقصى {{max}} حرفًا).",
     "streamingNotSupported": "متصفحك لا يدعم بث الردود.",
     "cannotChangeOwnRole": "لا يمكنك تغيير رتبتك الخاصة — اطلب من أسقف آخر القيام بذلك.",
-    "cannotDeleteOwnAccount": "لا يمكنك حذف حسابك الخاص — اطلب من أسقف آخر القيام بذلك."
+    "cannotDeleteOwnAccount": "لا يمكنك حذف حسابك الخاص — اطلب من أسقف آخر القيام بذلك.",
+    "insufficientRankForOrganization": "يجب أن تكون محققًا على الأقل لتأسيس فصيل.",
+    "alreadyInOrganization": "أنت بالفعل عضو في فصيل. يجب أن تغادره قبل الانضمام إلى فصيل آخر أو تأسيسه."
   }
 }

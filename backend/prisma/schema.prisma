@@ -28,25 +28,14 @@ enum Gender {
   FEMENINO
 }
 
-// Modelo de usuario: datos base de autenticación y perfil
 model User {
   id           Int      @id @default(autoincrement())
   email        String   @unique
-  // Optional now — accounts created via 42 OAuth never set a password;
-  // they can only log in by going through 42 again. login() checks for
-  // a null passwordHash explicitly and rejects cleanly, instead of
-  // handing bcrypt.compare a null value.
   passwordHash String?
-  // Links this account to a specific 42 intranet user id, used to
-  // recognize a returning OAuth login — null for anyone who registered
-  // the normal way and never connected their 42 account.
   intraId      Int?     @unique
   displayName  String?  @unique
   avatarUrl    String?
   role         Role     @default(HERMANO)
-  // Used only to pick the grammatically correct (masculine/feminine) form
-  // of the role name when displaying it — the role's actual permissions
-  // never depend on this
   gender       Gender   @default(MASCULINO)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -61,6 +50,11 @@ model User {
   deletedMessages  Message[] @relation("MessageDeletedBy")
   notifications Notification[]
   articles      Article[]
+
+  // A user belongs to at most ONE faction at a time — enforced here at
+  // the database level by making userId unique on OrganizationMember,
+  // not just checked in application code
+  organizationMembership OrganizationMember?
 }
 
 model RefreshToken {
@@ -91,6 +85,11 @@ model Conversation {
   type      ConversationType
   name      String?
   createdAt DateTime         @default(now())
+
+  // Set only for a faction's own dedicated channel — @unique because a
+  // faction has exactly one channel, never more than one
+  organizationId Int?          @unique
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   participants ConversationParticipant[]
   messages     Message[]
@@ -152,5 +151,47 @@ model Article {
   authorId  Int
   createdAt DateTime @default(now())
 
+  // null = a normal public library article (current behavior, unchanged).
+  // Set = visible only to members of that faction — an "internal"
+  // treatise, the same infrastructure just scoped differently.
+  organizationId Int?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+// A faction within the church — Radical, Snob, etc. Only an ARZOBISPO
+// can create one; editing/deleting is allowed for a current ARZOBISPO
+// OR whoever is this specific faction's own leader, regardless of that
+// person's current global rank (so a demoted founder still keeps the
+// ability to dissolve the faction they created).
+model Organization {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  manifesto String?
+  // Hex color used for the small badge shown next to a member's name
+  color     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members      OrganizationMember[]
+  conversation Conversation?
+  articles     Article[]
+}
+
+// Join table for faction membership — userId is @unique (not a
+// composite key with organizationId) specifically to enforce "at most
+// one faction per person" at the database level.
+model OrganizationMember {
+  id             Int      @id @default(autoincrement())
+  organizationId Int
+  userId         Int      @unique
+  // Faction-scoped leadership — deliberately separate from the global
+  // Role enum. This is what lets a demoted ARZOBISPO retain control
+  // over a faction they founded.
+  isLeader       Boolean  @default(false)
+  joinedAt       DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -39,7 +39,18 @@ export class ChatService {
     const participants = await this.prisma.conversationParticipant.findMany({
       where: { conversationId: general.id },
       include: {
-        user: { select: { id: true, displayName: true, avatarUrl: true } },
+        user: {
+          select: {
+            id: true,
+            displayName: true,
+            avatarUrl: true,
+            organizationMembership: {
+              select: {
+                organization: { select: { id: true, name: true, color: true } },
+              },
+            },
+          },
+        },
       },
     });
     return participants.map((p) => p.user);

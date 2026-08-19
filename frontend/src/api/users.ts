@@ -8,6 +8,10 @@ export interface PublicProfile {
   gender: 'MASCULINO' | 'FEMENINO';
   isOnline: boolean;
   createdAt: string;
+  organizationMembership: {
+    isLeader: boolean;
+    organization: { id: number; name: string; color: string };
+  } | null;
 }
 
 export async function getPublicProfile(userId: number): Promise<PublicProfile> {

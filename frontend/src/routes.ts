@@ -16,4 +16,7 @@ export const ROUTES = {
   LIBRARY: '/biblioteca',
   NEW_ARTICLE: '/biblioteca/nueva',
   ARTICLE: (articleId: number | string) => `/biblioteca/${articleId}`,
+  ORGANIZATIONS: '/facciones',
+  NEW_ORGANIZATION: '/facciones/nueva',
+  ORGANIZATION: (organizationId: number | string) => `/facciones/${organizationId}`,
 } as const;

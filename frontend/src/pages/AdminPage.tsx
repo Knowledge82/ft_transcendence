@@ -36,7 +36,7 @@ export function AdminPage() {
   }, []);
 
   async function handleRoleChange(userId: number, newRole: Role) {
-    setRoleChangeError(null);
+    setActionError(null);
     try {
       const updated = await changeUserRole(userId, newRole);
       setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: updated.role } : u)));

@@ -34,6 +34,9 @@ export interface Member {
   displayName: string | null;
   avatarUrl: string | null;
   isOnline: boolean;
+  organizationMembership: {
+    organization: { id: number; name: string; color: string };
+  } | null;
 }
 
 export interface DirectConversationSummary {

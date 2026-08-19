@@ -363,8 +363,8 @@ export function ChatPage() {
   }
 
   return (
-    <PageContainer className="flex flex-col" showFrame={false}>
-      <header className="grid grid-cols-3 items-center px-4 py-2 bg-ink-900 border-b border-border-default">
+    <PageContainer className="flex flex-col h-screen overflow-hidden" showFrame={false}>
+      <header className="flex-shrink-0 grid grid-cols-3 items-center px-4 py-2 bg-ink-900 border-b border-border-default">
         <div>
           <LanguageSwitcher />
         </div>
@@ -377,8 +377,8 @@ export function ChatPage() {
         </span>
       </header>
 
-      <div className="flex flex-1">
-      <aside className="w-64 bg-ink-900 border-e border-border-default flex flex-col">
+      <div className="flex flex-1 min-h-0">
+      <aside className="w-64 bg-ink-900 border-e border-border-default flex flex-col overflow-y-auto">
         <div className="p-4 border-b border-border-default">
           <BackLink to={ROUTES.HOME} />
         </div>
@@ -487,7 +487,7 @@ export function ChatPage() {
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col min-h-0">
         <div
           className="flex-1 overflow-y-auto p-4 space-y-3"
           aria-live="polite"

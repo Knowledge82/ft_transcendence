@@ -44,6 +44,7 @@
     "confessional": "El Confesionario",
     "library": "Biblioteca",
     "sanctuary": "Santuario",
+    "organizations": "Facciones",
     "logout": "Cerrar sesión",
     "changeAvatar": "Cambiar avatar",
     "uploading": "Subiendo...",
@@ -163,6 +164,37 @@
     "notAllowedEdit": "Solo el autor o un Arzobispo pueden corregir este tratado.",
     "notAllowedNew": "No tienes el rango necesario para escribir tratados.",
     "defaultRejection": "El Oráculo ha rechazado esta petición."
+  },
+  "organizations": {
+    "title": "Facciones",
+    "createButton": "Fundar facción",
+    "empty": "Todavía no existe ninguna facción.",
+    "memberCount_one": "{{count}} miembro",
+    "memberCount_other": "{{count}} miembros",
+    "noManifesto": "Esta facción todavía no tiene manifiesto.",
+    "notAllowedCreate": "No tienes el rango necesario para fundar una facción.",
+    "createHeading": "Fundar una nueva facción",
+    "nameLabel": "Nombre",
+    "colorLabel": "Color",
+    "creating": "Fundando...",
+    "createSubmit": "Fundar",
+    "createError": "No se pudo fundar la facción.",
+    "notFound": "Facción no encontrada",
+    "manifestoHeading": "Manifiesto",
+    "editManifesto": "Editar manifiesto",
+    "editName": "Editar",
+    "membersHeading": "Miembros",
+    "leaderBadge": "Líder",
+    "removeMember": "Expulsar",
+    "join": "Unirse",
+    "joining": "Uniéndose...",
+    "leave": "Abandonar",
+    "confirmLeave": "¿Seguro que quieres abandonar esta facción?",
+    "confirmRemoveMember": "¿Seguro que quieres expulsar a este miembro de la facción?",
+    "confirmDelete": "¿Seguro que quieres disolver esta facción? Esta acción no se puede deshacer.",
+    "deleteButton": "Disolver facción",
+    "updateError": "No se pudo guardar el cambio.",
+    "joinError": "No se pudo unir a la facción."
   },
   "legal": {
     "lastUpdated": "Última actualización: {{date}}",
@@ -288,6 +320,8 @@
     "makefileTooLong": "El Makefile es demasiado largo (máximo {{max}} caracteres).",
     "streamingNotSupported": "Tu navegador no admite streaming de respuestas.",
     "cannotChangeOwnRole": "No puedes cambiar tu propio rango — pide a otro Arzobispo que lo haga.",
-    "cannotDeleteOwnAccount": "No puedes eliminar tu propia cuenta — pide a otro Arzobispo que lo haga."
+    "cannotDeleteOwnAccount": "No puedes eliminar tu propia cuenta — pide a otro Arzobispo que lo haga.",
+    "insufficientRankForOrganization": "Necesitas ser al menos Inquisidor para fundar una facción.",
+    "alreadyInOrganization": "Ya perteneces a una facción. Debes abandonarla antes de unirte o fundar otra."
   }
 }

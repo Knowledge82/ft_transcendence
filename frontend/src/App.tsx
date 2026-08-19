@@ -19,6 +19,9 @@ import { NewArticlePage } from './pages/NewArticlePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { OAuthSuccessPage } from './pages/OAuthSuccessPage';
 import { OAuthCompletePage } from './pages/OAuthCompletePage';
+import { OrganizationsListPage } from './pages/OrganizationsListPage';
+import { NewOrganizationPage } from './pages/NewOrganizationPage';
+import { OrganizationDetailPage } from './pages/OrganizationDetailPage';
 function App() {
   return (
     <BrowserRouter>
@@ -109,6 +112,32 @@ function App() {
               />
               <Route path="/oauth/exito" element={<OAuthSuccessPage />} />
               <Route path="/oauth/completar" element={<OAuthCompletePage />} />
+              <Route
+                path="/facciones"
+                element={
+                  <ProtectedRoute>
+                    <OrganizationsListPage />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Same ordering rule as /biblioteca/nueva — "nueva" must
+                  come before the :id route or it gets captured as an id */}
+              <Route
+                path="/facciones/nueva"
+                element={
+                  <ProtectedRoute>
+                    <NewOrganizationPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/facciones/:id"
+                element={
+                  <ProtectedRoute>
+                    <OrganizationDetailPage />
+                  </ProtectedRoute>
+                }
+              />
               {/* Catch-all — MUST stay last, React Router matches routes in
                   declaration order and "*" would otherwise swallow every
                   other path declared after it */}

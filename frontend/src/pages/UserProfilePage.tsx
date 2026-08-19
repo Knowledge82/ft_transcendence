@@ -14,6 +14,7 @@ import {
   Avatar,
   StatusDot,
   RoleBadge,
+  OrganizationBadge,
   Button,
   BackLink,
 } from '../components/ui';
@@ -108,6 +109,9 @@ export function UserProfilePage() {
 
           <div className="mb-6">
             <RoleBadge role={profile.role} gender={profile.gender} />
+            <OrganizationBadge
+              organization={profile.organizationMembership?.organization ?? null}
+            />
           </div>
 
           <div className="flex gap-3 justify-center">

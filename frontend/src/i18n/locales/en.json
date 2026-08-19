@@ -44,6 +44,7 @@
     "confessional": "The Confessional",
     "library": "Library",
     "sanctuary": "Sanctuary",
+    "organizations": "Factions",
     "logout": "Log out",
     "changeAvatar": "Change avatar",
     "uploading": "Uploading...",
@@ -163,6 +164,37 @@
     "notAllowedEdit": "Only the author or an Archbishop can correct this treatise.",
     "notAllowedNew": "You don't have the rank required to write treatises.",
     "defaultRejection": "The Oracle has rejected this request."
+  },
+  "organizations": {
+    "title": "Factions",
+    "createButton": "Found a faction",
+    "empty": "No faction exists yet.",
+    "memberCount_one": "{{count}} member",
+    "memberCount_other": "{{count}} members",
+    "noManifesto": "This faction has no manifesto yet.",
+    "notAllowedCreate": "You don't have the rank required to found a faction.",
+    "createHeading": "Found a new faction",
+    "nameLabel": "Name",
+    "colorLabel": "Color",
+    "creating": "Founding...",
+    "createSubmit": "Found",
+    "createError": "Couldn't found the faction.",
+    "notFound": "Faction not found",
+    "manifestoHeading": "Manifesto",
+    "editManifesto": "Edit manifesto",
+    "editName": "Edit",
+    "membersHeading": "Members",
+    "leaderBadge": "Leader",
+    "removeMember": "Expel",
+    "join": "Join",
+    "joining": "Joining...",
+    "leave": "Leave",
+    "confirmLeave": "Are you sure you want to leave this faction?",
+    "confirmRemoveMember": "Are you sure you want to expel this member from the faction?",
+    "confirmDelete": "Are you sure you want to dissolve this faction? This action cannot be undone.",
+    "deleteButton": "Dissolve faction",
+    "updateError": "Couldn't save the change.",
+    "joinError": "Couldn't join the faction."
   },
   "legal": {
     "lastUpdated": "Last updated: {{date}}",
@@ -288,6 +320,8 @@
     "makefileTooLong": "The Makefile is too long (maximum {{max}} characters).",
     "streamingNotSupported": "Your browser doesn't support response streaming.",
     "cannotChangeOwnRole": "You can't change your own rank — ask another Archbishop to do it.",
-    "cannotDeleteOwnAccount": "You can't delete your own account — ask another Archbishop to do it."
+    "cannotDeleteOwnAccount": "You can't delete your own account — ask another Archbishop to do it.",
+    "insufficientRankForOrganization": "You need to be at least an Inquisitor to found a faction.",
+    "alreadyInOrganization": "You already belong to a faction. You must leave it before joining or founding another."
   }
 }

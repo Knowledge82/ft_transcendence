@@ -6,11 +6,12 @@ import { useSocket } from '../context/SocketContext';
 import { apiClient } from '../api/client';
 import { listFriends } from '../api/friends';
 import { Footer } from '../components/Footer';
-import { PageContainer, Card, LoadingScreen, Avatar, RoleBadge, Input, Button } from '../components/ui';
+import { PageContainer, Card, LoadingScreen, Avatar, RoleBadge, OrganizationBadge, Input, Button } from '../components/ui';
 import { ActivityTicker } from '../components/ActivityTicker';
 import { NotificationBell } from '../components/NotificationBell';
 import { RandomArticles } from '../components/RandomArticles';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { ROUTES } from '../routes';
 
 interface Profile {
   id: number;
@@ -19,6 +20,10 @@ interface Profile {
   avatarUrl: string | null;
   role: 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO';
   gender: 'MASCULINO' | 'FEMENINO';
+  organizationMembership: {
+    isLeader: boolean;
+    organization: { id: number; name: string; color: string };
+  } | null;
 }
 
 export function HomePage() {
@@ -133,11 +138,6 @@ export function HomePage() {
 
   return (
     <PageContainer className="flex flex-col">
-      {/* Visually hidden — the true page-level heading, placed before
-          any other heading in DOM order (WCAG 2.4.6 / 1.3.1). The
-          visible profile-name heading below is demoted to h2, since it
-          now correctly sits as a sibling section alongside the ticker
-          and library widgets, not the page's top-level heading. */}
       <h1 className="sr-only">{t('home.pageTitle')}</h1>
       <div className="flex-1 px-4 py-10">
         <div className="max-w-md mx-auto">
@@ -221,12 +221,19 @@ export function HomePage() {
           )}
 
           <p className="text-sm text-cream-400 mb-2">{profile.email}</p>
-          <div
-            className={`mb-6 inline-block rounded transition-shadow ${
-              justChangedRole ? 'animate-[pulse-glow_0.8s_ease-in-out_2]' : ''
-            }`}
-          >
-            <RoleBadge role={profile.role} gender={profile.gender} />
+          <div className="mb-6 space-y-1">
+            <div
+              className={`inline-block rounded transition-shadow ${
+                justChangedRole ? 'animate-[pulse-glow_0.8s_ease-in-out_2]' : ''
+              }`}
+            >
+              <RoleBadge role={profile.role} gender={profile.gender} />
+            </div>
+            {profile.organizationMembership && (
+              <div>
+                <OrganizationBadge organization={profile.organizationMembership.organization} />
+              </div>
+            )}
           </div>
 
           <div className="flex justify-center gap-8 mb-6">
@@ -258,6 +265,12 @@ export function HomePage() {
               className="bg-ink-800 text-gold-500 font-medium px-4 py-2 rounded-md hover:bg-ink-800/70 transition-colors"
             >
               {t('home.library')}
+            </Link>
+            <Link
+              to={ROUTES.ORGANIZATIONS}
+              className="bg-ink-800 text-gold-500 font-medium px-4 py-2 rounded-md hover:bg-ink-800/70 transition-colors"
+            >
+              {t('home.organizations')}
             </Link>
             {profile.role === 'ARZOBISPO' && (
               <Link

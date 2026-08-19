@@ -6,6 +6,8 @@ const CODE_TO_KEY: Record<string, string> = {
   STREAMING_NOT_SUPPORTED: 'streamingNotSupported',
   CANNOT_CHANGE_OWN_ROLE: 'cannotChangeOwnRole',
   CANNOT_DELETE_OWN_ACCOUNT: 'cannotDeleteOwnAccount',
+  INSUFFICIENT_RANK_FOR_ORGANIZATION: 'insufficientRankForOrganization',
+  ALREADY_IN_ORGANIZATION: 'alreadyInOrganization',
 };
 
 interface ApiErrorData {

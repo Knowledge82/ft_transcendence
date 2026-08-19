@@ -34,8 +34,8 @@
 | Major: Cumplimiento WCAG 2.1 AA completo | ✅ (auditoría completa: teclado/foco, ARIA, regiones en vivo, alt, jerarquía de encabezados, contraste de texto y no textual, tamaño de zonas táctiles, autocomplete, enlace de salto — verificado con Lighthouse) | 2 |
 | Minor: Soporte multi-idioma (3+ idiomas, i18n, selector) | ✅ (español/inglés/árabe — interfaz completa, crónica pública, notificaciones, códigos de error, y respuestas de la IA generadas en el idioma activo) | 1 |
 | Minor: Soporte RTL | ✅ (espejado completo auditado en todas las páginas y componentes — propiedades lógicas de CSS, excepciones documentadas para controles de utilidad persistentes y contenido no localizable) | 1 |
-| Minor: Compatibilidad con navegadores adicionales | ⏳ (Firefox probado y verificado sin problemas; Safari y Edge pendientes) | 0 |
-| Subtotal Accessibility/i18n | | 4 |
+| Minor: Compatibilidad con navegadores adicionales | ✅ (verificado en Chrome, Firefox y Edge sin problemas; Safari queda sin probar por falta de acceso a hardware de Apple) | 1 |
+| Subtotal Accessibility/i18n | | 5 |
 
 ---
 
@@ -47,7 +47,7 @@
 | Minor: Estadísticas de juego e historial de partidas | 🚫 | 0 |
 | Minor: Autenticación remota OAuth 2.0 | ✅ (inicio de sesión con 42 — flujo completo, incluida la finalización de registro para elegir género en el primer acceso) | 1 |
 | Major: Sistema de permisos avanzado (CRUD de usuarios, gestión de roles, vistas/acciones según rol) | ✅ | 2 |
-| Major: Sistema de organizaciones (crear/editar/eliminar, añadir/quitar usuarios, acciones dentro de la organización) | ⏳ | 0 |
+| Major: Sistema de organizaciones (crear/editar/eliminar, añadir/quitar usuarios, acciones dentro de la organización) | ⏳ (en curso — CRUD, membresía y distintivo de facción ya implementados; pendientes la crónica pública, el canal de chat propio, y los artículos exclusivos de facción) | 0 |
 | Minor: 2FA completo | ⏳ | 0 |
 | Minor: Panel de analíticas de actividad de usuario | ⏳ | 0 |
 | Subtotal User Management | | 5 |
@@ -75,10 +75,10 @@
 | Módulo | Puntos conseguidos |
 |---|---|
 | Web | 11 |
-| Accessibility/i18n | 4 |
+| Accessibility/i18n | 5 |
 | User Management | 5 |
 | Artificial Intelligence | 3 |
-| Total | 23 |
+| Total | 24 |
 
 ## Decisiones conscientes de no implementar (🚫)
 
@@ -96,6 +96,6 @@
 
 ## Huecos abiertos más relevantes de cara a la defensa
 
-1. Organizaciones (User Management, Major, 2 puntos) — no se ha empezado. Es el Major con más peso pendiente de todo el proyecto.
-2. Compatibilidad con navegadores adicionales — Firefox ya verificado; falta Safari y Edge.
+1. Organizaciones (User Management, Major, 2 puntos) — en curso; es el Major con más peso pendiente de todo el proyecto.
+2. Safari — el único navegador todavía sin verificar, por falta de acceso a hardware de Apple.
 3. Resize/Reflow (dentro de WCAG, pero pospuesto deliberadamente) — se abordará junto con el diseño responsive del proyecto.

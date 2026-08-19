@@ -10,6 +10,14 @@ const SELF_PROFILE_SELECT = {
   role: true,
   gender: true,
   createdAt: true,
+  organizationMembership: {
+    select: {
+      isLeader: true,
+      organization: {
+        select: { id: true, name: true, color: true },
+      },
+    },
+  },
 };
 
 const PUBLIC_PROFILE_SELECT = {
@@ -19,6 +27,14 @@ const PUBLIC_PROFILE_SELECT = {
   role: true,
   gender: true,
   createdAt: true,
+  organizationMembership: {
+    select: {
+      isLeader: true,
+      organization: {
+        select: { id: true, name: true, color: true },
+      },
+    },
+  },
 };
 
 @Injectable()
@@ -67,9 +83,6 @@ export class UsersService {
     });
   }
 
-  // Resets avatarUrl back to null — the frontend's Avatar component
-  // already knows to show the default image whenever avatarUrl is null,
-  // so there's nothing else to configure here
   async removeAvatar(userId: number) {
     return this.prisma.user.update({
       where: { id: userId },
