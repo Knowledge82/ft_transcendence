@@ -92,3 +92,6 @@ if (!user || !user.passwordHash) {
 ```
 
 El mensaje es deliberadamente el mismo en ambos casos — que el email no exista, o que exista pero sin contraseña — para no revelar cuál de las dos situaciones es la real.
+
+
+[Peculiaridades con deploy de proyecto fuera del campus](./docs-oauth-42-network-setup.md)
