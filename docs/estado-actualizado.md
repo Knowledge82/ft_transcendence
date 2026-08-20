@@ -47,10 +47,10 @@
 | Minor: Estadísticas de juego e historial de partidas | 🚫 | 0 |
 | Minor: Autenticación remota OAuth 2.0 | ✅ (inicio de sesión con 42 — flujo completo, incluida la finalización de registro para elegir género en el primer acceso) | 1 |
 | Major: Sistema de permisos avanzado (CRUD de usuarios, gestión de roles, vistas/acciones según rol) | ✅ | 2 |
-| Major: Sistema de organizaciones (crear/editar/eliminar, añadir/quitar usuarios, acciones dentro de la organización) | ⏳ (en curso — CRUD, membresía y distintivo de facción ya implementados; pendientes la crónica pública, el canal de chat propio, y los artículos exclusivos de facción) | 0 |
+| Major: Sistema de organizaciones (crear/editar/eliminar, añadir/quitar usuarios, acciones dentro de la organización) | ✅ (facciones internas — CRUD completo, membresía única por persona, liderazgo propio de cada facción independiente del rango global, distintivo de color junto al rango, canal de chat dedicado, artículos internos exclusivos de sus miembros, imagen de cabecera personalizable, y cuatro tipos de evento en la crónica pública) | 2 |
 | Minor: 2FA completo | ⏳ | 0 |
 | Minor: Panel de analíticas de actividad de usuario | ⏳ | 0 |
-| Subtotal User Management | | 5 |
+| Subtotal User Management | | 7 |
 
 ---
 
@@ -62,7 +62,7 @@
 | Major: Sistema RAG completo | 🚫 | 0 |
 | Major: Interfaz completa de sistema LLM (texto/streaming, manejo de errores, rate limiting) | ✅ (el Confesor, sobre Groq) | 2 |
 | Major: Sistema de recomendación con ML | 🚫 | 0 |
-| Minor: Moderación de contenido por IA | ✅ (el Oráculo, revisión de artículos) | 1 |
+| Minor: Moderación de contenido por IA | ✅ (el Oráculo, revisión de artículos — pendiente un ajuste fino en la regla de decoro para tratados internos de facción, ver huecos abiertos) | 1 |
 | Minor: Integración de voz/habla | 🚫 | 0 |
 | Minor: Análisis de sentimiento | 🚫 | 0 |
 | Minor: Reconocimiento y etiquetado de imágenes | 🚫 | 0 |
@@ -76,9 +76,9 @@
 |---|---|
 | Web | 11 |
 | Accessibility/i18n | 5 |
-| User Management | 5 |
+| User Management | 7 |
 | Artificial Intelligence | 3 |
-| Total | 24 |
+| Total | 26 |
 
 ## Decisiones conscientes de no implementar (🚫)
 
@@ -96,6 +96,6 @@
 
 ## Huecos abiertos más relevantes de cara a la defensa
 
-1. Organizaciones (User Management, Major, 2 puntos) — en curso; es el Major con más peso pendiente de todo el proyecto.
+1. Ajuste fino de la moderación por IA para tratados internos de facción — el Oráculo sigue rechazando, en algunos casos, contenido que debería aprobar dentro del tono más agresivo propio de ciertas facciones. La distinción entre regla pública/interna ya existe en el prompt, pero necesita más trabajo.
 2. Safari — el único navegador todavía sin verificar, por falta de acceso a hardware de Apple.
 3. Resize/Reflow (dentro de WCAG, pero pospuesto deliberadamente) — se abordará junto con el diseño responsive del proyecto.
