@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   getOrganizationById,
@@ -10,6 +10,8 @@ import {
   removeOrganizationMember,
 } from '../api/organizations';
 import type { OrganizationDetail } from '../api/organizations';
+import { getOrganizationArticles } from '../api/articles';
+import type { Article } from '../api/articles';
 import { apiClient } from '../api/client';
 import { ROUTES } from '../routes';
 import {
@@ -55,6 +57,8 @@ export function OrganizationDetailPage() {
 
   const [isJoining, setIsJoining] = useState(false);
 
+  const [orgArticles, setOrgArticles] = useState<Article[]>([]);
+
   function loadOrg(orgId: number) {
     return getOrganizationById(orgId).then((data) => {
       setOrg(data);
@@ -80,6 +84,17 @@ export function OrganizationDetailPage() {
   const isMember = ownMembership !== null;
   const isOwnLeader = ownMembership?.isLeader ?? false;
   const canManage = isArzobispo || isOwnLeader;
+  const canWriteArticle = isArzobispo || (ownRole === 'INQUISIDOR' && isMember);
+  const canViewArticles = isArzobispo || isMember;
+
+  useEffect(() => {
+    if (!org || !canViewArticles) {
+      return;
+    }
+    getOrganizationArticles(org.id)
+      .then(setOrgArticles)
+      .catch(() => setOrgArticles([]));
+  }, [org?.id, canViewArticles]);
 
   function handleApiError(err: unknown, fallbackKey: string) {
     const data = (err as { response?: { data?: { code?: string } } })?.response?.data;
@@ -309,6 +324,39 @@ export function OrganizationDetailPage() {
               </Button>
             )}
           </div>
+
+          {canViewArticles && (
+            <div className="mb-6 pb-6 border-b border-border-default">
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-sm uppercase tracking-wide text-cream-400">
+                  {t('organizations.articlesHeading')}
+                </h2>
+                {canWriteArticle && (
+                  <Link
+                    to={`${ROUTES.NEW_ARTICLE}?organizationId=${org.id}`}
+                    className="text-xs text-gold-500 hover:text-gold-400"
+                  >
+                    {t('organizations.writeArticle')}
+                  </Link>
+                )}
+              </div>
+              {orgArticles.length === 0 ? (
+                <p className="text-sm text-cream-400">{t('organizations.noArticles')}</p>
+              ) : (
+                <div className="space-y-1">
+                  {orgArticles.map((article) => (
+                    <Link
+                      key={article.id}
+                      to={ROUTES.ARTICLE(article.id)}
+                      className="block text-sm text-cream-100 hover:text-gold-500 transition-colors truncate"
+                    >
+                      {article.title}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <div>
             <h2 className="text-sm uppercase tracking-wide text-cream-400 mb-2">

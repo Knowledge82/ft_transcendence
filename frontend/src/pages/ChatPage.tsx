@@ -49,6 +49,21 @@ export function ChatPage() {
     displayName: string | null;
     avatarUrl: string | null;
   } | null>(null);
+  // The faction whose dedicated channel is currently open, if any
+  const [activeOrganization, setActiveOrganization] = useState<{
+    id: number;
+    name: string;
+    color: string;
+  } | null>(null);
+  // The faction the CURRENT user belongs to (regardless of which
+  // conversation is open right now) — used to show its channel button
+  // in the sidebar at all
+  const [ownOrganization, setOwnOrganization] = useState<{
+    id: number;
+    name: string;
+    color: string;
+    conversation: { id: number } | null;
+  } | null>(null);
   const [sentRequests, setSentRequests] = useState<Set<number>>(new Set());
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
@@ -88,6 +103,8 @@ export function ChatPage() {
   // switches language without re-selecting the conversation
   const headerLabel = activeDmTarget
     ? activeDmTarget.displayName ?? userFallback(activeDmTarget.id)
+    : activeOrganization
+    ? activeOrganization.name
     : t('chat.generalChannel');
 
   useEffect(() => {
@@ -97,7 +114,19 @@ export function ChatPage() {
       getGeneralMembers(),
       listPendingRequests(),
       getDirectConversations(),
-      apiClient.get<{ id: number; displayName: string | null; role: string }>('/users/me'),
+      apiClient.get<{
+        id: number;
+        displayName: string | null;
+        role: string;
+        organizationMembership: {
+          organization: {
+            id: number;
+            name: string;
+            color: string;
+            conversation: { id: number } | null;
+          };
+        } | null;
+      }>('/users/me'),
     ])
       .then(([general, friendsList, membersList, pending, directList, me]) => {
         setGeneralChannel(general);
@@ -109,6 +138,9 @@ export function ChatPage() {
         setOwnDisplayName(me.data.displayName);
         setOwnRole(me.data.role);
 
+        const myOrg = me.data.organizationMembership?.organization ?? null;
+        setOwnOrganization(myOrg);
+
         const cParam = searchParams.get('c');
         const cId = cParam ? Number(cParam) : null;
         const stateOtherUser = (location.state as { otherUser?: typeof activeDmTarget })
@@ -116,6 +148,9 @@ export function ChatPage() {
 
         if (cId === general.id) {
           setSelectedConversationId(general.id);
+        } else if (myOrg?.conversation && cId === myOrg.conversation.id) {
+          setSelectedConversationId(cId);
+          setActiveOrganization({ id: myOrg.id, name: myOrg.name, color: myOrg.color });
         } else if (cId) {
           const matchingDm = directList.find((c) => c.id === cId);
           if (matchingDm) {
@@ -246,9 +281,14 @@ export function ChatPage() {
   // every click handler doesn't have to remember to do both. `replace:
   // true` avoids spamming the browser's back-button history with every
   // single conversation switch.
-  function selectConversation(id: number, dmTarget: typeof activeDmTarget) {
+  function selectConversation(
+    id: number,
+    dmTarget: typeof activeDmTarget,
+    org: typeof activeOrganization = null,
+  ) {
     setSelectedConversationId(id);
     setActiveDmTarget(dmTarget);
+    setActiveOrganization(org);
     setSearchParams({ c: String(id) }, { replace: true });
   }
 
@@ -323,8 +363,10 @@ export function ChatPage() {
   }
 
   const isModerator = ownRole === 'INQUISIDOR' || ownRole === 'ARZOBISPO';
-  const isGeneralChannelSelected =
-    generalChannel !== null && selectedConversationId === generalChannel.id;
+  // Attachments are only allowed in DIRECT conversations (backend rule)
+  // — not just the general channel, ANY channel, including a faction's
+  // own. Being IN a DM is what matters, not merely NOT being general.
+  const isDirectConversationSelected = activeDmTarget !== null;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView();
@@ -395,6 +437,29 @@ export function ChatPage() {
               }`}
             >
               {t('chat.generalChannel')}
+            </button>
+          )}
+          {ownOrganization?.conversation && (
+            <button
+              onClick={() =>
+                selectConversation(ownOrganization.conversation!.id, null, {
+                  id: ownOrganization.id,
+                  name: ownOrganization.name,
+                  color: ownOrganization.color,
+                })
+              }
+              className={`w-full flex items-center gap-2 text-start px-3 py-2 rounded-md mb-1 transition-colors ${
+                selectedConversationId === ownOrganization.conversation.id
+                  ? 'bg-gold-500 text-gold-on'
+                  : 'text-cream-100 hover:bg-ink-800'
+              }`}
+            >
+              <span
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ backgroundColor: ownOrganization.color }}
+                aria-hidden="true"
+              />
+              <span className="truncate">{ownOrganization.name}</span>
             </button>
           )}
         </div>
@@ -580,7 +645,7 @@ export function ChatPage() {
               </div>
             );
           })}
-          {!activeDmTarget &&
+          {selectedConversationId === generalChannel?.id &&
             systemAnnouncements.map((announcement) => (
               <p key={announcement.id} className="text-center text-xs text-cream-400 italic py-1">
                 {renderMessage(announcement.text)}
@@ -627,7 +692,7 @@ export function ChatPage() {
         </div>
 
         <form onSubmit={handleSend} className="p-4 pt-1 border-t border-border-default flex gap-2">
-          {!isGeneralChannelSelected && (
+          {isDirectConversationSelected && (
             <>
               <input
                 ref={fileInputRef}

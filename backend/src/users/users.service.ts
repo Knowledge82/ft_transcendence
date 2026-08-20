@@ -14,7 +14,14 @@ const SELF_PROFILE_SELECT = {
     select: {
       isLeader: true,
       organization: {
-        select: { id: true, name: true, color: true },
+        select: {
+          id: true,
+          name: true,
+          color: true,
+          // Needed so ChatPage can show a button for the faction's own
+          // dedicated channel without a second round-trip to fetch it
+          conversation: { select: { id: true } },
+        },
       },
     },
   },

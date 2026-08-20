@@ -12,10 +12,16 @@ export interface Article {
     role: 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO';
     gender: 'MASCULINO' | 'FEMENINO';
   };
+  organization: { id: number; name: string; color: string } | null;
 }
 
 export async function getAllArticles(): Promise<Article[]> {
   const { data } = await apiClient.get<Article[]>('/articles');
+  return data;
+}
+
+export async function getOrganizationArticles(organizationId: number): Promise<Article[]> {
+  const { data } = await apiClient.get<Article[]>(`/articles/organization/${organizationId}`);
   return data;
 }
 
@@ -29,8 +35,12 @@ export async function getRandomArticles(count = 3): Promise<Article[]> {
   return data;
 }
 
-export async function createArticle(title: string, content: string): Promise<Article> {
-  const { data } = await apiClient.post<Article>('/articles', { title, content });
+export async function createArticle(
+  title: string,
+  content: string,
+  organizationId?: number,
+): Promise<Article> {
+  const { data } = await apiClient.post<Article>('/articles', { title, content, organizationId });
   return data;
 }
 

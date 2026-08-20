@@ -5,21 +5,38 @@ const AUTHOR_SELECT = {
   author: {
     select: { id: true, displayName: true, avatarUrl: true, role: true, gender: true },
   },
+  organization: {
+    select: { id: true, name: true, color: true },
+  },
 };
 
 @Injectable()
 export class ArticlesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createArticle(authorId: number, title: string, content: string) {
+  async createArticle(
+    authorId: number,
+    title: string,
+    content: string,
+    organizationId?: number,
+  ) {
     return this.prisma.article.create({
-      data: { authorId, title, content },
+      data: { authorId, title, content, organizationId },
       include: AUTHOR_SELECT,
     });
   }
 
   async getAllArticles() {
     return this.prisma.article.findMany({
+      where: { organizationId: null },
+      orderBy: { createdAt: 'desc' },
+      include: AUTHOR_SELECT,
+    });
+  }
+
+  async getOrganizationArticles(organizationId: number) {
+    return this.prisma.article.findMany({
+      where: { organizationId },
       orderBy: { createdAt: 'desc' },
       include: AUTHOR_SELECT,
     });
@@ -47,8 +64,6 @@ export class ArticlesService {
   async deleteArticle(id: number) {
     const article = await this.getArticleById(id);
     await this.prisma.article.delete({ where: { id } });
-    // Returned so the controller can still reference the title/author
-    // for the community event, AFTER the row is already gone
     return article;
   }
 
@@ -67,12 +82,16 @@ export class ArticlesService {
     });
   }
 
-  // Random selection for the /celda widget — done in two steps because
-  // PostgreSQL doesn't have a simple "ORDER BY RANDOM()" shortcut in
-  // Prisma's query builder: fetch all ids first (cheap, just numbers),
-  // shuffle in memory, then fetch the full rows only for the ones picked
+  async isOrganizationMember(userId: number, organizationId: number): Promise<boolean> {
+    const membership = await this.prisma.organizationMember.findUnique({ where: { userId } });
+    return membership?.organizationId === organizationId;
+  }
+
   async getRandomArticles(count: number) {
-    const allIds = await this.prisma.article.findMany({ select: { id: true } });
+    const allIds = await this.prisma.article.findMany({
+      where: { organizationId: null },
+      select: { id: true },
+    });
     if (allIds.length === 0) {
       return [];
     }

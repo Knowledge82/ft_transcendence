@@ -194,7 +194,11 @@
     "confirmDelete": "هل أنت متأكد أنك تريد حل هذا الفصيل؟ لا يمكن التراجع عن هذا الإجراء.",
     "deleteButton": "حل الفصيل",
     "updateError": "تعذر حفظ التغيير.",
-    "joinError": "تعذر الانضمام إلى الفصيل."
+    "joinError": "تعذر الانضمام إلى الفصيل.",
+    "articlesHeading": "الرسائل الداخلية",
+    "writeArticle": "كتابة رسالة",
+    "noArticles": "لم تُكتب أي رسالة داخلية بعد.",
+    "newArticleHeading": "كتابة رسالة داخلية"
   },
   "legal": {
     "lastUpdated": "آخر تحديث: {{date}}",
@@ -296,6 +300,26 @@
       "0": "تم إعدام **{{name}}** بتهمة الهرطقة.",
       "1": "طهّر الفصل صفوفه من **{{name}}**. فليكن هذا تحذيرًا.",
       "2": "تم حرق **{{name}}** على المحك بسبب خطايا ضد Makefile."
+    },
+    "organizationFounded": {
+      "0": "تأسس فصيل **{{organization}}** على يد **{{founder}}**.",
+      "1": "وُلِد فصيل جديد داخل الفصل: **{{organization}}**، بقيادة **{{founder}}**.",
+      "2": "اعتُرف بـ **{{organization}}** كفصيل رسمي، بقيادة **{{founder}}**."
+    },
+    "organizationDissolved": {
+      "0": "حُلَّ فصيل **{{organization}}**.",
+      "1": "لم يعد فصيل **{{organization}}** قائمًا.",
+      "2": "أُعلن عن نهاية فصيل **{{organization}}**."
+    },
+    "organizationJoined": {
+      "0": "انضمام **{{member}}** إلى فصيل **{{organization}}**.",
+      "1": "قسم ولاء جديد لـ **{{organization}}** من **{{member}}**.",
+      "2": "يرحب فصيل **{{organization}}** بانضمام **{{member}}** إلى صفوفه."
+    },
+    "organizationArticlePublished": {
+      "0": "نُشر تراث داخلي لفصيل **{{organization}}** بعنوان \"{{title}}\"، من إعداد **{{name}}**.",
+      "1": "توصّل فصيل **{{organization}}** بتراث جديد من **{{name}}**: \"{{title}}\".",
+      "2": "أضاف فصيل **{{organization}}** كتابة جديدة إلى أرشيفه: \"{{title}}\"، بقلم **{{name}}**."
     }
   },
   "notifications": {

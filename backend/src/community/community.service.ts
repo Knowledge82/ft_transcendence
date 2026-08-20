@@ -3,11 +3,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ChatGateway } from '../chat/chat.gateway';
 import Groq from 'groq-sdk';
 
-// How many phrase VARIANTS exist per event type — must stay in sync with
-// how many "community.<type>.N" keys actually exist in each of
-// frontend/src/i18n/locales/{es,en,ar}.json. The phrase TEXT itself no
-// longer lives on the backend at all — only this count, needed to pick a
-// valid random index.
 const TEMPLATE_POOL_SIZES: Record<string, number> = {
   USER_REGISTERED: 3,
   ROLE_CHANGED: 3,
@@ -18,6 +13,10 @@ const TEMPLATE_POOL_SIZES: Record<string, number> = {
   ARTICLE_DELETED: 2,
   FICTIONAL_STATIC: 26,
   USER_EXECUTED: 3,
+  ORGANIZATION_FOUNDED: 3,
+  ORGANIZATION_DISSOLVED: 3,
+  ORGANIZATION_JOINED: 3,
+  ORGANIZATION_ARTICLE_PUBLISHED: 3,
 };
 
 function randomIndex(type: string): number {
@@ -25,21 +24,10 @@ function randomIndex(type: string): number {
   return Math.floor(Math.random() * size);
 }
 
-// Massively increased frequency compared to earlier drafts — the ticker
-// on /celda cycles every few seconds, so a sparse pool of events felt
-// stale very quickly. Static events are free (no external API call), so
-// they can run often; AI-generated ones stay more conservative to avoid
-// burning through Groq's quota (especially now that each one costs
-// THREE calls instead of one, one per language).
-const AI_EVENTS_PER_DAY = 48; // roughly every 30 minutes
-const STATIC_EVENTS_PER_DAY = 288; // roughly every 5 minutes
+const AI_EVENTS_PER_DAY = 48;
+const STATIC_EVENTS_PER_DAY = 288;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-// One prompt per language — each asks the model to generate FRESH
-// creative content directly in that language, rather than generating
-// once and mechanically translating afterward (translation would risk
-// losing the joke/tone in languages structurally very different from
-// Spanish, like Arabic).
 const FICTIONAL_PROMPTS: Record<string, string> = {
   es: `Genera UNA sola frase corta (máximo 20 palabras), en español,
 sobre un evento cotidiano, ficticio y humorístico de "La Iglesia del
@@ -150,14 +138,40 @@ export class CommunityService implements OnModuleInit {
     return this.createEvent('FICTIONAL_STATIC', randomIndex('FICTIONAL_STATIC'), {});
   }
 
-  // Fired when a user is deleted (Option C from our design discussion):
-  // the account and all its content are genuinely gone — no tombstone
-  // profile, no preserved messages/articles — but the FACT that it
-  // happened is preserved publicly in the chronicle, the same way an
-  // auto-da-fé was a public spectacle meant to be remembered, even
-  // though the condemned themselves left nothing behind.
   async createUserExecutedEvent(name: string) {
     return this.createEvent('USER_EXECUTED', randomIndex('USER_EXECUTED'), { name });
+  }
+
+  async createOrganizationFoundedEvent(organization: string, founder: string) {
+    return this.createEvent('ORGANIZATION_FOUNDED', randomIndex('ORGANIZATION_FOUNDED'), {
+      organization,
+      founder,
+    });
+  }
+
+  async createOrganizationDissolvedEvent(organization: string) {
+    return this.createEvent('ORGANIZATION_DISSOLVED', randomIndex('ORGANIZATION_DISSOLVED'), {
+      organization,
+    });
+  }
+
+  async createOrganizationJoinedEvent(organization: string, member: string) {
+    return this.createEvent('ORGANIZATION_JOINED', randomIndex('ORGANIZATION_JOINED'), {
+      organization,
+      member,
+    });
+  }
+
+  // Only the title is ever shown publicly, never the content — this
+  // works more as advertising for the faction (drawing in new members
+  // curious about what they're writing) than as any real leak of
+  // anything actually private
+  async createOrganizationArticlePublishedEvent(name: string, title: string, organization: string) {
+    return this.createEvent(
+      'ORGANIZATION_ARTICLE_PUBLISHED',
+      randomIndex('ORGANIZATION_ARTICLE_PUBLISHED'),
+      { name, title, organization },
+    );
   }
 
   private async generateAiFictionalEvent() {

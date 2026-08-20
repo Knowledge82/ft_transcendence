@@ -194,7 +194,11 @@
     "confirmDelete": "¿Seguro que quieres disolver esta facción? Esta acción no se puede deshacer.",
     "deleteButton": "Disolver facción",
     "updateError": "No se pudo guardar el cambio.",
-    "joinError": "No se pudo unir a la facción."
+    "joinError": "No se pudo unir a la facción.",
+    "articlesHeading": "Tratados internos",
+    "writeArticle": "Escribir tratado",
+    "noArticles": "Todavía no se ha escrito ningún tratado interno.",
+    "newArticleHeading": "Escribir un tratado interno"
   },
   "legal": {
     "lastUpdated": "Última actualización: {{date}}",
@@ -296,6 +300,26 @@
       "0": "**{{name}}** ha sido juzgado y ejecutado por herejía.",
       "1": "El Capítulo ha purgado a **{{name}}** de sus filas. Que esto sirva de advertencia.",
       "2": "**{{name}}** arde en la hoguera por sus pecados contra el Makefile."
+    },
+    "organizationFounded": {
+      "0": "**{{founder}}** ha fundado la facción **{{organization}}**.",
+      "1": "Nace una nueva facción dentro del Capítulo: **{{organization}}**, fundada por **{{founder}}**.",
+      "2": "**{{organization}}** ha sido reconocida como facción oficial, bajo el liderazgo de **{{founder}}**."
+    },
+    "organizationDissolved": {
+      "0": "La facción **{{organization}}** ha sido disuelta.",
+      "1": "**{{organization}}** ya no existe. Sus miembros vuelven al Capítulo.",
+      "2": "Se ha decretado el fin de la facción **{{organization}}**."
+    },
+    "organizationJoined": {
+      "0": "**{{member}}** se ha unido a la facción **{{organization}}**.",
+      "1": "Un nuevo juramento: **{{member}}** jura lealtad a **{{organization}}**.",
+      "2": "**{{organization}}** da la bienvenida a **{{member}}** entre sus filas."
+    },
+    "organizationArticlePublished": {
+      "0": "**{{name}}** ha publicado un tratado interno para la facción **{{organization}}**: \"{{title}}\".",
+      "1": "La facción **{{organization}}** ha recibido un nuevo tratado de **{{name}}**: \"{{title}}\".",
+      "2": "**{{organization}}** guarda un nuevo escrito en sus archivos: \"{{title}}\", de **{{name}}**."
     }
   },
   "notifications": {

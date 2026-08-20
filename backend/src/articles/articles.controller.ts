@@ -38,18 +38,28 @@ export class ArticlesController {
     return this.articlesService.getAllArticles();
   }
 
-  // Declared BEFORE ':id' — otherwise "random" would be captured by the
-  // :id parameter and rejected by ParseIntPipe, same ordering rule we've
-  // hit before with other controllers
   @Get('random')
   async getRandom(@Query('count') count?: string) {
     const parsed = count ? parseInt(count, 10) : DEFAULT_RANDOM_COUNT;
     return this.articlesService.getRandomArticles(parsed || DEFAULT_RANDOM_COUNT);
   }
 
+  @Get('organization/:organizationId')
+  async getOrganizationArticles(
+    @Request() req,
+    @Param('organizationId', ParseIntPipe) organizationId: number,
+  ) {
+    await this.assertCanAccessOrganizationArticles(req.user.userId, organizationId);
+    return this.articlesService.getOrganizationArticles(organizationId);
+  }
+
   @Get(':id')
-  async getOne(@Param('id', ParseIntPipe) id: number) {
-    return this.articlesService.getArticleById(id);
+  async getOne(@Request() req, @Param('id', ParseIntPipe) id: number) {
+    const article = await this.articlesService.getArticleById(id);
+    if (article.organizationId) {
+      await this.assertCanAccessOrganizationArticles(req.user.userId, article.organizationId);
+    }
+    return article;
   }
 
   @Post()
@@ -60,9 +70,19 @@ export class ArticlesController {
     @Body() dto: CreateArticleDto,
     @Headers('accept-language') language: string,
   ) {
-    // The AI check happens BEFORE anything is saved — a rejected article
-    // never touches the database at all, only the stern rejection
-    // message is sent back
+    if (dto.organizationId) {
+      const role = await this.articlesService.getUserRole(req.user.userId);
+      if (role !== 'ARZOBISPO') {
+        const isMember = await this.articlesService.isOrganizationMember(
+          req.user.userId,
+          dto.organizationId,
+        );
+        if (!isMember) {
+          throw new ForbiddenException({ code: 'NOT_ORGANIZATION_MEMBER' });
+        }
+      }
+    }
+
     const check = await this.aiService.checkArticleRelevance(dto.title, dto.content, language);
     if (!check.approved) {
       throw new BadRequestException(check.rejectionMessage);
@@ -72,10 +92,20 @@ export class ArticlesController {
       req.user.userId,
       dto.title,
       dto.content,
+      dto.organizationId,
     );
 
     const authorName = article.author.displayName ?? `Usuario ${article.author.id}`;
-    await this.communityService.createArticlePublishedEvent(authorName, article.title);
+
+    if (article.organizationId && article.organization) {
+      await this.communityService.createOrganizationArticlePublishedEvent(
+        authorName,
+        article.title,
+        article.organization.name,
+      );
+    } else {
+      await this.communityService.createArticlePublishedEvent(authorName, article.title);
+    }
 
     return article;
   }
@@ -96,8 +126,6 @@ export class ArticlesController {
       throw new ForbiddenException('Solo el autor o un Arzobispo pueden corregir este tratado');
     }
 
-    // Editing is treated as "republishing" — the content changed, so it
-    // goes through the same relevance check again before being saved
     const check = await this.aiService.checkArticleRelevance(dto.title, dto.content, language);
     if (!check.approved) {
       throw new BadRequestException(check.rejectionMessage);
@@ -123,5 +151,16 @@ export class ArticlesController {
     await this.communityService.createArticleDeletedEvent(deleterName, deleted.title);
 
     return { deleted: true };
+  }
+
+  private async assertCanAccessOrganizationArticles(userId: number, organizationId: number) {
+    const role = await this.articlesService.getUserRole(userId);
+    if (role === 'ARZOBISPO') {
+      return;
+    }
+    const isMember = await this.articlesService.isOrganizationMember(userId, organizationId);
+    if (!isMember) {
+      throw new ForbiddenException({ code: 'NOT_ORGANIZATION_MEMBER' });
+    }
   }
 }

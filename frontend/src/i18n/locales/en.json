@@ -194,7 +194,11 @@
     "confirmDelete": "Are you sure you want to dissolve this faction? This action cannot be undone.",
     "deleteButton": "Dissolve faction",
     "updateError": "Couldn't save the change.",
-    "joinError": "Couldn't join the faction."
+    "joinError": "Couldn't join the faction.",
+    "articlesHeading": "Internal treatises",
+    "writeArticle": "Write a treatise",
+    "noArticles": "No internal treatise has been written yet.",
+    "newArticleHeading": "Write an internal treatise"
   },
   "legal": {
     "lastUpdated": "Last updated: {{date}}",
@@ -296,6 +300,26 @@
       "0": "**{{name}}** has been tried and executed for heresy.",
       "1": "The Chapter has purged **{{name}}** from its ranks. Let this serve as a warning.",
       "2": "**{{name}}** burns at the stake for their sins against the Makefile."
+    },
+    "organizationFounded": {
+      "0": "**{{founder}}** has founded the **{{organization}}** faction.",
+      "1": "A new faction is born within the Chapter: **{{organization}}**, founded by **{{founder}}**.",
+      "2": "**{{organization}}** has been recognized as an official faction, under the leadership of **{{founder}}**."
+    },
+    "organizationDissolved": {
+      "0": "The **{{organization}}** faction has been dissolved.",
+      "1": "**{{organization}}** no longer exists. Its members return to the Chapter.",
+      "2": "The end of the **{{organization}}** faction has been decreed."
+    },
+    "organizationJoined": {
+      "0": "**{{member}}** has joined the **{{organization}}** faction.",
+      "1": "A new oath: **{{member}}** swears loyalty to **{{organization}}**.",
+      "2": "**{{organization}}** welcomes **{{member}}** into its ranks."
+    },
+    "organizationArticlePublished": {
+      "0": "**{{name}}** has published an internal treatise for the **{{organization}}** faction: \"{{title}}\".",
+      "1": "The **{{organization}}** faction has received a new treatise from **{{name}}**: \"{{title}}\".",
+      "2": "**{{organization}}** now holds a new writing in its archives: \"{{title}}\", by **{{name}}**."
     }
   },
   "notifications": {

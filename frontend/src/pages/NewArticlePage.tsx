@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { createArticle, updateArticle, getArticleById } from '../api/articles';
 import { apiClient } from '../api/client';
@@ -16,7 +16,11 @@ export function NewArticlePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const isEditMode = Boolean(id);
+
+  const organizationIdParam = searchParams.get('organizationId');
+  const organizationId = organizationIdParam ? Number(organizationIdParam) : undefined;
 
   const [isLoading, setIsLoading] = useState(true);
   const [notAllowed, setNotAllowed] = useState(false);
@@ -27,7 +31,11 @@ export function NewArticlePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const meRequest = apiClient.get<{ id: number; role: string }>('/users/me');
+    const meRequest = apiClient.get<{
+      id: number;
+      role: string;
+      organizationMembership: { organization: { id: number } } | null;
+    }>('/users/me');
 
     if (isEditMode && id) {
       Promise.all([meRequest, getArticleById(Number(id))]).then(([me, article]) => {
@@ -41,11 +49,19 @@ export function NewArticlePage() {
       });
     } else {
       meRequest.then((me) => {
-        setNotAllowed(!MODERATOR_ROLES.includes(me.data.role));
+        const hasModeratorRank = MODERATOR_ROLES.includes(me.data.role);
+        if (!hasModeratorRank) {
+          setNotAllowed(true);
+        } else if (organizationId && me.data.role !== 'ARZOBISPO') {
+          const ownOrgId = me.data.organizationMembership?.organization.id;
+          setNotAllowed(ownOrgId !== organizationId);
+        } else {
+          setNotAllowed(false);
+        }
         setIsLoading(false);
       });
     }
-  }, [id, isEditMode]);
+  }, [id, isEditMode, organizationId]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -55,7 +71,7 @@ export function NewArticlePage() {
     try {
       const article = isEditMode
         ? await updateArticle(Number(id), title.trim(), content.trim())
-        : await createArticle(title.trim(), content.trim());
+        : await createArticle(title.trim(), content.trim(), organizationId);
       navigate(ROUTES.ARTICLE(article.id));
     } catch (err) {
       const data = (err as { response?: { data?: { code?: string; message?: string | string[] } } })
@@ -90,7 +106,11 @@ export function NewArticlePage() {
         </div>
 
         <h1 className="text-3xl font-semibold text-gold-500 mt-4 mb-2">
-          {isEditMode ? t('articles.editHeading') : t('articles.newHeading')}
+          {isEditMode
+            ? t('articles.editHeading')
+            : organizationId
+            ? t('organizations.newArticleHeading')
+            : t('articles.newHeading')}
         </h1>
         <p className="text-sm text-cream-400 mb-8">
           {isEditMode ? t('articles.oracleIntroEdit') : t('articles.oracleIntroNew')}

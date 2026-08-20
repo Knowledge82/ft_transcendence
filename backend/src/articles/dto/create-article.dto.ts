@@ -1,4 +1,4 @@
-import { IsString, MinLength, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsInt, MinLength, MaxLength } from 'class-validator';
 
 export class CreateArticleDto {
   @IsString()
@@ -10,4 +10,10 @@ export class CreateArticleDto {
   @MinLength(50, { message: 'El artículo debe tener al menos 50 caracteres' })
   @MaxLength(2000, { message: 'El artículo no puede superar los 2000 caracteres' })
   content: string;
+
+  // Present only when writing an internal treatise for a specific
+  // faction — absent (undefined) means a normal public library article
+  @IsOptional()
+  @IsInt()
+  organizationId?: number;
 }

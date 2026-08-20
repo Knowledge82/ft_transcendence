@@ -9,8 +9,6 @@ import { getGenderedRole } from '../utils/genderedRole';
 const CYCLE_MS = 7000;
 const FADE_MS = 1500;
 
-// Maps the backend's event "type" string to the corresponding namespace
-// under the "community" key in the translation JSON files
 const TYPE_TO_NAMESPACE: Record<string, string> = {
   USER_REGISTERED: 'userRegistered',
   ROLE_CHANGED: 'roleChanged',
@@ -21,6 +19,10 @@ const TYPE_TO_NAMESPACE: Record<string, string> = {
   ARTICLE_DELETED: 'articleDeleted',
   FICTIONAL_STATIC: 'fictionalStatic',
   USER_EXECUTED: 'userExecuted',
+  ORGANIZATION_FOUNDED: 'organizationFounded',
+  ORGANIZATION_DISSOLVED: 'organizationDissolved',
+  ORGANIZATION_JOINED: 'organizationJoined',
+  ORGANIZATION_ARTICLE_PUBLISHED: 'organizationArticlePublished',
 };
 
 function shuffle<T>(items: T[]): T[] {

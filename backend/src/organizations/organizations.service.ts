@@ -5,12 +5,16 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CommunityService } from '../community/community.service';
 
 const CREATOR_ROLES = ['INQUISIDOR', 'ARZOBISPO'];
 
 @Injectable()
 export class OrganizationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly communityService: CommunityService,
+  ) {}
 
   async listOrganizations() {
     return this.prisma.organization.findMany({
@@ -90,6 +94,9 @@ export class OrganizationsService {
       });
     }
 
+    const founderName = creator.displayName ?? `Usuario ${creator.id}`;
+    await this.communityService.createOrganizationFoundedEvent(org.name, founderName);
+
     return org;
   }
 
@@ -104,7 +111,14 @@ export class OrganizationsService {
 
   async deleteOrganization(organizationId: number, requestingUserId: number) {
     await this.assertCanManage(organizationId, requestingUserId);
+
+    const org = await this.prisma.organization.findUnique({ where: { id: organizationId } });
+
     await this.prisma.organization.delete({ where: { id: organizationId } });
+
+    if (org) {
+      await this.communityService.createOrganizationDissolvedEvent(org.name);
+    }
   }
 
   async joinOrganization(organizationId: number, userId: number) {
@@ -130,6 +144,10 @@ export class OrganizationsService {
         data: { conversationId: org.conversation.id, userId },
       });
     }
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const memberName = user?.displayName ?? `Usuario ${userId}`;
+    await this.communityService.createOrganizationJoinedEvent(org.name, memberName);
 
     return org;
   }
