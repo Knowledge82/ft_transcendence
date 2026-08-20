@@ -9,9 +9,18 @@ import {
   Request,
   ParseIntPipe,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OrganizationsService } from './organizations.service';
+
+const ALLOWED_BANNER_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_BANNER_SIZE_BYTES = 5 * 1024 * 1024;
 
 @Controller('organizations')
 @UseGuards(JwtAuthGuard)
@@ -40,6 +49,49 @@ export class OrganizationsController {
     @Body() data: { name?: string; manifesto?: string; color?: string },
   ) {
     return this.organizationsService.updateOrganization(id, data, req.user.userId);
+  }
+
+  @Post(':id/banner')
+  @UseInterceptors(
+    FileInterceptor('banner', {
+      storage: diskStorage({
+        destination: './uploads/organization-banners',
+        filename: (req, file, callback) => {
+          const orgId = req.params.id;
+          const uniqueSuffix = Date.now();
+          const ext = extname(file.originalname);
+          callback(null, `${orgId}-${uniqueSuffix}${ext}`);
+        },
+      }),
+      limits: { fileSize: MAX_BANNER_SIZE_BYTES },
+      fileFilter: (req, file, callback) => {
+        if (!ALLOWED_BANNER_MIME_TYPES.includes(file.mimetype)) {
+          callback(new BadRequestException('Only JPEG, PNG or WEBP images are allowed'), false);
+          return;
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  async uploadBanner(
+    @Request() req,
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+    const bannerUrl = `/api/uploads/organization-banners/${file.filename}`;
+    return this.organizationsService.updateOrganization(id, { bannerUrl }, req.user.userId);
+  }
+
+  @Delete(':id/banner')
+  async removeBanner(@Request() req, @Param('id', ParseIntPipe) id: number) {
+    return this.organizationsService.updateOrganization(
+      id,
+      { bannerUrl: null },
+      req.user.userId,
+    );
   }
 
   @Delete(':id')

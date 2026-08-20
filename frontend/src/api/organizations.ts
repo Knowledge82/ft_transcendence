@@ -5,6 +5,7 @@ export interface OrganizationSummary {
   name: string;
   color: string;
   manifesto: string | null;
+  bannerUrl: string | null;
   _count: { members: number };
 }
 
@@ -26,6 +27,7 @@ export interface OrganizationDetail {
   name: string;
   manifesto: string | null;
   color: string;
+  bannerUrl: string | null;
   createdAt: string;
   updatedAt: string;
   members: OrganizationMemberInfo[];
@@ -55,6 +57,25 @@ export async function updateOrganization(
   updates: { name?: string; manifesto?: string; color?: string },
 ): Promise<OrganizationDetail> {
   const { data } = await apiClient.patch<OrganizationDetail>(`/organizations/${id}`, updates);
+  return data;
+}
+
+export async function uploadOrganizationBanner(
+  id: number,
+  file: File,
+): Promise<OrganizationDetail> {
+  const formData = new FormData();
+  formData.append('banner', file);
+  const { data } = await apiClient.post<OrganizationDetail>(
+    `/organizations/${id}/banner`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return data;
+}
+
+export async function removeOrganizationBanner(id: number): Promise<OrganizationDetail> {
+  const { data } = await apiClient.delete<OrganizationDetail>(`/organizations/${id}/banner`);
   return data;
 }
 

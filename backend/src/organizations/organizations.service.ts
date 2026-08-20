@@ -23,6 +23,7 @@ export class OrganizationsService {
         name: true,
         color: true,
         manifesto: true,
+        bannerUrl: true,
         _count: { select: { members: true } },
       },
       orderBy: { name: 'asc' },
@@ -102,7 +103,7 @@ export class OrganizationsService {
 
   async updateOrganization(
     organizationId: number,
-    data: { name?: string; manifesto?: string; color?: string },
+    data: { name?: string; manifesto?: string; color?: string; bannerUrl?: string | null },
     requestingUserId: number,
   ) {
     await this.assertCanManage(organizationId, requestingUserId);

@@ -83,7 +83,12 @@ export class ArticlesController {
       }
     }
 
-    const check = await this.aiService.checkArticleRelevance(dto.title, dto.content, language);
+    const check = await this.aiService.checkArticleRelevance(
+      dto.title,
+      dto.content,
+      language,
+      Boolean(dto.organizationId),
+    );
     if (!check.approved) {
       throw new BadRequestException(check.rejectionMessage);
     }
@@ -126,7 +131,12 @@ export class ArticlesController {
       throw new ForbiddenException('Solo el autor o un Arzobispo pueden corregir este tratado');
     }
 
-    const check = await this.aiService.checkArticleRelevance(dto.title, dto.content, language);
+    const check = await this.aiService.checkArticleRelevance(
+      dto.title,
+      dto.content,
+      language,
+      Boolean(existing.organizationId),
+    );
     if (!check.approved) {
       throw new BadRequestException(check.rejectionMessage);
     }

@@ -64,7 +64,7 @@ const MAX_INPUT_LENGTH = 4000;
 const MAX_OUTPUT_TOKENS = 1500;
 const MODEL_NAME = process.env.GROQ_MODEL ?? 'openai/gpt-oss-20b';
 
-const ARTICLE_CHECK_PROMPTS: Record<Language, string> = {
+const ARTICLE_CHECK_BASE_PROMPTS: Record<Language, string> = {
   es: `Eres el Oráculo de La Iglesia del Verdadero Relink, una entidad
 mística e impersonal (no un hermano ni un cargo humano) encargada de
 revisar que los artículos escritos por la comunidad sean aceptables.
@@ -77,22 +77,7 @@ artículo si ocurre CUALQUIERA de estas condiciones:
    Barcelona relacionada con estos temas.
 2. El TÍTULO no guarda relación clara con el contenido o con estos mismos
    temas — un título gracioso, vulgar o completamente ajeno al tema NO es
-   aceptable, incluso si el contenido en sí es válido.
-3. El título O el contenido contienen lenguaje vulgar, ofensivo, sexual,
-   o inapropiado — esto también descalifica el artículo aunque el tema
-   de fondo sea correcto.
-
-Solo aprueba si el título Y el contenido son, ambos, temáticamente
-apropiados Y decorosos.
-
-Responde EXACTAMENTE en este formato, sin nada más antes o después:
-
-Primera línea: la palabra APROBADO o RECHAZADO, y nada más en esa línea.
-Si es RECHAZADO: en la línea siguiente, un reproche breve (máximo 40
-palabras), severo y en tono de inquisidor medieval, explicando por qué
-el artículo no es aceptable — menciona específicamente si el problema
-está en el título, en el contenido, o en ambos.
-Si es APROBADO: no escribas nada más después de la primera línea.`,
+   aceptable, incluso si el contenido en sí es válido.`,
   en: `You are the Oracle of La Iglesia del Verdadero Relink, a mystical and
 impersonal entity (not a brother or a human role) in charge of
 reviewing whether articles written by the community are acceptable.
@@ -105,24 +90,7 @@ ANY of these conditions occur:
    Barcelona related to these topics.
 2. The TITLE has no clear relation to the content or these same
    topics — a funny, vulgar, or completely unrelated title is NOT
-   acceptable, even if the content itself is valid.
-3. The title OR the content contain vulgar, offensive, sexual, or
-   inappropriate language — this also disqualifies the article even if
-   the underlying topic is correct.
-
-Only approve if both the title AND the content are, together,
-thematically appropriate AND decent.
-
-Respond EXACTLY in this format, nothing else before or after:
-
-First line: the word APROBADO or RECHAZADO (always in Spanish, exactly
-as written here — this is a fixed protocol marker, do not translate
-it), and nothing else on that line.
-If it's RECHAZADO: on the next line, write a brief rebuke (max 40
-words), IN ENGLISH, severe and in the tone of a medieval inquisitor,
-explaining why the article isn't acceptable — specifically mention
-whether the problem is in the title, the content, or both.
-If it's APROBADO: don't write anything else after the first line.`,
+   acceptable, even if the content itself is valid.`,
   ar: `أنت الأوراكل في "كنيسة إعادة الربط الحقيقية"، كيان صوفي وغير شخصي (ليس
 أخًا ولا منصبًا بشريًا) مسؤول عن مراجعة ما إذا كانت المقالات التي يكتبها
 المجتمع مقبولة.
@@ -134,14 +102,85 @@ If it's APROBADO: don't write anything else after the first line.`,
    بهذه المواضيع.
 2. العنوان لا يرتبط بوضوح بالمحتوى أو بهذه المواضيع نفسها — عنوان مضحك
    أو مبتذل أو غير ذي صلة تمامًا بالموضوع غير مقبول، حتى لو كان المحتوى
-   نفسه صالحًا.
-3. يحتوي العنوان أو المحتوى على لغة مبتذلة أو مسيئة أو جنسية أو غير
+   نفسه صالحًا.`,
+};
+
+const ARTICLE_CHECK_PUBLIC_RULE3: Record<Language, string> = {
+  es: `3. El título O el contenido contienen lenguaje vulgar, ofensivo, sexual,
+   o inapropiado — esto también descalifica el artículo aunque el tema
+   de fondo sea correcto.
+
+Solo aprueba si el título Y el contenido son, ambos, temáticamente
+apropiados Y decorosos.`,
+  en: `3. The title OR the content contain vulgar, offensive, sexual, or
+   inappropriate language — this also disqualifies the article even if
+   the underlying topic is correct.
+
+Only approve if both the title AND the content are, together,
+thematically appropriate AND decent.`,
+  ar: `3. يحتوي العنوان أو المحتوى على لغة مبتذلة أو مسيئة أو جنسية أو غير
    لائقة — وهذا أيضًا يُسقط أهلية المقال حتى لو كان الموضوع الأساسي
    صحيحًا.
 
-وافق فقط إذا كان العنوان والمحتوى، معًا، مناسبين من حيث الموضوع ولائقين.
+وافق فقط إذا كان العنوان والمحتوى، معًا، مناسبين من حيث الموضوع ولائقين.`,
+};
 
-أجب بالضبط بهذا الشكل، دون أي شيء آخر قبله أو بعده:
+const ARTICLE_CHECK_INTERNAL_RULE3: Record<Language, string> = {
+  es: `3. El título o el contenido contienen contenido sexual explícito, discurso
+   de odio real dirigido a personas o grupos reales, o cualquier cosa
+   genuinamente dañina fuera de la ficción satírica propia del proyecto.
+   Esto es un tratado INTERNO de una facción, visible solo para sus
+   propios miembros — el fervor faccional, la retórica agresiva contra
+   "herejes" ficticios, o el lenguaje malsonante dentro del propio tono
+   satírico e inquisitorial del proyecto NO deben rechazarse por sí
+   solos, siempre que sigan siendo parte de esa ficción.
+
+Solo aprueba si el título Y el contenido son, ambos, temáticamente
+apropiados Y están libres de contenido genuinamente dañino (no
+simplemente combativo dentro de la ficción del proyecto).`,
+  en: `3. The title or the content contain explicit sexual content, real hate
+   speech directed at real people or groups, or anything genuinely
+   harmful outside the project's own satirical fiction. This is an
+   INTERNAL treatise for a specific faction, visible only to its own
+   members — factional fervor, aggressive rhetoric against fictional
+   "heretics", or blunt language within the project's own satirical,
+   inquisitorial tone should NOT be rejected on their own, as long as
+   they remain part of that fiction.
+
+Only approve if both the title AND the content are, together,
+thematically appropriate AND free of genuinely harmful content (not
+merely combative within the project's fiction).`,
+  ar: `3. يحتوي العنوان أو المحتوى على محتوى جنسي صريح، أو خطاب كراهية حقيقي
+   موجه لأشخاص أو مجموعات حقيقية، أو أي شيء ضار فعليًا خارج الخيال
+   الساخر الخاص بالمشروع. هذه رسالة داخلية لفصيل معين، لا يراها إلا
+   أعضاؤه — الحماس الفصائلي، أو الخطاب العدائي ضد "الهراطقة" الخياليين،
+   أو اللغة الفظة ضمن النبرة الساخرة والتفتيشية الخاصة بالمشروع، لا يجب
+   رفضها لمجرد ذلك، طالما بقيت جزءًا من ذلك الخيال.
+
+وافق فقط إذا كان العنوان والمحتوى، معًا، مناسبين من حيث الموضوع وخاليين
+من محتوى ضار فعليًا (لا مجرد عدائي ضمن خيال المشروع).`,
+};
+
+const ARTICLE_CHECK_FORMAT_INSTRUCTIONS: Record<Language, string> = {
+  es: `Responde EXACTAMENTE en este formato, sin nada más antes o después:
+
+Primera línea: la palabra APROBADO o RECHAZADO, y nada más en esa línea.
+Si es RECHAZADO: en la línea siguiente, un reproche breve (máximo 40
+palabras), severo y en tono de inquisidor medieval, explicando por qué
+el artículo no es aceptable — menciona específicamente si el problema
+está en el título, en el contenido, o en ambos.
+Si es APROBADO: no escribas nada más después de la primera línea.`,
+  en: `Respond EXACTLY in this format, nothing else before or after:
+
+First line: the word APROBADO or RECHAZADO (always in Spanish, exactly
+as written here — this is a fixed protocol marker, do not translate
+it), and nothing else on that line.
+If it's RECHAZADO: on the next line, write a brief rebuke (max 40
+words), IN ENGLISH, severe and in the tone of a medieval inquisitor,
+explaining why the article isn't acceptable — specifically mention
+whether the problem is in the title, the content, or both.
+If it's APROBADO: don't write anything else after the first line.`,
+  ar: `أجب بالضبط بهذا الشكل، دون أي شيء آخر قبله أو بعده:
 
 السطر الأول: كلمة APROBADO أو RECHAZADO (دائمًا بالإسبانية، كما هي
 مكتوبة هنا تمامًا — هذه علامة بروتوكول ثابتة، لا تترجمها)، ولا شيء آخر
@@ -152,6 +191,11 @@ If it's APROBADO: don't write anything else after the first line.`,
 المحتوى أو كليهما.
 إذا كانت APROBADO: لا تكتب أي شيء آخر بعد السطر الأول.`,
 };
+
+function buildArticleCheckPrompt(lang: Language, isInternal: boolean): string {
+  const rule3 = isInternal ? ARTICLE_CHECK_INTERNAL_RULE3[lang] : ARTICLE_CHECK_PUBLIC_RULE3[lang];
+  return `${ARTICLE_CHECK_BASE_PROMPTS[lang]}\n${rule3}\n\n${ARTICLE_CHECK_FORMAT_INSTRUCTIONS[lang]}`;
+}
 
 @Injectable()
 export class AiService {
@@ -165,6 +209,7 @@ export class AiService {
     title: string,
     content: string,
     language?: string,
+    isInternal = false,
   ): Promise<{ approved: boolean; rejectionMessage: string | null }> {
     const lang = resolveLanguage(language);
 
@@ -172,7 +217,7 @@ export class AiService {
       const completion = await this.groq.chat.completions.create({
         model: MODEL_NAME,
         messages: [
-          { role: 'system', content: ARTICLE_CHECK_PROMPTS[lang] },
+          { role: 'system', content: buildArticleCheckPrompt(lang, isInternal) },
           { role: 'user', content: `Título: ${title}\n\nContenido: ${content}` },
         ],
         max_tokens: 600,

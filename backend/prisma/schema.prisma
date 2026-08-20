@@ -171,6 +171,10 @@ model Organization {
   manifesto String?
   // Hex color used for the small badge shown next to a member's name
   color     String
+  // Optional banner image shown at the top of the faction's page and
+  // as the card background on /facciones — null means no banner has
+  // been uploaded yet, frontend falls back to a plain colored card
+  bannerUrl String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
