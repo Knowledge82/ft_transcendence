@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,6 +8,8 @@ import {
   joinOrganization,
   leaveOrganization,
   removeOrganizationMember,
+  uploadOrganizationBanner,
+  removeOrganizationBanner,
 } from '../api/organizations';
 import type { OrganizationDetail } from '../api/organizations';
 import { getOrganizationArticles } from '../api/articles';
@@ -58,6 +60,9 @@ export function OrganizationDetailPage() {
   const [isJoining, setIsJoining] = useState(false);
 
   const [orgArticles, setOrgArticles] = useState<Article[]>([]);
+
+  const [isUploadingBanner, setIsUploadingBanner] = useState(false);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   function loadOrg(orgId: number) {
     return getOrganizationById(orgId).then((data) => {
@@ -176,6 +181,36 @@ export function OrganizationDetailPage() {
     navigate(ROUTES.ORGANIZATIONS);
   }
 
+  async function handleBannerSelected(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file || !org) {
+      return;
+    }
+    setActionError(null);
+    setIsUploadingBanner(true);
+    try {
+      await uploadOrganizationBanner(org.id, file);
+      await loadOrg(org.id);
+    } catch (err) {
+      handleApiError(err, 'organizations.bannerUploadError');
+    } finally {
+      setIsUploadingBanner(false);
+      if (bannerInputRef.current) {
+        bannerInputRef.current.value = '';
+      }
+    }
+  }
+
+  async function handleRemoveBanner() {
+    if (!org) return;
+    try {
+      await removeOrganizationBanner(org.id);
+      await loadOrg(org.id);
+    } catch (err) {
+      handleApiError(err, 'organizations.updateError');
+    }
+  }
+
   if (isLoading) {
     return <LoadingScreen />;
   }
@@ -196,6 +231,50 @@ export function OrganizationDetailPage() {
           <BackLink to={ROUTES.ORGANIZATIONS} />
           <LanguageSwitcher />
         </div>
+
+        {(org.bannerUrl || canManage) && (
+          <div className="mt-6">
+            {org.bannerUrl ? (
+              <div
+                className="relative w-full h-48 rounded-xl bg-cover bg-center"
+                style={{ backgroundImage: `url(${org.bannerUrl})` }}
+              >
+                {canManage && (
+                  <div className="absolute bottom-2 end-2 flex gap-2">
+                    <button
+                      onClick={() => bannerInputRef.current?.click()}
+                      disabled={isUploadingBanner}
+                      className="text-xs bg-ink-950/80 text-gold-500 px-2 py-1 rounded-md hover:bg-ink-950 disabled:opacity-50"
+                    >
+                      {isUploadingBanner ? t('home.uploading') : t('organizations.changeBanner')}
+                    </button>
+                    <button
+                      onClick={handleRemoveBanner}
+                      className="text-xs bg-ink-950/80 text-error-500 px-2 py-1 rounded-md hover:bg-ink-950"
+                    >
+                      {t('organizations.removeBanner')}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => bannerInputRef.current?.click()}
+                disabled={isUploadingBanner}
+                className="w-full h-24 rounded-xl border-2 border-dashed border-border-default text-cream-400 hover:border-gold-500 hover:text-gold-500 transition-colors text-sm disabled:opacity-50"
+              >
+                {isUploadingBanner ? t('home.uploading') : t('organizations.addBanner')}
+              </button>
+            )}
+            <input
+              ref={bannerInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleBannerSelected}
+              className="hidden"
+            />
+          </div>
+        )}
 
         <Card className="mt-6">
           <div className="flex items-center gap-3 mb-2">

@@ -198,7 +198,11 @@
     "articlesHeading": "Tratados internos",
     "writeArticle": "Escribir tratado",
     "noArticles": "Todavía no se ha escrito ningún tratado interno.",
-    "newArticleHeading": "Escribir un tratado interno"
+    "newArticleHeading": "Escribir un tratado interno",
+    "changeBanner": "Cambiar imagen",
+    "removeBanner": "Quitar imagen",
+    "addBanner": "Añadir una imagen de cabecera",
+    "bannerUploadError": "No se pudo subir la imagen."
   },
   "legal": {
     "lastUpdated": "Última actualización: {{date}}",

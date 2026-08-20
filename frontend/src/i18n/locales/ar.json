@@ -198,7 +198,11 @@
     "articlesHeading": "الرسائل الداخلية",
     "writeArticle": "كتابة رسالة",
     "noArticles": "لم تُكتب أي رسالة داخلية بعد.",
-    "newArticleHeading": "كتابة رسالة داخلية"
+    "newArticleHeading": "كتابة رسالة داخلية",
+    "changeBanner": "تغيير الصورة",
+    "removeBanner": "إزالة الصورة",
+    "addBanner": "إضافة صورة غلاف",
+    "bannerUploadError": "تعذر رفع الصورة."
   },
   "legal": {
     "lastUpdated": "آخر تحديث: {{date}}",

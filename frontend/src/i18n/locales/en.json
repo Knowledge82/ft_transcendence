@@ -198,7 +198,11 @@
     "articlesHeading": "Internal treatises",
     "writeArticle": "Write a treatise",
     "noArticles": "No internal treatise has been written yet.",
-    "newArticleHeading": "Write an internal treatise"
+    "newArticleHeading": "Write an internal treatise",
+    "changeBanner": "Change image",
+    "removeBanner": "Remove image",
+    "addBanner": "Add a banner image",
+"bannerUploadError": "Couldn't upload the image."
   },
   "legal": {
     "lastUpdated": "Last updated: {{date}}",

@@ -59,26 +59,53 @@ export function OrganizationsListPage() {
           <p className="text-cream-400">{t('organizations.empty')}</p>
         ) : (
           <div className="space-y-4">
-            {organizations.map((org) => (
-              <Link key={org.id} to={ROUTES.ORGANIZATION(org.id)}>
-                <Card className="hover:border-gold-500 transition-colors">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span
-                      className="w-3 h-3 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: org.color }}
-                      aria-hidden="true"
-                    />
-                    <h2 className="text-lg font-semibold text-gold-500">{org.name}</h2>
+            {organizations.map((org) =>
+              org.bannerUrl ? (
+                <Link key={org.id} to={ROUTES.ORGANIZATION(org.id)}>
+                  <div
+                    className="relative h-40 rounded-xl overflow-hidden border border-border-default hover:border-gold-500 transition-colors bg-cover bg-center"
+                    style={{ backgroundImage: `url(${org.bannerUrl})` }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+                    <div className="relative z-10 h-full flex flex-col justify-end p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span
+                          className="w-3 h-3 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: org.color }}
+                          aria-hidden="true"
+                        />
+                        <h2 className="text-lg font-semibold text-white">{org.name}</h2>
+                      </div>
+                      <p className="text-xs text-cream-200 mb-1">
+                        {t('organizations.memberCount', { count: org._count.members })}
+                      </p>
+                      <p className="text-sm text-cream-100 line-clamp-2">
+                        {org.manifesto ? excerpt(org.manifesto) : t('organizations.noManifesto')}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs text-cream-400 mb-3">
-                    {t('organizations.memberCount', { count: org._count.members })}
-                  </p>
-                  <p className="text-sm text-cream-100">
-                    {org.manifesto ? excerpt(org.manifesto) : t('organizations.noManifesto')}
-                  </p>
-                </Card>
-              </Link>
-            ))}
+                </Link>
+              ) : (
+                <Link key={org.id} to={ROUTES.ORGANIZATION(org.id)}>
+                  <Card className="hover:border-gold-500 transition-colors">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span
+                        className="w-3 h-3 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: org.color }}
+                        aria-hidden="true"
+                      />
+                      <h2 className="text-lg font-semibold text-gold-500">{org.name}</h2>
+                    </div>
+                    <p className="text-xs text-cream-400 mb-3">
+                      {t('organizations.memberCount', { count: org._count.members })}
+                    </p>
+                    <p className="text-sm text-cream-100">
+                      {org.manifesto ? excerpt(org.manifesto) : t('organizations.noManifesto')}
+                    </p>
+                  </Card>
+                </Link>
+              ),
+            )}
           </div>
         )}
       </div>
