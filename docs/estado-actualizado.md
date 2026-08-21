@@ -48,9 +48,9 @@
 | Minor: Autenticación remota OAuth 2.0 | ✅ (inicio de sesión con 42 — flujo completo, incluida la finalización de registro para elegir género en el primer acceso) | 1 |
 | Major: Sistema de permisos avanzado (CRUD de usuarios, gestión de roles, vistas/acciones según rol) | ✅ | 2 |
 | Major: Sistema de organizaciones (crear/editar/eliminar, añadir/quitar usuarios, acciones dentro de la organización) | ✅ (facciones internas — CRUD completo, membresía única por persona, liderazgo propio de cada facción independiente del rango global, distintivo de color junto al rango, canal de chat dedicado, artículos internos exclusivos de sus miembros, imagen de cabecera personalizable, y cuatro tipos de evento en la crónica pública) | 2 |
-| Minor: 2FA completo | ⏳ | 0 |
-| Minor: Panel de analíticas de actividad de usuario | ⏳ | 0 |
-| Subtotal User Management | | 7 |
+| Minor: 2FA completo | ✅ (verificación en dos pasos por TOTP, restringida a cuentas con contraseña por diseño — no ofrece una falsa sensación de seguridad a cuentas vinculadas solo a 42; configuración con código QR, confirmación obligatoria antes de activar, y desactivación protegida por contraseña) | 1 |
+| Minor: Panel de analíticas de actividad de usuario | ✅ (panel personal en /celda — accesos, tratados escritos, antigüedad — y panel administrativa en /santuario con desglose por rango, gráfico de registros de los últimos 7 días, y top 5 de personas más activas) | 1 |
+| Subtotal User Management | | 9 |
 
 ---
 
@@ -76,9 +76,9 @@
 |---|---|
 | Web | 11 |
 | Accessibility/i18n | 5 |
-| User Management | 7 |
+| User Management | 9 |
 | Artificial Intelligence | 3 |
-| Total | 26 |
+| Total | 28 |
 
 ## Decisiones conscientes de no implementar (🚫)
 
@@ -99,3 +99,4 @@
 1. Ajuste fino de la moderación por IA para tratados internos de facción — el Oráculo sigue rechazando, en algunos casos, contenido que debería aprobar dentro del tono más agresivo propio de ciertas facciones. La distinción entre regla pública/interna ya existe en el prompt, pero necesita más trabajo.
 2. Safari — el único navegador todavía sin verificar, por falta de acceso a hardware de Apple.
 3. Resize/Reflow (dentro de WCAG, pero pospuesto deliberadamente) — se abordará junto con el diseño responsive del proyecto.
+4. Una serie de retoques visuales menores identificados durante las pruebas (cursores, espaciados, tamaños de fuente, mensajes de confirmación) — en curso.
