@@ -92,7 +92,7 @@ export function NewArticlePage() {
         <p className="text-cream-100">
           {isEditMode ? t('articles.notAllowedEdit') : t('articles.notAllowedNew')}
         </p>
-        <BackLink to={ROUTES.LIBRARY} label={t('articles.backToLibrary')} />
+        <BackLink />
       </PageContainer>
     );
   }
@@ -101,7 +101,7 @@ export function NewArticlePage() {
     <PageContainer className="px-4 py-10">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center">
-          <BackLink to={ROUTES.LIBRARY} label={t('articles.backToLibrary')} />
+          <BackLink />
           <LanguageSwitcher />
         </div>
 

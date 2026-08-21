@@ -9,5 +9,6 @@ export { FieldError } from './FieldError';
 export { LoadingScreen } from './LoadingScreen';
 export { PageContainer } from './PageContainer';
 export { IconButton } from './IconButton';
+export { IconLink } from './IconLink';
 export { BackLink } from './BackLink';
 export { OrganizationBadge } from './OrganizationBadge';
