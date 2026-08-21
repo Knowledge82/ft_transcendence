@@ -14,3 +14,11 @@
 - DONE. невозможность / предупреждение о смене роли последнего админа - самому себе невозможно сменить роль в принципе.
 - DONE. 404 не существует? при переходе на страницу, например /celd (вместо /celda) - белый экран.
 - cursor on Eliminar in Biblioteca
+- line "En el Capítulo desde el" in personal statistics (HomePage). separate more from upper line with numbers. separate with a line?
+- Button "Seguridad" without translate.
+- Upon completion of 2FA the success phrase should be displayed.
+- Emphasize the fact that 2FA is enabled and the invitation to disable it.
+- Enlarge the Backlink.
+- change OrganizationsListPage: 2 banners of org in a row, square form, change <number of members> color to light color.
+- in Sanctuary change Miembros de facción to Total miembros.
+- globally enlarge font size a little.

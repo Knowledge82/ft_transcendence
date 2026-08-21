@@ -426,6 +426,8 @@ Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server E
 
 [+ Orgs Done](./docs/docs-organizations-feature-DONE.md)
 
+[+ Statistics(personal and general) and 2FA](./docs/docs-stats-and-2fa.md)
+
 ### WCAG 2.1 AA
 
 - [WCAG AA: keyboard navigation](./docs/WCAG-AA-keyboard-navigation.md)

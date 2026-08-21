@@ -19,4 +19,5 @@ export const ROUTES = {
   ORGANIZATIONS: '/facciones',
   NEW_ORGANIZATION: '/facciones/nueva',
   ORGANIZATION: (organizationId: number | string) => `/facciones/${organizationId}`,
+  SECURITY: '/seguridad',
 } as const;

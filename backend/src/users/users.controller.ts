@@ -37,6 +37,11 @@ export class UsersController {
     return this.usersService.findById(req.user.userId);
   }
 
+  @Get('me/stats')
+  async getMyStats(@Request() req) {
+    return this.usersService.getUserStats(req.user.userId);
+  }
+
   @Patch('me')
   async updateMe(@Request() req, @Body() dto: UpdateProfileDto) {
     return this.usersService.updateProfile(req.user.userId, dto);
@@ -84,8 +89,9 @@ export class UsersController {
     return this.usersService.removeAvatar(req.user.userId);
   }
 
-  // IMPORTANT: this route must stay declared AFTER 'me' and 'me/avatar' —
-  // otherwise a request to /users/me could be captured by :id first
+  // IMPORTANT: this route must stay declared AFTER 'me', 'me/stats',
+  // and 'me/avatar' — otherwise a request to one of those could be
+  // captured by :id first
   @Get(':id')
   async getPublicProfile(@Param('id', ParseIntPipe) id: number) {
     const profile = await this.usersService.findPublicProfile(id);

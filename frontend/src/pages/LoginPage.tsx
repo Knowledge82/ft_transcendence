@@ -21,7 +21,12 @@ export function LoginPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { login } = useAuth();
+  const [pendingToken, setPendingToken] = useState<string | null>(null);
+  const [code, setCode] = useState('');
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  const { login, verifyTwoFactor } = useAuth();
   const navigate = useNavigate();
 
   function validate(): boolean {
@@ -43,13 +48,90 @@ export function LoginPage() {
 
     setIsSubmitting(true);
     try {
-      await login(email, password);
-      navigate(ROUTES.HOME);
+      const outcome = await login(email, password);
+      if (outcome.requiresTwoFactor && outcome.pendingToken) {
+        setPendingToken(outcome.pendingToken);
+      } else {
+        navigate(ROUTES.HOME);
+      }
     } catch (err) {
       setSubmitError(t('login.invalidCredentials'));
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  async function handleVerifyCode(event: FormEvent) {
+    event.preventDefault();
+    setCodeError(null);
+
+    if (!pendingToken) {
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      await verifyTwoFactor(pendingToken, code.trim());
+      navigate(ROUTES.HOME);
+    } catch (err) {
+      setCodeError(t('login.invalidTwoFactorCode'));
+    } finally {
+      setIsVerifying(false);
+    }
+  }
+
+  if (pendingToken) {
+    return (
+      <PageContainer className="flex items-center justify-center px-4">
+        <div className="w-full max-w-sm">
+          <div className="flex justify-between items-center mb-3">
+            <button
+              onClick={() => {
+                setPendingToken(null);
+                setCode('');
+                setCodeError(null);
+              }}
+              className="text-sm text-cream-400 hover:text-cream-100"
+            >
+              {t('common.back')}
+            </button>
+            <LanguageSwitcher />
+          </div>
+          <Card>
+            <h1 className="text-2xl font-semibold text-cream-100 mb-2 text-center">
+              {t('login.twoFactorTitle')}
+            </h1>
+            <p className="text-sm text-cream-400 mb-6 text-center">
+              {t('login.twoFactorSubtitle')}
+            </p>
+
+            <form onSubmit={handleVerifyCode} noValidate className="space-y-4">
+              <div>
+                <label htmlFor="code" className="block text-sm font-medium text-cream-400 mb-1">
+                  {t('login.twoFactorCodeLabel')}
+                </label>
+                <Input
+                  id="code"
+                  type="text"
+                  inputMode="numeric"
+                  dir="ltr"
+                  autoComplete="one-time-code"
+                  autoFocus
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  className="text-center tracking-[0.3em] text-lg"
+                />
+                <FieldError>{codeError}</FieldError>
+              </div>
+
+              <Button type="submit" disabled={isVerifying || code.length !== 6} className="w-full">
+                {isVerifying ? t('login.verifying') : t('login.verify')}
+              </Button>
+            </form>
+          </Card>
+        </div>
+      </PageContainer>
+    );
   }
 
   return (
@@ -110,10 +192,6 @@ export function LoginPage() {
           <div className="flex-1 h-px bg-border-default" />
         </div>
 
-        {/* Plain <a>, not <Link> — this needs a real full-page browser
-            navigation to the backend, which itself redirects to 42's
-            authorization page. React Router's navigate() only works for
-            in-app SPA routes, not for leaving the app entirely. */}
         <a
           href="/api/auth/oauth/42"
           className="w-full flex items-center justify-center gap-2 border border-border-default rounded-md py-2 text-sm text-cream-100 hover:bg-ink-800 transition-colors"

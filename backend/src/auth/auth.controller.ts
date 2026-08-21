@@ -16,9 +16,10 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import type { FortyTwoProfile } from './strategies/oauth-fortytwo.strategy';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 const REFRESH_COOKIE_NAME = 'refreshToken';
-const REFRESH_COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days, must match REFRESH_TOKEN_TTL_DAYS in auth.service.ts
+const REFRESH_COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const FRONTEND_URL = process.env.FRONTEND_URL ?? 'https://localhost:8443';
 
 @Controller('auth')
@@ -31,9 +32,9 @@ export class AuthController {
     @Headers('accept-language') language: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken } = await this.authService.register(dto, language);
-    this.setRefreshCookie(res, refreshToken);
-    return { accessToken };
+    const result = await this.authService.register(dto, language);
+    this.setRefreshCookie(res, result.refreshToken);
+    return { accessToken: result.accessToken };
   }
 
   @Post('login')
@@ -42,9 +43,53 @@ export class AuthController {
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken } = await this.authService.login(dto);
+    const result = await this.authService.login(dto);
+
+    if (result.requiresTwoFactor) {
+      return { requiresTwoFactor: true, pendingToken: result.pendingToken };
+    }
+
+    this.setRefreshCookie(res, result.refreshToken);
+    return { requiresTwoFactor: false, accessToken: result.accessToken };
+  }
+
+  @Post('2fa/verify')
+  @HttpCode(HttpStatus.OK)
+  async verifyTwoFactor(
+    @Body('pendingToken') pendingToken: string,
+    @Body('code') code: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, refreshToken } = await this.authService.verifyTwoFactorLogin(
+      pendingToken,
+      code,
+    );
     this.setRefreshCookie(res, refreshToken);
     return { accessToken };
+  }
+
+  @Post('2fa/setup')
+  @UseGuards(JwtAuthGuard)
+  async setupTwoFactor(@Req() req: Request & { user: { userId: number } }) {
+    return this.authService.setupTwoFactor(req.user.userId);
+  }
+
+  @Post('2fa/confirm')
+  @UseGuards(JwtAuthGuard)
+  async confirmTwoFactor(
+    @Req() req: Request & { user: { userId: number } },
+    @Body('code') code: string,
+  ) {
+    return this.authService.confirmTwoFactor(req.user.userId, code);
+  }
+
+  @Post('2fa/disable')
+  @UseGuards(JwtAuthGuard)
+  async disableTwoFactor(
+    @Req() req: Request & { user: { userId: number } },
+    @Body('password') password: string,
+  ) {
+    return this.authService.disableTwoFactor(req.user.userId, password);
   }
 
   @Get('oauth/42')
@@ -107,11 +152,11 @@ export class AuthController {
 
   private setRefreshCookie(res: Response, token: string) {
     res.cookie(REFRESH_COOKIE_NAME, token, {
-      httpOnly: true, // inaccessible to JavaScript — protects against XSS token theft
-      secure: true, // sent only over HTTPS — we already enforce this via nginx
-      sameSite: 'strict', // not sent on cross-site requests — protects against CSRF
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
       maxAge: REFRESH_COOKIE_MAX_AGE_MS,
-      path: '/api/auth', // cookie only sent to auth endpoints, not the whole app
+      path: '/api/auth',
     });
   }
 }

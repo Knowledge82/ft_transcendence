@@ -37,6 +37,8 @@ model User {
   avatarUrl    String?
   role         Role     @default(HERMANO)
   gender       Gender   @default(MASCULINO)
+  twoFactorSecret  String?
+  twoFactorEnabled Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

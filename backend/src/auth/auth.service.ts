@@ -2,10 +2,14 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
+  ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { generateSecret, generateURI, verify as verifyTotp } from 'otplib';
+import * as QRCode from 'qrcode';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -15,6 +19,8 @@ import { suggestAvailableNames } from './display-name-suggestions';
 const SALT_ROUNDS = 12;
 const ACCESS_TOKEN_TTL = '15m';
 const REFRESH_TOKEN_TTL_DAYS = 7;
+const TWO_FACTOR_PENDING_TTL = '5m';
+const TWO_FACTOR_ISSUER = 'La Iglesia del Verdadero Relink';
 
 @Injectable()
 export class AuthService {
@@ -56,7 +62,8 @@ export class AuthService {
     const name = user.displayName ?? `Usuario ${user.id}`;
     await this.communityService.createUserRegisteredEvent(name);
 
-    return this.issueTokens(user.id, user.email);
+    const tokens = await this.issueTokens(user.id, user.email);
+    return { requiresTwoFactor: false as const, ...tokens };
   }
 
   async login(dto: LoginDto) {
@@ -64,10 +71,6 @@ export class AuthService {
       where: { email: dto.email },
     });
 
-    // Same generic message whether the account doesn't exist, or exists
-    // but was created via 42 OAuth and has no password at all — this
-    // deliberately doesn't reveal WHICH case it is, avoiding leaking
-    // whether a given email is registered
     if (!user || !user.passwordHash) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
@@ -77,15 +80,96 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    if (user.twoFactorEnabled) {
+      const pendingToken = this.jwtService.sign(
+        { sub: user.id, purpose: 'two-factor' },
+        { secret: process.env.JWT_SECRET, expiresIn: TWO_FACTOR_PENDING_TTL },
+      );
+      return { requiresTwoFactor: true as const, pendingToken };
+    }
+
+    const tokens = await this.issueTokens(user.id, user.email);
+    return { requiresTwoFactor: false as const, ...tokens };
+  }
+
+  async verifyTwoFactorLogin(pendingToken: string, code: string) {
+    let payload: { sub: number; purpose: string };
+    try {
+      payload = this.jwtService.verify(pendingToken, { secret: process.env.JWT_SECRET });
+    } catch {
+      throw new UnauthorizedException({ code: 'TWO_FACTOR_TOKEN_EXPIRED' });
+    }
+    if (payload.purpose !== 'two-factor') {
+      throw new UnauthorizedException();
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
+    if (!user?.twoFactorSecret || !user.twoFactorEnabled) {
+      throw new UnauthorizedException();
+    }
+
+    const isValid = (await verifyTotp({ token: code, secret: user.twoFactorSecret })).valid;
+    if (!isValid) {
+      throw new UnauthorizedException({ code: 'INVALID_TWO_FACTOR_CODE' });
+    }
+
     return this.issueTokens(user.id, user.email);
   }
 
-  // Called right after 42 hands back the person's profile. Two
-  // outcomes: they already have an account linked to this 42 id (log
-  // them in normally), or this is their first time (issue a short-lived
-  // token carrying their 42 profile data, instead of creating the
-  // account immediately — we still need them to pick a gender, and to
-  // confirm/change their display name if it's already taken).
+  async setupTwoFactor(userId: number) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    if (!user.passwordHash) {
+      throw new ForbiddenException({ code: 'TWO_FACTOR_REQUIRES_PASSWORD' });
+    }
+
+    const secret = generateSecret();
+    const otpauthUrl = generateURI({ issuer: TWO_FACTOR_ISSUER, label: user.email, secret });
+    const qrCodeDataUrl = await QRCode.toDataURL(otpauthUrl);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { twoFactorSecret: secret },
+    });
+
+    return { qrCodeDataUrl, secret };
+  }
+
+  async confirmTwoFactor(userId: number, code: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user?.twoFactorSecret) {
+      throw new BadRequestException({ code: 'TWO_FACTOR_NOT_SETUP' });
+    }
+
+    const isValid = (await verifyTotp({ token: code, secret: user.twoFactorSecret })).valid;
+    if (!isValid) {
+      throw new BadRequestException({ code: 'INVALID_TWO_FACTOR_CODE' });
+    }
+
+    await this.prisma.user.update({ where: { id: userId }, data: { twoFactorEnabled: true } });
+    return { enabled: true };
+  }
+
+  async disableTwoFactor(userId: number, password: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user?.passwordHash) {
+      throw new UnauthorizedException();
+    }
+
+    const matches = await bcrypt.compare(password, user.passwordHash);
+    if (!matches) {
+      throw new UnauthorizedException({ code: 'INVALID_PASSWORD' });
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { twoFactorEnabled: false, twoFactorSecret: null },
+    });
+    return { enabled: false };
+  }
+
   async handleFortyTwoLogin(profile: {
     intraId: number;
     email: string;
@@ -105,11 +189,6 @@ export class AuthService {
     return { isNewAccount: true as const, pendingToken };
   }
 
-  // The second half of the 42 signup flow — called once the person has
-  // picked a gender on the "complete your registration" page. Re-runs
-  // the same uniqueness checks as normal registration (someone else
-  // could have taken the name, or even registered the same email
-  // normally, in the few minutes since the pending token was issued).
   async completeOAuthRegistration(
     pendingToken: string,
     gender: string,
@@ -135,9 +214,6 @@ export class AuthService {
       throw new ConflictException({ code: 'EMAIL_TAKEN' });
     }
 
-    // Prefer whatever the person chose on the completion form — only
-    // fall back to their 42 login if they left it untouched or the
-    // field was somehow omitted
     const finalDisplayName = displayName?.trim() || profile.displayName;
 
     const existingName = await this.prisma.user.findFirst({
@@ -155,8 +231,6 @@ export class AuthService {
         displayName: finalDisplayName,
         avatarUrl: profile.avatarUrl,
         gender: gender as 'MASCULINO' | 'FEMENINO',
-        // passwordHash stays null — this account can only sign in
-        // through 42 again, never with an email/password form
       },
     });
 

@@ -18,7 +18,13 @@
     "register": "Sign up",
     "invalidCredentials": "Incorrect email or password.",
     "with42": "Sign in with 42",
-    "orDivider": "or"
+    "orDivider": "or",
+    "twoFactorTitle": "Two-step verification",
+    "twoFactorSubtitle": "Enter the code from your authenticator app.",
+    "twoFactorCodeLabel": "6-digit code",
+    "verifying": "Verifying...",
+    "verify": "Verify",
+    "invalidTwoFactorCode": "That code is wrong or has expired."
   },
   "landing": {
     "loading": "Loading",
@@ -54,7 +60,10 @@
     "nameTooShort": "The name must be at least 2 characters long",
     "nameUpdateError": "Couldn't update the name",
     "noName": "No name",
-    "editNameHint": "Click to edit"
+    "editNameHint": "Click to edit",
+    "statsLogins": "Logins",
+    "statsArticles": "Treatises",
+    "statsMemberSince": "In the Chapter since {{date}}"
   },
   "widgets": {
     "activityTitle": "Chapter Activity",
@@ -126,7 +135,16 @@
     "rank": "Rank",
     "delete": "Delete",
     "confirmDelete": "Are you sure you want to delete this account? This action cannot be undone.",
-    "roleChangeError": "Couldn't change the rank."
+    "roleChangeError": "Couldn't change the rank.",
+    "statsRoleHermano": "Brothers/Sisters",
+    "statsRoleInquisidor": "Inquisitors",
+    "statsRoleArzobispo": "Archbishops",
+    "statsArticles": "Treatises",
+    "statsOrganizations": "Factions",
+    "statsOrgMembers": "Faction members",
+    "statsRegistrations": "Registrations, last 7 days",
+    "statsTopActive": "Most active (by logins)",
+    "statsNoData": "Not enough data yet."
   },
   "profile": {
     "notFound": "Couldn't find this brother",
@@ -351,5 +369,23 @@
     "cannotDeleteOwnAccount": "You can't delete your own account — ask another Archbishop to do it.",
     "insufficientRankForOrganization": "You need to be at least an Inquisitor to found a faction.",
     "alreadyInOrganization": "You already belong to a faction. You must leave it before joining or founding another."
+  },
+  "security": {
+    "title": "Account security",
+    "requiresPassword": "Two-step verification is only available for accounts with a password. Your account signs in through 42.",
+    "disabledInfo": "Two-step verification is off. Add an extra layer of protection with an authenticator app.",
+    "startSetup": "Turn on two-step verification",
+    "setupError": "Couldn't start setup.",
+    "scanInstructions": "Scan this code with your authenticator app (Google Authenticator, Authy, etc.).",
+    "qrAlt": "QR code to set up two-step verification",
+    "manualEntryHint": "Can't scan? Enter this code manually:",
+    "confirming": "Confirming...",
+    "confirmButton": "Confirm and turn on",
+    "invalidCode": "That code is wrong or has expired.",
+    "enabledInfo": "Two-step verification is on. To turn it off, confirm your password.",
+    "confirmDisable": "Are you sure you want to turn off two-step verification?",
+    "disabling": "Turning off...",
+    "disableButton": "Turn off",
+    "invalidPassword": "Incorrect password."
   }
 }

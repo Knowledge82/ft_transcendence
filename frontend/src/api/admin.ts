@@ -13,6 +13,20 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export interface AdminStats {
+  usersByRole: { role: Role; count: number }[];
+  registrations: { date: string; count: number }[];
+  totalArticles: number;
+  totalOrganizations: number;
+  totalOrgMembers: number;
+  topActiveUsers: { userId: number; displayName: string; loginCount: number }[];
+}
+
+export async function getAdminStats(): Promise<AdminStats> {
+  const { data } = await apiClient.get<AdminStats>('/admin/stats');
+  return data;
+}
+
 export async function listAllUsers(): Promise<AdminUser[]> {
   const { data } = await apiClient.get<AdminUser[]>('/admin/users');
   return data;

@@ -33,6 +33,11 @@ export class AdminController {
     return this.adminService.listUsers();
   }
 
+  @Get('stats')
+  async getStats() {
+    return this.adminService.getAdminStats();
+  }
+
   @Patch('users/:id/role')
   async changeRole(
     @Request() req,

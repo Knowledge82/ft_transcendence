@@ -22,6 +22,7 @@ import { OAuthCompletePage } from './pages/OAuthCompletePage';
 import { OrganizationsListPage } from './pages/OrganizationsListPage';
 import { NewOrganizationPage } from './pages/NewOrganizationPage';
 import { OrganizationDetailPage } from './pages/OrganizationDetailPage';
+import { TwoFactorSetupPage } from './pages/TwoFactorSetupPage';
 function App() {
   return (
     <BrowserRouter>
@@ -135,6 +136,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <OrganizationDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/seguridad"
+                element={
+                  <ProtectedRoute>
+                    <TwoFactorSetupPage />
                   </ProtectedRoute>
                 }
               />

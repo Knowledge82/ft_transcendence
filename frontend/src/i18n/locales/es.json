@@ -18,7 +18,13 @@
     "register": "Regístrate",
     "invalidCredentials": "Email o contraseña incorrectos.",
     "with42": "Entrar con 42",
-    "orDivider": "o"
+    "orDivider": "o",
+    "twoFactorTitle": "Verificación en dos pasos",
+    "twoFactorSubtitle": "Introduce el código de tu aplicación de autenticación.",
+    "twoFactorCodeLabel": "Código de 6 dígitos",
+    "verifying": "Verificando...",
+    "verify": "Verificar",
+    "invalidTwoFactorCode": "El código no es correcto o ha caducado."
   },
   "landing": {
     "loading": "Cargando",
@@ -45,6 +51,7 @@
     "library": "Biblioteca",
     "sanctuary": "Santuario",
     "organizations": "Facciones",
+    "security": "Seguridad",
     "logout": "Cerrar sesión",
     "changeAvatar": "Cambiar avatar",
     "uploading": "Subiendo...",
@@ -54,7 +61,10 @@
     "nameTooShort": "El nombre debe tener al menos 2 caracteres",
     "nameUpdateError": "No se pudo actualizar el nombre",
     "noName": "Sin nombre",
-    "editNameHint": "Haz clic para editar"
+    "editNameHint": "Haz clic para editar",
+    "statsLogins": "Accesos",
+    "statsArticles": "Tratados",
+    "statsMemberSince": "En el Capítulo desde el {{date}}"
   },
   "widgets": {
     "activityTitle": "Actividad del Capítulo",
@@ -126,7 +136,16 @@
     "rank": "Rango",
     "delete": "Eliminar",
     "confirmDelete": "¿Seguro que quieres eliminar esta cuenta? Esta acción no se puede deshacer.",
-    "roleChangeError": "No se pudo cambiar el rango."
+    "roleChangeError": "No se pudo cambiar el rango.",
+    "statsRoleHermano": "Hermanos",
+    "statsRoleInquisidor": "Inquisidores",
+    "statsRoleArzobispo": "Arzobispos",
+    "statsArticles": "Tratados",
+    "statsOrganizations": "Facciones",
+    "statsOrgMembers": "Miembros de facción",
+    "statsRegistrations": "Registros de los últimos 7 días",
+    "statsTopActive": "Los más activos (por accesos)",
+    "statsNoData": "Todavía no hay suficientes datos."
   },
   "profile": {
     "notFound": "No se pudo encontrar a este hermano",
@@ -351,5 +370,23 @@
     "cannotDeleteOwnAccount": "No puedes eliminar tu propia cuenta — pide a otro Arzobispo que lo haga.",
     "insufficientRankForOrganization": "Necesitas ser al menos Inquisidor para fundar una facción.",
     "alreadyInOrganization": "Ya perteneces a una facción. Debes abandonarla antes de unirte o fundar otra."
+  },
+  "security": {
+    "title": "Seguridad de la cuenta",
+    "requiresPassword": "La verificación en dos pasos solo está disponible para cuentas con contraseña. Tu cuenta inicia sesión a través de 42.",
+    "disabledInfo": "La verificación en dos pasos está desactivada. Añade una capa extra de protección con una aplicación de autenticación.",
+    "startSetup": "Activar verificación en dos pasos",
+    "setupError": "No se pudo iniciar la configuración.",
+    "scanInstructions": "Escanea este código con tu aplicación de autenticación (Google Authenticator, Authy, etc.).",
+    "qrAlt": "Código QR para configurar la verificación en dos pasos",
+    "manualEntryHint": "¿No puedes escanear? Introduce este código manualmente:",
+    "confirming": "Confirmando...",
+    "confirmButton": "Confirmar y activar",
+    "invalidCode": "El código no es correcto o ha caducado.",
+    "enabledInfo": "La verificación en dos pasos está activada. Para desactivarla, confirma tu contraseña.",
+    "confirmDisable": "¿Seguro que quieres desactivar la verificación en dos pasos?",
+    "disabling": "Desactivando...",
+    "disableButton": "Desactivar",
+    "invalidPassword": "Contraseña incorrecta."
   }
 }

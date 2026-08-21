@@ -5,6 +5,9 @@ import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { apiClient } from '../api/client';
 import { listFriends } from '../api/friends';
+import { getMyStats } from '../api/users';
+import type { UserStats } from '../api/users';
+import { getDateLocale } from '../utils/dateLocale';
 import { Footer } from '../components/Footer';
 import { PageContainer, Card, LoadingScreen, Avatar, RoleBadge, OrganizationBadge, Input, Button } from '../components/ui';
 import { ActivityTicker } from '../components/ActivityTicker';
@@ -27,13 +30,14 @@ interface Profile {
 }
 
 export function HomePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { logout } = useAuth();
   const { socket } = useSocket();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [friendCount, setFriendCount] = useState(0);
   const [onlineCount, setOnlineCount] = useState(0);
+  const [stats, setStats] = useState<UserStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [justChangedRole, setJustChangedRole] = useState(false);
 
@@ -49,11 +53,13 @@ export function HomePage() {
     Promise.all([
       apiClient.get<Profile>('/users/me'),
       listFriends(),
-    ]).then(([me, friends]) => {
+      getMyStats(),
+    ]).then(([me, friends, myStats]) => {
       setProfile(me.data);
       setNameDraft(me.data.displayName ?? '');
       setFriendCount(friends.length);
       setOnlineCount(friends.filter((f) => f.isOnline).length);
+      setStats(myStats);
       setIsLoading(false);
     });
   }, []);
@@ -236,7 +242,7 @@ export function HomePage() {
             )}
           </div>
 
-          <div className="flex justify-center gap-8 mb-6">
+          <div className="flex justify-center gap-6 sm:gap-8 mb-1 flex-wrap">
             <div>
               <p className="text-xl text-gold-500 font-semibold">{friendCount}</p>
               <p className="text-xs text-cream-400">{t('home.friends')}</p>
@@ -245,7 +251,26 @@ export function HomePage() {
               <p className="text-xl text-gold-500 font-semibold">{onlineCount}</p>
               <p className="text-xs text-cream-400">{t('home.online')}</p>
             </div>
+            {stats && (
+              <>
+                <div>
+                  <p className="text-xl text-gold-500 font-semibold">{stats.loginCount}</p>
+                  <p className="text-xs text-cream-400">{t('home.statsLogins')}</p>
+                </div>
+                <div>
+                  <p className="text-xl text-gold-500 font-semibold">{stats.articleCount}</p>
+                  <p className="text-xs text-cream-400">{t('home.statsArticles')}</p>
+                </div>
+              </>
+            )}
           </div>
+          {stats?.memberSince && (
+            <p className="text-xs text-cream-400 mb-6 text-center">
+              {t('home.statsMemberSince', {
+                date: new Date(stats.memberSince).toLocaleDateString(getDateLocale(i18n.language)),
+              })}
+            </p>
+          )}
 
           <div className="flex gap-3 justify-center flex-wrap">
             <Link
@@ -271,6 +296,12 @@ export function HomePage() {
               className="bg-ink-800 text-gold-500 font-medium px-4 py-2 rounded-md hover:bg-ink-800/70 transition-colors"
             >
               {t('home.organizations')}
+            </Link>
+            <Link
+              to={ROUTES.SECURITY}
+              className="bg-ink-800 text-gold-500 font-medium px-4 py-2 rounded-md hover:bg-ink-800/70 transition-colors"
+            >
+              {t('home.security')}
             </Link>
             {profile.role === 'ARZOBISPO' && (
               <Link

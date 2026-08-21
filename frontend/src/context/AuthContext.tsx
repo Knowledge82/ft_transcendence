@@ -6,12 +6,19 @@ import {
   refreshRequest,
   logoutRequest,
   completeOAuthRegistrationRequest,
+  verifyTwoFactorRequest,
 } from '../api/auth';
+
+interface LoginOutcome {
+  requiresTwoFactor: boolean;
+  pendingToken?: string;
+}
 
 interface AuthContextValue {
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<LoginOutcome>;
+  verifyTwoFactor: (pendingToken: string, code: string) => Promise<void>;
   register: (
     email: string,
     password: string,
@@ -51,8 +58,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setIsLoading(false));
   }, []);
 
-  async function login(email: string, password: string) {
-    const { accessToken } = await loginRequest(email, password);
+  async function login(email: string, password: string): Promise<LoginOutcome> {
+    const result = await loginRequest(email, password);
+
+    if (result.requiresTwoFactor) {
+      return { requiresTwoFactor: true, pendingToken: result.pendingToken };
+    }
+
+    setClientAccessToken(result.accessToken);
+    setIsAuthenticated(true);
+    return { requiresTwoFactor: false };
+  }
+
+  async function verifyTwoFactor(pendingToken: string, code: string) {
+    const { accessToken } = await verifyTwoFactorRequest(pendingToken, code);
     setClientAccessToken(accessToken);
     setIsAuthenticated(true);
   }
@@ -94,6 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated,
         isLoading,
         login,
+        verifyTwoFactor,
         register,
         completeOAuthRegistration,
         logout,

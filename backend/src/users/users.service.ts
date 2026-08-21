@@ -51,14 +51,18 @@ export class UsersService {
   async findById(userId: number) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: SELF_PROFILE_SELECT,
+      select: { ...SELF_PROFILE_SELECT, passwordHash: true, twoFactorEnabled: true },
     });
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    return user;
+    // passwordHash itself never leaves the backend — only whether one
+    // exists at all, which the frontend needs to decide whether 2FA
+    // setup is even an option for this account
+    const { passwordHash, ...rest } = user;
+    return { ...rest, hasPassword: passwordHash !== null };
   }
 
   async findPublicProfile(userId: number) {
@@ -96,5 +100,21 @@ export class UsersService {
       data: { avatarUrl: null },
       select: SELF_PROFILE_SELECT,
     });
+  }
+
+  async getUserStats(userId: number) {
+    const [loginCount, articleCount, user] = await Promise.all([
+      // Every successful login issues a fresh refresh token, so this
+      // doubles as a login counter without needing any new table
+      this.prisma.refreshToken.count({ where: { userId } }),
+      this.prisma.article.count({ where: { authorId: userId } }),
+      this.prisma.user.findUnique({ where: { id: userId }, select: { createdAt: true } }),
+    ]);
+
+    return {
+      loginCount,
+      articleCount,
+      memberSince: user?.createdAt ?? null,
+    };
   }
 }

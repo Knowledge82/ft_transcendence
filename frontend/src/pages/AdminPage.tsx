@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiClient } from '../api/client';
-import { listAllUsers, changeUserRole, deleteUser } from '../api/admin';
-import type { AdminUser, Role } from '../api/admin';
+import { listAllUsers, changeUserRole, deleteUser, getAdminStats } from '../api/admin';
+import type { AdminUser, Role, AdminStats } from '../api/admin';
+import { AdminStatsPanel } from '../components/AdminStatsPanel';
 import { PageContainer, LoadingScreen, IconButton, BackLink } from '../components/ui';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { ROUTES } from '../routes';
@@ -17,6 +18,7 @@ export function AdminPage() {
   const confirm = useConfirm();
   const [ownRole, setOwnRole] = useState<Role | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [stats, setStats] = useState<AdminStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -24,12 +26,9 @@ export function AdminPage() {
     apiClient.get<{ id: number; role: Role }>('/users/me').then(async (me) => {
       setOwnRole(me.data.role);
       if (me.data.role === 'ARZOBISPO') {
-        const allUsers = await listAllUsers();
-        // Never show your own row — you can't change your own role or
-        // delete your own account from here anyway (enforced on the
-        // backend), so an editable control for yourself would just be
-        // confusing, always-failing UI
+        const [allUsers, adminStats] = await Promise.all([listAllUsers(), getAdminStats()]);
         setUsers(allUsers.filter((u) => u.id !== me.data.id));
+        setStats(adminStats);
       }
       setIsLoading(false);
     });
@@ -90,6 +89,8 @@ export function AdminPage() {
             {actionError}
           </p>
         )}
+
+        {stats && <AdminStatsPanel stats={stats} />}
 
         <div className="bg-ink-900 border border-border-default rounded-xl overflow-hidden">
           <table className="w-full text-sm">

@@ -14,7 +14,18 @@ export interface PublicProfile {
   } | null;
 }
 
+export interface UserStats {
+  loginCount: number;
+  articleCount: number;
+  memberSince: string | null;
+}
+
 export async function getPublicProfile(userId: number): Promise<PublicProfile> {
   const { data } = await apiClient.get<PublicProfile>(`/users/${userId}`);
+  return data;
+}
+
+export async function getMyStats(): Promise<UserStats> {
+  const { data } = await apiClient.get<UserStats>('/users/me/stats');
   return data;
 }

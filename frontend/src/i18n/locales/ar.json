@@ -18,7 +18,13 @@
     "register": "أنشئ حسابًا",
     "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
     "with42": "الدخول عبر 42",
-    "orDivider": "أو"
+    "orDivider": "أو",
+    "twoFactorTitle": "التحقق بخطوتين",
+    "twoFactorSubtitle": "أدخل الرمز من تطبيق المصادقة الخاص بك.",
+    "twoFactorCodeLabel": "رمز مكوّن من 6 أرقام",
+    "verifying": "جارٍ التحقق...",
+    "verify": "تحقق",
+    "invalidTwoFactorCode": "الرمز غير صحيح أو انتهت صلاحيته."
   },
   "landing": {
     "loading": "جارٍ التحميل",
@@ -54,7 +60,10 @@
     "nameTooShort": "يجب أن يتكون الاسم من حرفين على الأقل",
     "nameUpdateError": "تعذر تحديث الاسم",
     "noName": "بدون اسم",
-    "editNameHint": "انقر للتعديل"
+    "editNameHint": "انقر للتعديل",
+    "statsLogins": "مرات الدخول",
+    "statsArticles": "الرسائل",
+    "statsMemberSince": "في الفصل منذ {{date}}"
   },
   "widgets": {
     "activityTitle": "أخبار الفصل",
@@ -126,7 +135,16 @@
     "rank": "الرتبة",
     "delete": "حذف",
     "confirmDelete": "هل أنت متأكد أنك تريد حذف هذا الحساب؟ لا يمكن التراجع عن هذا الإجراء.",
-    "roleChangeError": "تعذر تغيير الرتبة."
+    "roleChangeError": "تعذر تغيير الرتبة.",
+    "statsRoleHermano": "الإخوة",
+    "statsRoleInquisidor": "المحققون",
+    "statsRoleArzobispo": "الأساقفة",
+    "statsArticles": "الرسائل",
+    "statsOrganizations": "الفصائل",
+    "statsOrgMembers": "أعضاء الفصائل",
+    "statsRegistrations": "التسجيلات، آخر 7 أيام",
+    "statsTopActive": "الأكثر نشاطًا (حسب الدخول)",
+    "statsNoData": "لا توجد بيانات كافية بعد."
   },
   "profile": {
     "notFound": "تعذر العثور على هذا الأخ",
@@ -351,5 +369,23 @@
     "cannotDeleteOwnAccount": "لا يمكنك حذف حسابك الخاص — اطلب من أسقف آخر القيام بذلك.",
     "insufficientRankForOrganization": "يجب أن تكون محققًا على الأقل لتأسيس فصيل.",
     "alreadyInOrganization": "أنت بالفعل عضو في فصيل. يجب أن تغادره قبل الانضمام إلى فصيل آخر أو تأسيسه."
+  },
+  "security": {
+    "title": "أمان الحساب",
+    "requiresPassword": "التحقق بخطوتين متاح فقط للحسابات التي لديها كلمة مرور. حسابك يسجّل الدخول عبر 42.",
+    "disabledInfo": "التحقق بخطوتين معطّل. أضف طبقة حماية إضافية باستخدام تطبيق مصادقة.",
+    "startSetup": "تفعيل التحقق بخطوتين",
+    "setupError": "تعذر بدء الإعداد.",
+    "scanInstructions": "امسح هذا الرمز باستخدام تطبيق المصادقة (Google Authenticator، Authy، إلخ).",
+    "qrAlt": "رمز QR لإعداد التحقق بخطوتين",
+    "manualEntryHint": "لا يمكنك المسح؟ أدخل هذا الرمز يدويًا:",
+    "confirming": "جارٍ التأكيد...",
+    "confirmButton": "تأكيد وتفعيل",
+    "invalidCode": "الرمز غير صحيح أو انتهت صلاحيته.",
+    "enabledInfo": "التحقق بخطوتين مفعّل. لإلغائه، أكّد كلمة المرور.",
+    "confirmDisable": "هل أنت متأكد أنك تريد إلغاء تفعيل التحقق بخطوتين؟",
+    "disabling": "جارٍ الإلغاء...",
+    "disableButton": "إلغاء التفعيل",
+    "invalidPassword": "كلمة المرور غير صحيحة."
   }
 }
