@@ -32,7 +32,7 @@
     "p1": "Has this ever happened to you during a defense at 42 Barcelona?",
     "p2": "The evaluator, with an air of superiority, runs <0>make</0> right after you've built your precious, brilliant, and completely correct project. The sacred line appears:",
     "p4": "But that's not enough for them. With an unbelievable dickhead face, they type <0>touch Makefile</0>, run <1>make</1> again, and stand there waiting with moral superiority, claiming your Makefile is wrong because \"you didn't add the Makefile or the headers as dependencies.\"",
-    "p5": "And you just stood there. Silent. While your blood boiled inside at such ignorance disguised as authority.",
+    "p5": "And you just stood there. Floored. Speechless at such ignorance disguised as authority.",
     "p6": "You knew the truth.",
     "p7": "Your <0>Makefile</0> was flawless. The linker hadn't run in vain. There had been no relinking.",
     "p8": "Confusing recompilation with relinking is not an opinion. It's pure heresy.",
@@ -51,6 +51,7 @@
     "library": "Library",
     "sanctuary": "Sanctuary",
     "organizations": "Factions",
+    "security": "Security",
     "logout": "Log out",
     "changeAvatar": "Change avatar",
     "uploading": "Uploading...",
@@ -142,6 +143,7 @@
     "statsArticles": "Treatises",
     "statsOrganizations": "Factions",
     "statsOrgMembers": "Faction members",
+    "statsTotalMembers": "Total Members",
     "statsRegistrations": "Registrations, last 7 days",
     "statsTopActive": "Most active (by logins)",
     "statsNoData": "Not enough data yet."
@@ -220,7 +222,7 @@
     "changeBanner": "Change image",
     "removeBanner": "Remove image",
     "addBanner": "Add a banner image",
-"bannerUploadError": "Couldn't upload the image."
+    "bannerUploadError": "Couldn't upload the image."
   },
   "legal": {
     "lastUpdated": "Last updated: {{date}}",
@@ -382,6 +384,9 @@
     "confirming": "Confirming...",
     "confirmButton": "Confirm and turn on",
     "invalidCode": "That code is wrong or has expired.",
+    "justEnabledMessage": "Two-step verification turned on successfully!",
+    "enabledEmphasis": "Your account is protected with two-step verification.",
+    "disableInvite": "If you ever want to turn it off, confirm your password below.",
     "enabledInfo": "Two-step verification is on. To turn it off, confirm your password.",
     "confirmDisable": "Are you sure you want to turn off two-step verification?",
     "disabling": "Turning off...",

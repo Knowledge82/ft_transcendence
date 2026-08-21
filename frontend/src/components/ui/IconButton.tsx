@@ -14,7 +14,7 @@ const TONE_CLASSES: Record<IconButtonTone, string> = {
 export function IconButton({ tone = 'gold', className = '', ...props }: IconButtonProps) {
   return (
     <button
-      className={`text-xs flex-shrink-0 disabled:text-cream-400 disabled:cursor-not-allowed ${TONE_CLASSES[tone]} ${className}`}
+      className={`text-xs flex-shrink-0 cursor-pointer disabled:text-cream-400 disabled:cursor-not-allowed ${TONE_CLASSES[tone]} ${className}`}
       {...props}
     />
   );

@@ -242,7 +242,7 @@ export function HomePage() {
             )}
           </div>
 
-          <div className="flex justify-center gap-6 sm:gap-8 mb-1 flex-wrap">
+          <div className="flex justify-center gap-6 sm:gap-8 mb-4 flex-wrap">
             <div>
               <p className="text-xl text-gold-500 font-semibold">{friendCount}</p>
               <p className="text-xs text-cream-400">{t('home.friends')}</p>
@@ -265,12 +265,20 @@ export function HomePage() {
             )}
           </div>
           {stats?.memberSince && (
-            <p className="text-xs text-cream-400 mb-6 text-center">
-              {t('home.statsMemberSince', {
-                date: new Date(stats.memberSince).toLocaleDateString(getDateLocale(i18n.language)),
-              })}
-            </p>
+            <>
+              {/* Thin gold divider — separates the numeric stats above
+                  from the join-date line below, instead of relying on
+                  spacing alone to imply they're different kinds of
+                  information */}
+              <div className="w-16 h-px bg-gold-500/40 mx-auto mb-3" aria-hidden="true" />
+              <p className="text-xs text-cream-400 mb-6 text-center">
+                {t('home.statsMemberSince', {
+                  date: new Date(stats.memberSince).toLocaleDateString(getDateLocale(i18n.language)),
+                })}
+              </p>
+            </>
           )}
+
 
           <div className="flex gap-3 justify-center flex-wrap">
             <Link

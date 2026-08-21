@@ -10,7 +10,7 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 const CREATOR_ROLES = ['INQUISIDOR', 'ARZOBISPO'];
 
-function excerpt(text: string, maxLength = 140): string {
+function excerpt(text: string, maxLength = 90): string {
   if (text.length <= maxLength) {
     return text;
   }
@@ -58,28 +58,28 @@ export function OrganizationsListPage() {
         {organizations.length === 0 ? (
           <p className="text-cream-400">{t('organizations.empty')}</p>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
             {organizations.map((org) =>
               org.bannerUrl ? (
                 <Link key={org.id} to={ROUTES.ORGANIZATION(org.id)}>
                   <div
-                    className="relative h-40 rounded-xl overflow-hidden border border-border-default hover:border-gold-500 transition-colors bg-cover bg-center"
+                    className="relative aspect-square rounded-xl overflow-hidden border border-border-default hover:border-gold-500 transition-colors bg-cover bg-center"
                     style={{ backgroundImage: `url(${org.bannerUrl})` }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
-                    <div className="relative z-10 h-full flex flex-col justify-end p-4">
-                      <div className="flex items-center gap-2 mb-1">
+                    <div className="relative z-10 h-full flex flex-col justify-end p-3">
+                      <div className="flex items-center gap-1.5 mb-1">
                         <span
-                          className="w-3 h-3 rounded-full flex-shrink-0"
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                           style={{ backgroundColor: org.color }}
                           aria-hidden="true"
                         />
-                        <h2 className="text-lg font-semibold text-white">{org.name}</h2>
+                        <h2 className="text-sm font-semibold text-white truncate">{org.name}</h2>
                       </div>
-                      <p className="text-xs text-cream-200 mb-1">
+                      <p className="text-xs text-cream-100 mb-1">
                         {t('organizations.memberCount', { count: org._count.members })}
                       </p>
-                      <p className="text-sm text-cream-100 line-clamp-2">
+                      <p className="text-xs text-cream-200 line-clamp-2">
                         {org.manifesto ? excerpt(org.manifesto) : t('organizations.noManifesto')}
                       </p>
                     </div>
@@ -87,19 +87,19 @@ export function OrganizationsListPage() {
                 </Link>
               ) : (
                 <Link key={org.id} to={ROUTES.ORGANIZATION(org.id)}>
-                  <Card className="hover:border-gold-500 transition-colors">
-                    <div className="flex items-center gap-2 mb-1">
+                  <Card className="aspect-square flex flex-col justify-center hover:border-gold-500 transition-colors">
+                    <div className="flex items-center gap-1.5 mb-1">
                       <span
-                        className="w-3 h-3 rounded-full flex-shrink-0"
+                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                         style={{ backgroundColor: org.color }}
                         aria-hidden="true"
                       />
-                      <h2 className="text-lg font-semibold text-gold-500">{org.name}</h2>
+                      <h2 className="text-sm font-semibold text-gold-500 truncate">{org.name}</h2>
                     </div>
-                    <p className="text-xs text-cream-400 mb-3">
+                    <p className="text-xs text-cream-100 mb-1">
                       {t('organizations.memberCount', { count: org._count.members })}
                     </p>
-                    <p className="text-sm text-cream-100">
+                    <p className="text-xs text-cream-400 line-clamp-3">
                       {org.manifesto ? excerpt(org.manifesto) : t('organizations.noManifesto')}
                     </p>
                   </Card>

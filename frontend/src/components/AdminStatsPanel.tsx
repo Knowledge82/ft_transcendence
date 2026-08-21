@@ -43,8 +43,10 @@ export function AdminStatsPanel({ stats }: AdminStatsPanelProps) {
           <p className="text-xs text-cream-400">{t('admin.statsOrganizations')}</p>
         </Card>
         <Card className="text-center py-3">
-          <p className="text-xl text-gold-500 font-semibold">{stats.totalOrgMembers}</p>
-          <p className="text-xs text-cream-400">{t('admin.statsOrgMembers')}</p>
+          <p className="text-xl text-gold-500 font-semibold">
+            {stats.usersByRole.reduce((sum, r) => sum + r.count, 0)}
+          </p>
+          <p className="text-xs text-cream-400">{t('admin.statsTotalMembers')}</p>
         </Card>
       </div>
 

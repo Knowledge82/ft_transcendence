@@ -1,16 +1,18 @@
 @import "tailwindcss";
 
+/* Modest global bump — a percentage (not a fixed px value) so it stays
+   relative to the browser's own font-size setting, respecting anyone
+   who has already adjusted that for accessibility reasons, rather than
+   overriding it outright */
+html {
+  font-size: 106%;
+}
+
 @theme {
   --color-ink-950: #0b0a0f;
   --color-ink-900: #17151d;
   --color-ink-800: #2a2732;
 
-  /* Same hue family as ink-800, but lightened specifically to clear the
-     3:1 non-text contrast threshold (WCAG 1.4.11) against both ink-950
-     and ink-900 backgrounds — ink-800 itself measured at only ~1.3:1
-     against those, meaning borders/outlines built from it were nearly
-     invisible, not just "subtle". Use this for any border/outline that
-     needs to be genuinely visible; keep ink-800 for backgrounds/fills. */
   --color-border-default: #726b8a;
 
   --color-gold-400: #e8c766;
@@ -27,13 +29,6 @@ body {
   margin: 0;
 }
 
-/* Global, theme-consistent keyboard focus indicator — required for WCAG
-   2.4.7 (Focus Visible). Uses :focus-visible instead of :focus so it only
-   appears for keyboard navigation (Tab), not on mouse clicks — avoids the
-   common complaint of "ugly ring on every click" while still guaranteeing
-   every focusable element has a clearly visible indicator when tabbing.
-   Applies globally, to every interactive element, without needing to
-   touch each component individually. */
 :focus-visible {
   outline: 2px solid var(--color-gold-500);
   outline-offset: 2px;
@@ -49,10 +44,6 @@ body {
   }
 }
 
-/* "Hot news" flicker behind the article scrolls on /celda — alternates
-   between two warm tones (orange/red) at slightly different sizes, so it
-   reads as an irregular, living flame-like glow rather than a mechanical
-   pulse of a single color */
 @keyframes scroll-glow {
   0%, 100% {
     box-shadow: 0 0 12px 4px rgba(232, 90, 30, 0.35);
@@ -66,13 +57,6 @@ body {
   animation: scroll-glow 1.8s ease-in-out infinite;
 }
 
-/* A text-safe alternative to Tailwind's built-in animate-pulse — that
-   one dips to 50% opacity, which drops contrast well below the WCAG AA
-   threshold (measured at 2.51:1 against our ink-950 background, versus
-   the 4.5:1 minimum) during part of the animation cycle. This version
-   only dips to 80% — the lowest point that still keeps a comfortable
-   margin above 4.5:1 (measured at 4.74:1) — while still reading as a
-   visible "breathing" pulse. */
 @keyframes text-pulse-safe {
   0%, 100% {
     opacity: 1;
@@ -86,10 +70,6 @@ body {
   animation: text-pulse-safe 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Custom scrollbar, matching the project's dark/gold palette instead of
-   the browser's default (which clashed badly with the theme). Uses the
-   same CSS variables already defined in the @theme block above, so it
-   automatically stays in sync if the palette ever changes. */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -109,36 +89,6 @@ body {
   background: var(--color-gold-500);
 }
 
-/* Firefox uses a completely different (non-pseudo-element) API */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border-default) var(--color-ink-950);
-}
-
-/* Custom scrollbar, matching the project's dark/gold palette instead of
-   the browser's default (which clashed badly with the theme). Uses the
-   same CSS variables already defined in the @theme block above, so it
-   automatically stays in sync if the palette ever changes. */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-ink-950);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-border-default);
-  border-radius: 9999px;
-  border: 2px solid var(--color-ink-950);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-gold-500);
-}
-
-/* Firefox uses a completely different (non-pseudo-element) API */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--color-border-default) var(--color-ink-950);

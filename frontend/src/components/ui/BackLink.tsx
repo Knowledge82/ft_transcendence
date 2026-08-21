@@ -22,7 +22,7 @@ export function BackLink({ to, label, className = '' }: BackLinkProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const resolvedLabel = label ?? t('common.back');
-  const sharedClassName = `text-base text-gold-500 hover:text-gold-400 inline-flex items-center gap-1 ${className}`;
+  const sharedClassName = `text-lg font-medium text-gold-500 hover:text-gold-400 inline-flex items-center gap-1.5 ${className}`;
 
   // When no fixed destination is given, this becomes a REAL "go back"
   // button (browser history), instead of always landing on one hardcoded

@@ -24,6 +24,7 @@ export function TwoFactorSetupPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasPassword, setHasPassword] = useState(true);
   const [isEnabled, setIsEnabled] = useState(false);
+  const [justConfirmed, setJustConfirmed] = useState(false);
 
   const [setup, setSetup] = useState<TwoFactorSetup | null>(null);
   const [confirmCode, setConfirmCode] = useState('');
@@ -59,6 +60,7 @@ export function TwoFactorSetupPage() {
     try {
       await confirmTwoFactorRequest(confirmCode.trim());
       setIsEnabled(true);
+      setJustConfirmed(true);
       setSetup(null);
       setConfirmCode('');
     } catch (err) {
@@ -80,6 +82,7 @@ export function TwoFactorSetupPage() {
     try {
       await disableTwoFactorRequest(disablePassword);
       setIsEnabled(false);
+      setJustConfirmed(false);
       setDisablePassword('');
     } catch (err) {
       setDisableError(t('security.invalidPassword'));
@@ -111,8 +114,26 @@ export function TwoFactorSetupPage() {
             </p>
           </Card>
         ) : isEnabled ? (
-          <Card>
-            <p className="text-sm text-cream-100 mb-4 text-center">{t('security.enabledInfo')}</p>
+          <Card className="border-2 border-gold-500">
+            {justConfirmed && (
+              <p
+                role="status"
+                className="text-sm text-gold-500 font-semibold text-center mb-4"
+              >
+                ✓ {t('security.justEnabledMessage')}
+              </p>
+            )}
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span aria-hidden="true" className="text-xl">
+                🛡️
+              </span>
+              <p className="text-sm font-semibold text-gold-500">
+                {t('security.enabledEmphasis')}
+              </p>
+            </div>
+            <p className="text-sm text-cream-400 mb-6 text-center">
+              {t('security.disableInvite')}
+            </p>
             <form onSubmit={handleDisable} className="space-y-4">
               <div>
                 <label
