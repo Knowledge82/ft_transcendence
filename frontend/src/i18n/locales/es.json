@@ -107,7 +107,8 @@
     "addFriend": "+ Amigo",
     "confirmRemoveFriend": "¿Seguro que quieres quitar a este hermano de tu lista de amigos?",
     "confirmDeleteMessage": "¿Señalar esta herejía y eliminarla?",
-    "uploadError": "No se pudo subir el archivo."
+    "uploadError": "No se pudo subir el archivo.",
+    "showMembers": "Ver hermanos"
   },
   "register": {
     "title": "Registro",

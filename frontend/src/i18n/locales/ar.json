@@ -107,7 +107,8 @@
     "addFriend": "+ صديق",
     "confirmRemoveFriend": "هل أنت متأكد أنك تريد إزالة هذا الأخ من قائمة أصدقائك؟",
     "confirmDeleteMessage": "الإبلاغ عن هذه الهرطقة وحذفها؟",
-    "uploadError": "تعذر رفع الملف."
+    "uploadError": "تعذر رفع الملف.",
+    "showMembers": "عرض الإخوة"
   },
   "register": {
     "title": "التسجيل",

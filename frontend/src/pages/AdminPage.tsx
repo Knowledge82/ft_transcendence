@@ -92,7 +92,8 @@ export function AdminPage() {
 
         {stats && <AdminStatsPanel stats={stats} />}
 
-        <div className="bg-ink-900 border border-border-default rounded-xl overflow-hidden">
+        {/* Desktop — the original table, unchanged */}
+        <div className="hidden md:block bg-ink-900 border border-border-default rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border-default text-cream-400 text-start">
@@ -131,6 +132,45 @@ export function AdminPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile — one card per person instead of a table row, which
+            would otherwise force either horizontal scrolling or
+            illegibly squeezed columns on a narrow screen */}
+        <div className="md:hidden space-y-3">
+          {users.map((user) => (
+            <div
+              key={user.id}
+              className="bg-ink-900 border border-border-default rounded-xl p-4"
+            >
+              <p className="text-cream-100 font-medium truncate">
+                {user.displayName ?? `${t('common.user')} ${user.id}`}
+              </p>
+              <p className="text-xs text-cream-400 truncate mb-3" dir="ltr">
+                {user.email}
+              </p>
+              <div className="flex items-center gap-2">
+                <select
+                  value={user.role}
+                  onChange={(e) => handleRoleChange(user.id, e.target.value as Role)}
+                  className="flex-1 min-w-0 bg-ink-950 border border-border-default rounded-md px-2 py-2 text-cream-100 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-gold-500"
+                >
+                  {ROLES.map((role) => (
+                    <option key={role} value={role}>
+                      {getGenderedRole(role, user.gender, i18n.language)}
+                    </option>
+                  ))}
+                </select>
+                <IconButton
+                  tone="danger"
+                  onClick={() => handleDelete(user.id)}
+                  className="min-w-[44px] min-h-[44px] flex-shrink-0"
+                >
+                  {t('admin.delete')}
+                </IconButton>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </PageContainer>

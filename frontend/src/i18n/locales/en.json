@@ -107,7 +107,8 @@
     "addFriend": "+ Friend",
     "confirmRemoveFriend": "Are you sure you want to remove this brother from your friend list?",
     "confirmDeleteMessage": "Flag this heresy and delete it?",
-    "uploadError": "Couldn't upload the file."
+    "uploadError": "Couldn't upload the file.",
+    "showMembers": "View brothers"
   },
   "register": {
     "title": "Register",

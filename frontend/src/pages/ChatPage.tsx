@@ -13,11 +13,9 @@ import { getGenderedRole } from '../utils/genderedRole';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useConfirm } from '../context/ConfirmContext';
 
-// Same parsing used in ActivityTicker/NotificationBell — turns
-// **name** markers into bold gold spans, for the ephemeral system
-// announcements rendered inline in the general channel
-// Must stay in sync with MAX_MESSAGE_LENGTH in backend/src/chat/chat.service.ts
 const MAX_MESSAGE_LENGTH = 500;
+
+type MobileView = 'list' | 'chat' | 'members';
 
 function renderMessage(message: string) {
   const parts = message.split(/(\*\*[^*]+\*\*)/g);
@@ -40,6 +38,8 @@ export function ChatPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
 
+  const [mobileView, setMobileView] = useState<MobileView>('list');
+
   const [generalChannel, setGeneralChannel] = useState<Conversation | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
@@ -49,15 +49,11 @@ export function ChatPage() {
     displayName: string | null;
     avatarUrl: string | null;
   } | null>(null);
-  // The faction whose dedicated channel is currently open, if any
   const [activeOrganization, setActiveOrganization] = useState<{
     id: number;
     name: string;
     color: string;
   } | null>(null);
-  // The faction the CURRENT user belongs to (regardless of which
-  // conversation is open right now) — used to show its channel button
-  // in the sidebar at all
   const [ownOrganization, setOwnOrganization] = useState<{
     id: number;
     name: string;
@@ -76,9 +72,6 @@ export function ChatPage() {
   const [ownDisplayName, setOwnDisplayName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Attachment upload state — pendingAttachment holds the file's metadata
-  // AFTER it's already uploaded to the server (has a filename/type/name),
-  // ready to be attached to the next message sent
   const [pendingAttachment, setPendingAttachment] = useState<{
     filename: string;
     type: string;
@@ -91,16 +84,10 @@ export function ChatPage() {
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Small helper reused everywhere we fall back to showing a raw user id
-  // instead of a real display name — keeps the translated "User" word
-  // consistent instead of repeating the same ternary everywhere
   function userFallback(id: number | undefined) {
     return `${t('common.user')} ${id}`;
   }
 
-  // The header label is DERIVED, never stored — storing an already-
-  // translated string in state would go stale the moment the user
-  // switches language without re-selecting the conversation
   const headerLabel = activeDmTarget
     ? activeDmTarget.displayName ?? userFallback(activeDmTarget.id)
     : activeOrganization
@@ -148,23 +135,22 @@ export function ChatPage() {
 
         if (cId === general.id) {
           setSelectedConversationId(general.id);
+          if (cId) setMobileView('chat');
         } else if (myOrg?.conversation && cId === myOrg.conversation.id) {
           setSelectedConversationId(cId);
           setActiveOrganization({ id: myOrg.id, name: myOrg.name, color: myOrg.color });
+          setMobileView('chat');
         } else if (cId) {
           const matchingDm = directList.find((c) => c.id === cId);
           if (matchingDm) {
             setSelectedConversationId(matchingDm.id);
             setActiveDmTarget(matchingDm.otherUser);
+            setMobileView('chat');
           } else if (stateOtherUser) {
-            // Brand new conversation, not in directList yet (no messages
-            // sent so far) — we still know who it's with because
-            // UserProfilePage passed it along via navigation state
             setSelectedConversationId(cId);
             setActiveDmTarget(stateOtherUser);
+            setMobileView('chat');
           } else {
-            // ?c= points to a conversation we have no information about
-            // (e.g. a stale/invalid link) — fall back safely to the general channel
             setSelectedConversationId(general.id);
           }
         } else {
@@ -237,18 +223,10 @@ export function ChatPage() {
       );
     }
 
-    // The message isn't removed from the list — it's REPLACED with its
-    // updated (tombstoned) version, which now carries deletedAt/deletedBy
     function handleMessageUpdated(updated: Message) {
       setMessages((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
     }
 
-    // Kept as a separate, lightweight array — not merged into `messages`
-    // itself, since these are purely live/ephemeral (never part of
-    // message history) and don't share its shape (no sender, no id from
-    // the database, etc.). We receive raw role/gender, not a finished
-    // phrase — same principle as the community chronicle — so it renders
-    // correctly regardless of which language each viewer currently has active.
     function handleArzobispoPresence(data: { gender: string; isOnline: boolean }) {
       const namespace = data.isOnline ? 'arzobispoOnline' : 'arzobispoOffline';
       const variantIndex = Math.floor(Math.random() * 3);
@@ -276,11 +254,6 @@ export function ChatPage() {
     };
   }, [socket, selectedConversationId, i18n.language]);
 
-  // Central place that changes which conversation is selected — updates
-  // all the related state AND syncs the URL (?c=<id>) in one call, so
-  // every click handler doesn't have to remember to do both. `replace:
-  // true` avoids spamming the browser's back-button history with every
-  // single conversation switch.
   function selectConversation(
     id: number,
     dmTarget: typeof activeDmTarget,
@@ -290,6 +263,11 @@ export function ChatPage() {
     setActiveDmTarget(dmTarget);
     setActiveOrganization(org);
     setSearchParams({ c: String(id) }, { replace: true });
+    setMobileView('chat');
+  }
+
+  function handleMobileBack() {
+    setMobileView(mobileView === 'members' ? 'chat' : 'list');
   }
 
   async function openDirectConversation(friend: Friend) {
@@ -363,9 +341,6 @@ export function ChatPage() {
   }
 
   const isModerator = ownRole === 'INQUISIDOR' || ownRole === 'ARZOBISPO';
-  // Attachments are only allowed in DIRECT conversations (backend rule)
-  // — not just the general channel, ANY channel, including a faction's
-  // own. Being IN a DM is what matters, not merely NOT being general.
   const isDirectConversationSelected = activeDmTarget !== null;
 
   useEffect(() => {
@@ -407,20 +382,47 @@ export function ChatPage() {
   return (
     <PageContainer className="flex flex-col h-screen overflow-hidden" showFrame={false}>
       <header className="flex-shrink-0 grid grid-cols-3 items-center px-4 py-2 bg-ink-900 border-b border-border-default">
-        <div>
-          <LanguageSwitcher />
+        <div className="flex items-center gap-2">
+          {mobileView !== 'list' && (
+            <button
+              onClick={handleMobileBack}
+              className="md:hidden text-cream-100 text-xl inline-flex items-center justify-center min-w-[44px] min-h-[44px] -ms-2"
+              aria-label={t('common.back')}
+            >
+              <span aria-hidden="true" className="rtl:scale-x-[-1]">←</span>
+            </button>
+          )}
+          <div className={mobileView === 'list' ? 'block' : 'hidden md:block'}>
+            <LanguageSwitcher />
+          </div>
         </div>
-        <h1 className="text-sm text-gold-500 font-medium text-center">{headerLabel}</h1>
-        <span className="text-sm text-cream-400 text-end">
-          {t('chat.loggedInAs')}{' '}
-          <span className="text-gold-500 font-medium">
-            {ownDisplayName ?? userFallback(ownUserId ?? undefined)}
+        <h1 className="text-sm text-gold-500 font-medium text-center truncate px-1">
+          {headerLabel}
+        </h1>
+        <div className="flex items-center justify-end gap-2">
+          {mobileView === 'chat' && !activeDmTarget && (
+            <button
+              onClick={() => setMobileView('members')}
+              className="md:hidden text-cream-100 text-lg inline-flex items-center justify-center min-w-[44px] min-h-[44px]"
+              aria-label={t('chat.showMembers')}
+              title={t('chat.showMembers')}
+            >
+              👥
+            </button>
+          )}
+          <span className="hidden md:inline text-sm text-cream-400">
+            {t('chat.loggedInAs')}{' '}
+            <span className="text-gold-500 font-medium">
+              {ownDisplayName ?? userFallback(ownUserId ?? undefined)}
+            </span>
           </span>
-        </span>
+        </div>
       </header>
 
       <div className="flex flex-1 min-h-0">
-      <aside className="w-64 bg-ink-900 border-e border-border-default flex flex-col overflow-y-auto">
+      <aside
+        className={`${mobileView === 'list' ? 'flex' : 'hidden'} md:flex w-full md:w-64 bg-ink-900 border-e border-border-default flex-col overflow-y-auto`}
+      >
         <div className="p-4 border-b border-border-default">
           <BackLink to={ROUTES.HOME} />
         </div>
@@ -526,24 +528,26 @@ export function ChatPage() {
           {friends.map((friend) => (
             <div
               key={friend.id}
-              className="flex items-center gap-2 px-3 py-2 rounded-md mb-1 hover:bg-ink-800 transition-colors"
+              className="flex items-center gap-2 px-1 py-1 rounded-md mb-1 hover:bg-ink-800 transition-colors"
             >
               <StatusDot isOnline={friend.isOnline} />
-              <span className="flex-1 text-start text-sm text-cream-100 truncate">
-                {friend.displayName ?? userFallback(friend.id)}
-              </span>
-              <IconButton
+              {/* Tapping the name itself opens the DM — replaces the
+                  separate ✉ icon button, which was cramped right next
+                  to the ✕ one and, like it, had no explicit touch
+                  target size at all */}
+              <button
                 onClick={() => openDirectConversation(friend)}
                 title={t('chat.sendMessage')}
-                aria-label={t('chat.sendMessage')}
+                className="flex-1 min-w-0 min-h-[44px] flex items-center text-start text-sm text-cream-100 truncate hover:text-gold-500 transition-colors"
               >
-                ✉
-              </IconButton>
+                <span className="truncate">{friend.displayName ?? userFallback(friend.id)}</span>
+              </button>
               <IconButton
                 tone="danger"
                 onClick={() => handleRemoveFriend(friend.id)}
                 title={t('chat.removeFriend')}
                 aria-label={t('chat.removeFriend')}
+                className="min-w-[44px] min-h-[44px] flex-shrink-0"
               >
                 ✕
               </IconButton>
@@ -552,7 +556,9 @@ export function ChatPage() {
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col min-h-0">
+      <main
+        className={`${mobileView === 'chat' ? 'flex' : 'hidden'} md:flex flex-1 flex-col min-h-0`}
+      >
         <div
           className="flex-1 overflow-y-auto p-4 space-y-3"
           aria-live="polite"
@@ -567,7 +573,7 @@ export function ChatPage() {
                 className={`flex ${isOwn ? 'justify-end' : 'justify-start'} group`}
               >
                 <div
-                  className={`max-w-xs rounded-lg px-3 py-2 relative ${
+                  className={`max-w-[80%] sm:max-w-xs rounded-lg px-3 py-2 relative ${
                     isDeleted
                       ? 'bg-ink-950 border border-border-default text-cream-400 italic'
                       : isOwn
@@ -706,7 +712,7 @@ export function ChatPage() {
                 onClick={() => fileInputRef.current?.click()}
                 title={t('chat.attachFile')}
                 aria-label={t('chat.attachFile')}
-                className="text-cream-400 hover:text-gold-500 transition-colors inline-flex items-center justify-center min-w-[44px] min-h-[44px]"
+                className="text-cream-400 hover:text-gold-500 transition-colors inline-flex items-center justify-center min-w-[44px] min-h-[44px] flex-shrink-0"
               >
                 📎
               </button>
@@ -718,13 +724,15 @@ export function ChatPage() {
             onChange={(e) => setDraft(e.target.value.slice(0, MAX_MESSAGE_LENGTH))}
             placeholder={t('chat.messagePlaceholder')}
             maxLength={MAX_MESSAGE_LENGTH}
-            className="flex-1"
+            className="flex-1 min-w-0"
           />
-          <Button type="submit">{t('chat.send')}</Button>
+          <Button type="submit" className="flex-shrink-0">{t('chat.send')}</Button>
         </form>
       </main>
 
-      <aside className="w-56 bg-ink-900 border-s border-border-default p-4 overflow-y-auto">
+      <aside
+        className={`${mobileView === 'members' ? 'flex' : 'hidden'} md:flex flex-col w-full md:w-56 bg-ink-900 border-s border-border-default p-4 overflow-y-auto`}
+      >
         <h2 className="text-xs uppercase tracking-wide text-cream-400 mb-2">
           {t('chat.membersHeader', {
             online: members.filter((m) => m.isOnline).length,
