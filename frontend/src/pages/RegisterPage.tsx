@@ -212,6 +212,19 @@ export function RegisterPage() {
           </Button>
         </form>
 
+        <div className="my-6 flex items-center gap-3">
+          <div className="flex-1 h-px bg-border-default" />
+          <span className="text-xs text-cream-400 uppercase">{t('login.orDivider')}</span>
+          <div className="flex-1 h-px bg-border-default" />
+        </div>
+
+        <a
+          href="/api/auth/oauth/42"
+          className="w-full flex items-center justify-center gap-2 border border-border-default rounded-md py-2 text-sm text-cream-100 hover:bg-ink-800 transition-colors"
+        >
+          {t('register.with42')}
+        </a>
+
         <p className="mt-6 text-sm text-cream-400 text-center">
           {t('register.hasAccount')}{' '}
           <Link to="/login" className="text-gold-500 hover:text-gold-400 font-medium">

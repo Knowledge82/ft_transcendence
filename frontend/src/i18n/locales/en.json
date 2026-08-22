@@ -125,7 +125,8 @@
     "submitError": "Couldn't complete the registration. Check your details.",
     "completeTitle": "Complete your registration",
     "completeSubmit": "Finish registration",
-    "oauthExpired": "The registration link has expired. Try again from the login page."
+    "oauthExpired": "The registration link has expired. Try again from the login page.",
+    "with42": "Sign up with 42"
   },
   "admin": {
     "title": "Sanctuary — Administration",

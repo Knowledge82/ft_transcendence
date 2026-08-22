@@ -125,7 +125,8 @@
     "submitError": "No se pudo completar el registro. Comprueba los datos.",
     "completeTitle": "Completa tu registro",
     "completeSubmit": "Finalizar registro",
-    "oauthExpired": "El enlace de registro ha expirado. Vuelve a intentarlo desde el inicio de sesión."
+    "oauthExpired": "El enlace de registro ha expirado. Vuelve a intentarlo desde el inicio de sesión.",
+    "with42": "Registrarse con 42"
   },
   "admin": {
     "title": "Santuario — Administración",
