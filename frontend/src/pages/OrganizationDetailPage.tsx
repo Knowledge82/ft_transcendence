@@ -276,7 +276,7 @@ export function OrganizationDetailPage() {
           </div>
         )}
 
-        <Card className="mt-6">
+        <Card className="mt-6 border-l-4" style={{ borderLeftColor: org.color }}>
           <div className="flex items-center gap-3 mb-2">
             <span
               className="w-4 h-4 rounded-full flex-shrink-0"
@@ -329,151 +329,158 @@ export function OrganizationDetailPage() {
               </>
             )}
           </div>
-
-          <p className="text-xs text-cream-400 mb-6">
+          <p className="text-xs text-cream-400">
             {t('organizations.memberCount', { count: org.members.length })}
           </p>
+        </Card>
 
-          <div className="mb-6 pb-6 border-b border-border-default">
-            <h2 className="text-sm uppercase tracking-wide text-cream-400 mb-2">
-              {t('organizations.manifestoHeading')}
-            </h2>
-            {isEditingManifesto ? (
-              <div>
-                <Textarea
-                  rows={6}
-                  value={manifestoDraft}
-                  onChange={(e) =>
-                    setManifestoDraft(e.target.value.slice(0, MAX_MANIFESTO_LENGTH))
-                  }
-                />
-                <span className="text-xs text-cream-400" dir="ltr">
-                  {manifestoDraft.length}/{MAX_MANIFESTO_LENGTH}
-                </span>
-                <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={handleSaveManifesto}
-                    disabled={isSavingManifesto}
-                    className="text-xs text-gold-500 hover:text-gold-400"
-                  >
-                    {t('common.save')}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsEditingManifesto(false);
-                      setManifestoDraft(org.manifesto ?? '');
-                    }}
-                    className="text-xs text-cream-400 hover:text-cream-100"
-                  >
-                    {t('common.cancel')}
-                  </button>
-                </div>
+        {actionError && (
+          <p role="alert" className="text-sm text-error-500 mt-4">
+            {actionError}
+          </p>
+        )}
+
+        <Card className="mt-4 border-l-4" style={{ borderLeftColor: org.color }}>
+          <h2 className="text-sm uppercase tracking-wide text-cream-400 mb-2">
+            {t('organizations.manifestoHeading')}
+          </h2>
+          {isEditingManifesto ? (
+            <div>
+              <Textarea
+                rows={6}
+                value={manifestoDraft}
+                onChange={(e) => setManifestoDraft(e.target.value.slice(0, MAX_MANIFESTO_LENGTH))}
+              />
+              <span className="text-xs text-cream-400" dir="ltr">
+                {manifestoDraft.length}/{MAX_MANIFESTO_LENGTH}
+              </span>
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={handleSaveManifesto}
+                  disabled={isSavingManifesto}
+                  className="text-xs text-gold-500 hover:text-gold-400"
+                >
+                  {t('common.save')}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsEditingManifesto(false);
+                    setManifestoDraft(org.manifesto ?? '');
+                  }}
+                  className="text-xs text-cream-400 hover:text-cream-100"
+                >
+                  {t('common.cancel')}
+                </button>
               </div>
-            ) : (
-              <div>
-                <p className="text-cream-100 leading-relaxed whitespace-pre-wrap">
-                  {org.manifesto || t('organizations.noManifesto')}
-                </p>
-                {canManage && (
-                  <button
-                    onClick={() => setIsEditingManifesto(true)}
-                    className="text-xs text-gold-500 hover:text-gold-400 mt-2"
-                  >
-                    {t('organizations.editManifesto')}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-
-          {actionError && (
-            <p role="alert" className="text-sm text-error-500 mb-4">
-              {actionError}
-            </p>
-          )}
-
-          <div className="mb-6">
-            {isMember ? (
-              <Button variant="secondary" onClick={handleLeave}>
-                {t('organizations.leave')}
-              </Button>
-            ) : (
-              <Button onClick={handleJoin} disabled={isJoining}>
-                {isJoining ? t('organizations.joining') : t('organizations.join')}
-              </Button>
-            )}
-          </div>
-
-          {canViewArticles && (
-            <div className="mb-6 pb-6 border-b border-border-default">
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-sm uppercase tracking-wide text-cream-400">
-                  {t('organizations.articlesHeading')}
-                </h2>
-                {canWriteArticle && (
-                  <Link
-                    to={`${ROUTES.NEW_ARTICLE}?organizationId=${org.id}`}
-                    className="text-xs text-gold-500 hover:text-gold-400"
-                  >
-                    {t('organizations.writeArticle')}
-                  </Link>
-                )}
-              </div>
-              {orgArticles.length === 0 ? (
-                <p className="text-sm text-cream-400">{t('organizations.noArticles')}</p>
-              ) : (
-                <div className="space-y-1">
-                  {orgArticles.map((article) => (
-                    <Link
-                      key={article.id}
-                      to={ROUTES.ARTICLE(article.id)}
-                      className="block text-sm text-cream-100 hover:text-gold-500 transition-colors truncate"
-                    >
-                      {article.title}
-                    </Link>
-                  ))}
-                </div>
+            </div>
+          ) : (
+            <div>
+              <p className="text-cream-100 leading-relaxed whitespace-pre-wrap">
+                {org.manifesto || t('organizations.noManifesto')}
+              </p>
+              {canManage && (
+                <button
+                  onClick={() => setIsEditingManifesto(true)}
+                  className="text-xs text-gold-500 hover:text-gold-400 mt-2"
+                >
+                  {t('organizations.editManifesto')}
+                </button>
               )}
             </div>
           )}
-
-          <div>
-            <h2 className="text-sm uppercase tracking-wide text-cream-400 mb-2">
-              {t('organizations.membersHeading')}
-            </h2>
-            {org.members.map((member) => (
-              <div key={member.id} className="flex items-center gap-2 py-1.5">
-                <Avatar
-                  avatarUrl={member.user.avatarUrl}
-                  fallbackText={member.user.displayName ?? '?'}
-                  size={28}
-                />
-                <span className="text-sm text-cream-100 flex-1 truncate">
-                  {getGenderedRole(member.user.role, member.user.gender, i18n.language)}{' '}
-                  {member.user.displayName ?? `${t('common.user')} ${member.user.id}`}
-                </span>
-                {member.isLeader && (
-                  <span className="text-xs text-gold-500 font-medium">
-                    {t('organizations.leaderBadge')}
-                  </span>
-                )}
-                {canManage && member.user.id !== ownUserId && (
-                  <IconButton tone="danger" onClick={() => handleRemoveMember(member.user.id)}>
-                    {t('organizations.removeMember')}
-                  </IconButton>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {canManage && (
-            <div className="mt-6 pt-6 border-t border-border-default">
-              <IconButton tone="danger" onClick={handleDelete}>
-                {t('organizations.deleteButton')}
-              </IconButton>
-            </div>
-          )}
         </Card>
+
+        {canViewArticles && (
+          <Card
+            className="mt-4 border-l-4"
+            style={{ borderLeftColor: org.color }}
+          >
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-sm uppercase tracking-wide text-cream-400">
+                {t('organizations.articlesHeading')}
+              </h2>
+              {canWriteArticle && (
+                <Link
+                  to={`${ROUTES.NEW_ARTICLE}?organizationId=${org.id}`}
+                  className="text-xs text-gold-500 hover:text-gold-400"
+                >
+                  {t('organizations.writeArticle')}
+                </Link>
+              )}
+            </div>
+            {orgArticles.length === 0 ? (
+              <p className="text-sm text-cream-400">{t('organizations.noArticles')}</p>
+            ) : (
+              <div className="space-y-1.5">
+                {orgArticles.map((article, index) => (
+                  <Link
+                    key={article.id}
+                    to={ROUTES.ARTICLE(article.id)}
+                    className="flex items-baseline gap-2 text-sm text-cream-100 hover:text-gold-500 transition-colors"
+                  >
+                    <span
+                      className="text-xs font-mono flex-shrink-0"
+                      style={{ color: org.color }}
+                      aria-hidden="true"
+                    >
+                      {index + 1}.
+                    </span>
+                    <span className="truncate">{article.title}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </Card>
+        )}
+
+        <Card className="mt-4 border-l-4" style={{ borderLeftColor: org.color }}>
+          <h2 className="text-sm uppercase tracking-wide text-cream-400 mb-2">
+            {t('organizations.membersHeading')}
+          </h2>
+          {org.members.map((member) => (
+            <div key={member.id} className="flex items-center gap-2 py-1.5">
+              <Avatar
+                avatarUrl={member.user.avatarUrl}
+                fallbackText={member.user.displayName ?? '?'}
+                size={28}
+              />
+              <span className="text-sm text-cream-100 flex-1 truncate">
+                {getGenderedRole(member.user.role, member.user.gender, i18n.language)}{' '}
+                {member.user.displayName ?? `${t('common.user')} ${member.user.id}`}
+              </span>
+              {member.isLeader && (
+                <span className="text-xs text-gold-500 font-medium">
+                  {t('organizations.leaderBadge')}
+                </span>
+              )}
+              {canManage && member.user.id !== ownUserId && (
+                <IconButton tone="danger" onClick={() => handleRemoveMember(member.user.id)}>
+                  {t('organizations.removeMember')}
+                </IconButton>
+              )}
+            </div>
+          ))}
+        </Card>
+
+        <div className="mt-6 flex justify-center">
+          {isMember ? (
+            <Button variant="secondary" onClick={handleLeave}>
+              {t('organizations.leave')}
+            </Button>
+          ) : (
+            <Button onClick={handleJoin} disabled={isJoining}>
+              {isJoining ? t('organizations.joining') : t('organizations.join')}
+            </Button>
+          )}
+        </div>
+
+        {canManage && (
+          <div className="mt-8 pt-6 border-t border-border-default flex justify-center">
+            <IconButton tone="danger" onClick={handleDelete}>
+              {t('organizations.deleteButton')}
+            </IconButton>
+          </div>
+        )}
       </div>
     </PageContainer>
   );
