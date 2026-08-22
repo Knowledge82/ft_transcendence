@@ -12,3 +12,4 @@ export { IconButton } from './IconButton';
 export { IconLink } from './IconLink';
 export { BackLink } from './BackLink';
 export { OrganizationBadge } from './OrganizationBadge';
+export { AvatarPositionEditor } from './AvatarPositionEditor';
