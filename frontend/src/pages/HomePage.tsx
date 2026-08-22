@@ -9,7 +9,7 @@ import { getMyStats } from '../api/users';
 import type { UserStats } from '../api/users';
 import { getDateLocale } from '../utils/dateLocale';
 import { Footer } from '../components/Footer';
-import { PageContainer, Card, LoadingScreen, Avatar, RoleBadge, OrganizationBadge, Input, Button } from '../components/ui';
+import { PageContainer, Card, LoadingScreen, Avatar, RoleBadge, OrganizationBadge, Input, Button, AvatarPositionEditor } from '../components/ui';
 import { ActivityTicker } from '../components/ActivityTicker';
 import { NotificationBell } from '../components/NotificationBell';
 import { RandomArticles } from '../components/RandomArticles';
@@ -21,6 +21,8 @@ interface Profile {
   email: string;
   displayName: string | null;
   avatarUrl: string | null;
+  avatarPositionX: number;
+  avatarPositionY: number;
   role: 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO';
   gender: 'MASCULINO' | 'FEMENINO';
   organizationMembership: {
@@ -47,6 +49,7 @@ export function HomePage() {
 
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [isPositioningAvatar, setIsPositioningAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -118,6 +121,7 @@ export function HomePage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setProfile(data);
+      setIsPositioningAvatar(true);
     } catch (err) {
       setAvatarError(t('home.avatarUploadError'));
     } finally {
@@ -138,6 +142,24 @@ export function HomePage() {
     }
   }
 
+  async function handleConfirmAvatarPosition(positionX: number, positionY: number) {
+    try {
+      const { data } = await apiClient.patch<Profile>('/users/me', {
+        avatarPositionX: positionX,
+        avatarPositionY: positionY,
+      });
+      setProfile(data);
+    } catch (err) {
+      setAvatarError(t('home.avatarUploadError'));
+    } finally {
+      setIsPositioningAvatar(false);
+    }
+  }
+
+  function handleCancelAvatarPosition() {
+    setIsPositioningAvatar(false);
+  }
+
   if (isLoading || !profile) {
     return <LoadingScreen />;
   }
@@ -155,7 +177,13 @@ export function HomePage() {
           <RandomArticles />
           <Card className="text-center">
           <div className="relative w-36 h-36 mx-auto mb-4">
-            <Avatar avatarUrl={profile.avatarUrl} fallbackText={profile.displayName ?? profile.email} size={144} />
+            <Avatar
+              avatarUrl={profile.avatarUrl}
+              fallbackText={profile.displayName ?? profile.email}
+              size={144}
+              positionX={profile.avatarPositionX}
+              positionY={profile.avatarPositionY}
+            />
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingAvatar}
@@ -327,6 +355,15 @@ export function HomePage() {
         </div>
       </div>
       <Footer />
+      {isPositioningAvatar && profile.avatarUrl && (
+        <AvatarPositionEditor
+          imageUrl={profile.avatarUrl}
+          initialPositionX={profile.avatarPositionX}
+          initialPositionY={profile.avatarPositionY}
+          onConfirm={handleConfirmAvatarPosition}
+          onCancel={handleCancelAvatarPosition}
+        />
+      )}
     </PageContainer>
   );
 }
