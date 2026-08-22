@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CommunityService } from '../community/community.service';
+import { ChatGateway } from '../chat/chat.gateway';
 
 const CREATOR_ROLES = ['INQUISIDOR', 'ARZOBISPO'];
 
@@ -14,6 +15,7 @@ export class OrganizationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly communityService: CommunityService,
+    private readonly chatGateway: ChatGateway,
   ) {}
 
   async listOrganizations() {
@@ -93,6 +95,7 @@ export class OrganizationsService {
       await this.prisma.conversationParticipant.create({
         data: { conversationId: org.conversation.id, userId: creatorId },
       });
+      this.chatGateway.joinConversationRoom(creatorId, org.conversation.id);
     }
 
     const founderName = creator.displayName ?? `Usuario ${creator.id}`;
@@ -144,6 +147,7 @@ export class OrganizationsService {
       await this.prisma.conversationParticipant.create({
         data: { conversationId: org.conversation.id, userId },
       });
+      this.chatGateway.joinConversationRoom(userId, org.conversation.id);
     }
 
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
@@ -170,6 +174,7 @@ export class OrganizationsService {
       await this.prisma.conversationParticipant.deleteMany({
         where: { conversationId: org.conversation.id, userId },
       });
+      this.chatGateway.leaveConversationRoom(userId, org.conversation.id);
     }
   }
 
