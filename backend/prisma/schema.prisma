@@ -29,18 +29,23 @@ enum Gender {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  passwordHash String?
-  intraId      Int?     @unique
-  displayName  String?  @unique
-  avatarUrl    String?
-  role         Role     @default(HERMANO)
-  gender       Gender   @default(MASCULINO)
-  twoFactorSecret  String?
-  twoFactorEnabled Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                Int      @id @default(autoincrement())
+  email             String   @unique
+  passwordHash      String?
+  intraId           Int?     @unique
+  displayName       String?  @unique
+  avatarUrl         String?
+  // Percentage-based focal point (0-100) matching CSS object-position
+  // directly, so no conversion is needed when rendering the avatar —
+  // 50/50 (center) is the default, matching the previous fixed-center behavior
+  avatarPositionX   Int      @default(50)
+  avatarPositionY   Int      @default(50)
+  role              Role     @default(HERMANO)
+  gender            Gender   @default(MASCULINO)
+  twoFactorSecret   String?
+  twoFactorEnabled  Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   refreshTokens RefreshToken[]
 
