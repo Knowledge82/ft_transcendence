@@ -64,13 +64,13 @@ export function AvatarPositionEditor({
           onTouchStart={handlePointerDown}
           onTouchMove={handlePointerMove}
           onTouchEnd={handlePointerUp}
-          className="relative w-full aspect-square rounded-md overflow-hidden cursor-crosshair select-none"
+          className="relative inline-block max-h-[60vh] rounded-md overflow-hidden cursor-crosshair select-none"
         >
           <img
             src={imageUrl}
             alt=""
             draggable={false}
-            className="w-full h-full object-cover pointer-events-none"
+            className="max-h-[60vh] w-auto block pointer-events-none"
           />
           <div
             className="absolute w-6 h-6 rounded-full bg-gold-500 border-2 border-cream-50 shadow-lg -translate-x-1/2 -translate-y-1/2"
