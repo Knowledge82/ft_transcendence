@@ -443,6 +443,8 @@ export function OrganizationDetailPage() {
                 avatarUrl={member.user.avatarUrl}
                 fallbackText={member.user.displayName ?? '?'}
                 size={28}
+                positionX={member.user.avatarPositionX}
+                positionY={member.user.avatarPositionY}
               />
               <span className="text-sm text-cream-100 flex-1 truncate">
                 {getGenderedRole(member.user.role, member.user.gender, i18n.language)}{' '}
