@@ -37,7 +37,15 @@ export class OrganizationsService {
         members: {
           include: {
             user: {
-              select: { id: true, displayName: true, avatarUrl: true, role: true, gender: true },
+              select: {
+                id: true,
+                displayName: true,
+                avatarUrl: true,
+                avatarPositionX: true,
+                avatarPositionY: true,
+                role: true,
+                gender: true,
+              },
             },
           },
         },
