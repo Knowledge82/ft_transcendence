@@ -97,7 +97,13 @@ export function UserProfilePage() {
 
         <Card className="text-center mt-6">
           <div className="w-24 h-24 mx-auto mb-4">
-            <Avatar avatarUrl={profile.avatarUrl} fallbackText={profile.displayName ?? '?'} size={96} />
+            <Avatar
+              avatarUrl={profile.avatarUrl}
+              fallbackText={profile.displayName ?? '?'}
+              size={96}
+              positionX={profile.avatarPositionX}
+              positionY={profile.avatarPositionY}
+            />
           </div>
 
           <div className="flex items-center justify-center gap-2 mb-1">
