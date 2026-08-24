@@ -166,6 +166,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  // Symmetric to joinConversationRoom, for the opposite case — someone
+  // leaving a faction (or being expelled) should stop receiving that
+  // channel's live messages immediately, not just after their next reload
+  leaveConversationRoom(userId: number, conversationId: number) {
+    const socketIds = this.onlineUsers.get(userId);
+    if (!socketIds) {
+      return;
+    }
+    for (const socketId of socketIds) {
+      this.server.sockets.sockets.get(socketId)?.leave(roomName(conversationId));
+    }
+  }
+
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     @ConnectedSocket() client: Socket,
