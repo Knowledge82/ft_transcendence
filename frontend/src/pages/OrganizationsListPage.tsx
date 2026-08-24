@@ -79,7 +79,7 @@ export function OrganizationsListPage() {
                       <p className="text-xs text-cream-100 mb-1">
                         {t('organizations.memberCount', { count: org._count.members })}
                       </p>
-                      <p className="text-xs text-cream-200 line-clamp-2">
+                      <p className="text-xs text-cream-100 line-clamp-2">
                         {org.manifesto ? excerpt(org.manifesto) : t('organizations.noManifesto')}
                       </p>
                     </div>
