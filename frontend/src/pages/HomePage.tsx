@@ -298,7 +298,7 @@ export function HomePage() {
                   from the join-date line below, instead of relying on
                   spacing alone to imply they're different kinds of
                   information */}
-              <div className="w-16 h-px bg-gold-500/40 mx-auto mb-3" aria-hidden="true" />
+              <div className="w-16 h-0.5 bg-gold-500/40 mx-auto mb-3" aria-hidden="true" />
               <p className="text-xs text-cream-400 mb-6 text-center">
                 {t('home.statsMemberSince', {
                   date: new Date(stats.memberSince).toLocaleDateString(getDateLocale(i18n.language)),
