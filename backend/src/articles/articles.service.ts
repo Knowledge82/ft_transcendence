@@ -3,7 +3,15 @@ import { PrismaService } from '../prisma/prisma.service';
 
 const AUTHOR_SELECT = {
   author: {
-    select: { id: true, displayName: true, avatarUrl: true, role: true, gender: true },
+    select: {
+      id: true,
+      displayName: true,
+      avatarUrl: true,
+      avatarPositionX: true,
+      avatarPositionY: true,
+      role: true,
+      gender: true,
+    },
   },
   organization: {
     select: { id: true, name: true, color: true },

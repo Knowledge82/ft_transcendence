@@ -94,6 +94,8 @@ export function ArticleDetailPage() {
               avatarUrl={article.author.avatarUrl}
               fallbackText={article.author.displayName ?? '?'}
               size={40}
+              positionX={article.author.avatarPositionX}
+              positionY={article.author.avatarPositionY}
             />
             <div>
               <p className="text-sm text-cream-100">

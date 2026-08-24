@@ -17,6 +17,8 @@ export interface OrganizationMemberInfo {
     id: number;
     displayName: string | null;
     avatarUrl: string | null;
+    avatarPositionX: number;
+    avatarPositionY: number;
     role: 'HERMANO' | 'INQUISIDOR' | 'ARZOBISPO';
     gender: 'MASCULINO' | 'FEMENINO';
   };
