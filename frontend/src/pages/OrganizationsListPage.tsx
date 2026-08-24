@@ -76,9 +76,10 @@ export function OrganizationsListPage() {
                         />
                         <h2 className="text-sm font-semibold text-white truncate">{org.name}</h2>
                       </div>
-                      <p className="text-xs text-cream-100 mb-1">
+                      <p className="text-xs text-cream-100 mb-1.5">
                         {t('organizations.memberCount', { count: org._count.members })}
                       </p>
+                      <div className="w-10 h-0.5 bg-gold-500/40 mb-1.5" aria-hidden="true" />
                       <p className="text-xs text-cream-100 line-clamp-2">
                         {org.manifesto ? excerpt(org.manifesto) : t('organizations.noManifesto')}
                       </p>
