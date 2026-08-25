@@ -27,6 +27,15 @@ function randomIndex(type: string): number {
 const AI_EVENTS_PER_DAY = 48;
 const STATIC_EVENTS_PER_DAY = 288;
 const DAY_MS = 24 * 60 * 60 * 1000;
+const MAX_PHRASE_LENGTH = 200;
+const FICTIONAL_MAX_TOKENS = 500;
+
+function isValidPhrase(text: string): boolean {
+  return text.length > 0 && text.length <= MAX_PHRASE_LENGTH;
+}
+
+const FICTIONAL_EVENT_TYPES = ['FICTIONAL_STATIC', 'FICTIONAL_AI'];
+const TODAY_FEED_LIMIT = 100;
 
 const FICTIONAL_PROMPTS: Record<string, string> = {
   es: `Genera UNA sola frase corta (máximo 20 palabras), en español,
@@ -78,7 +87,22 @@ export class CommunityService implements OnModuleInit {
       data: { type, templateIndex, params },
     });
     this.chatGateway.broadcastToAll('communityEventCreated', event);
+    this.clearOldFictionalEvents().catch((err) =>
+      console.error('No se pudieron limpiar los eventos ficticios antiguos:', err.message),
+    );
+
     return event;
+  }
+  private async clearOldFictionalEvents() {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    await this.prisma.communityEvent.deleteMany({
+      where: {
+        type: { in: FICTIONAL_EVENT_TYPES },
+        createdAt: { lt: startOfDay },
+      },
+    });
   }
 
   async getRecentEvents(limit = 30) {
@@ -94,6 +118,7 @@ export class CommunityService implements OnModuleInit {
     return this.prisma.communityEvent.findMany({
       where: { createdAt: { gte: startOfDay } },
       orderBy: { createdAt: 'asc' },
+      take: TODAY_FEED_LIMIT,
     });
   }
 
@@ -183,13 +208,17 @@ export class CommunityService implements OnModuleInit {
           .create({
             model: process.env.GROQ_MODEL ?? 'openai/gpt-oss-20b',
             messages: [{ role: 'system', content: FICTIONAL_PROMPTS[lang] }],
+            max_tokens: FICTIONAL_MAX_TOKENS,
           })
           .then((completion) => completion.choices[0]?.message?.content?.trim() ?? ''),
       ),
     );
 
     const [es, en, ar] = results;
-    if (!es || !en || !ar) {
+    if (!isValidPhrase(es) || !isValidPhrase(en) || !isValidPhrase(ar)) {
+      console.warn(
+        `Evento ficticio descartado por longitud (es:${es.length} en:${en.length} ar:${ar.length}, max ${MAX_PHRASE_LENGTH})`,
+      );
       return;
     }
 
