@@ -64,7 +64,7 @@ export function ChatPage() {
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [systemAnnouncements, setSystemAnnouncements] = useState<{ id: string; text: string }[]>(
+  const [systemAnnouncements, setSystemAnnouncements] = useState<{ id: string; text: string; fading: boolean }[]>(
     [],
   );
   const [draft, setDraft] = useState('');
@@ -232,7 +232,18 @@ export function ChatPage() {
       const variantIndex = Math.floor(Math.random() * 3);
       const genderedRole = getGenderedRole('ARZOBISPO', data.gender, i18n.language);
       const text = t(`chat.${namespace}.${variantIndex}`, { role: genderedRole });
-      setSystemAnnouncements((prev) => [...prev, { id: `${Date.now()}-${Math.random()}`, text }]);
+      const id = `${Date.now()}-${Math.random()}`;
+      setSystemAnnouncements((prev) => [...prev, { id, text, fading: false }]);
+
+      setTimeout(() => {
+        setSystemAnnouncements((prev) =>
+          prev.map((a) => (a.id === id ? { ...a, fading: true } : a)),
+        );
+      }, 5000);
+
+      setTimeout(() => {
+        setSystemAnnouncements((prev) => prev.filter((a) => a.id !== id));
+      }, 6000);
     }
 
     socket.on('newMessage', handleNewMessage);
@@ -653,7 +664,12 @@ export function ChatPage() {
           })}
           {selectedConversationId === generalChannel?.id &&
             systemAnnouncements.map((announcement) => (
-              <p key={announcement.id} className="text-center text-xs text-cream-400 italic py-1">
+              <p
+                key={announcement.id}
+                className={`text-center text-xs text-cream-400 italic py-1 transition-opacity duration-1000 ${
+                  announcement.fading ? 'opacity-0' : 'opacity-100'
+                }`}
+              >
                 {renderMessage(announcement.text)}
               </p>
             ))}
