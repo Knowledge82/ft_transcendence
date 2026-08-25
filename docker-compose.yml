@@ -4,9 +4,9 @@ services:
     container_name: ft_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:? ❌ [FATAL] POSTGRES_USER is missing in your .env file }
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:? ❌ [FATAL] POSTGRES_PASSWORD is missing in your .env file }
+      POSTGRES_DB: ${POSTGRES_DB:? ❌ [FATAL] POSTGRES_DB is missing in your .env file }
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -29,24 +29,24 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-      NODE_ENV: ${NODE_ENV}
+      JWT_SECRET: ${JWT_SECRET:? ❌ [FATAL] JWT_SECRET is missing in your .env file }
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:? ❌ [FATAL] JWT_REFRESH_SECRET is missing in your .env file }
+      NODE_ENV: ${NODE_ENV:-development}
       # dos ajustes para el hot-reload en entornos virtuales (Vim/Docker)
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
       # Reenvía la clave de la API de Gemini desde el .env del host hacia el
       # contenedor — sin esto, docker-compose no la pasa automáticamente, aunque
       # esté definida en el archivo .env
-      GROQ_API_KEY: ${GROQ_API_KEY}
-      GROQ_MODEL: ${GROQ_MODEL}
+      GROQ_API_KEY: ${GROQ_API_KEY:? ❌ [FATAL] GROQ_API_KEY is missing in your .env file }
+      GROQ_MODEL: ${GROQ_MODEL:-openai/gpt-oss-20b}
       # Credenciales de la aplicación OAuth registrada en la intra de 42
       # (https://profile.intra.42.fr/oauth/applications/new) — sin esto,
       # el inicio de sesión con 42 no puede funcionar en absoluto
-      FORTYTWO_CLIENT_ID: ${FORTYTWO_CLIENT_ID}
-      FORTYTWO_CLIENT_SECRET: ${FORTYTWO_CLIENT_SECRET}
-      FORTYTWO_CALLBACK_URL: ${FORTYTWO_CALLBACK_URL}
-      FRONTEND_URL: ${FRONTEND_URL}
+      FORTYTWO_CLIENT_ID: ${FORTYTWO_CLIENT_ID:? ❌ [FATAL] FORTYTWO_CLIENT_ID is missing in your .env file }
+      FORTYTWO_CLIENT_SECRET: ${FORTYTWO_CLIENT_SECRET:? ❌ [FATAL] FORTYTWO_CLIENT_SECRET is missing in your .env file }
+      FORTYTWO_CALLBACK_URL: ${FORTYTWO_CALLBACK_URL:? ❌ [FATAL] FORTYTWO_CALLBACK_URL is missing in your .env file }
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -99,4 +99,3 @@ networks:
 
 volumes:
   postgres_data:
-
