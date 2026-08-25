@@ -62,7 +62,7 @@ export function ArticlesListPage() {
         ) : (
           <div className="space-y-4">
             {articles.map((article) => (
-              <Link key={article.id} to={ROUTES.ARTICLE(article.id)}>
+              <Link key={article.id} to={ROUTES.ARTICLE(article.id)} className="block">
                 <Card className="hover:border-gold-500 transition-colors">
                   <h2 className="text-lg font-semibold text-gold-500 mb-1">
                     {article.title}
