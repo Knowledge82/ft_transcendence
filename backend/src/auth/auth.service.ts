@@ -254,12 +254,17 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token inválido o expirado');
     }
 
+    const { token, expiresAt } = this.buildRefreshToken();
+
     await this.prisma.refreshToken.update({
       where: { id: storedToken.id },
-      data: { revoked: true },
+      data: { token, expiresAt },
     });
 
-    return this.issueTokens(storedToken.user.id, storedToken.user.email);
+    return {
+      accessToken: this.signAccessToken(storedToken.user.id, storedToken.user.email),
+      refreshToken: token,
+    };
   }
 
   async logout(rawToken: string) {
@@ -273,29 +278,28 @@ export class AuthService {
     });
   }
 
-  private async issueTokens(userId: number, email: string) {
-    const payload = { sub: userId, email };
-
-    const accessToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_SECRET,
-      expiresIn: ACCESS_TOKEN_TTL,
-    });
-
-    const refreshTokenValue = crypto.randomBytes(64).toString('hex');
+  private signAccessToken(userId: number, email: string) {
+    return this.jwtService.sign(
+      { sub: userId, email },
+      { secret: process.env.JWT_SECRET, expiresIn: ACCESS_TOKEN_TTL },
+    );
+  }
+  private buildRefreshToken() {
+    const token = crypto.randomBytes(64).toString('hex');
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_TTL_DAYS);
+    return { token, expiresAt };
+  }
+  private async issueTokens(userId: number, email: string) {
+    const { token, expiresAt } = this.buildRefreshToken();
 
     await this.prisma.refreshToken.create({
-      data: {
-        token: refreshTokenValue,
-        userId,
-        expiresAt,
-      },
+      data: { token, userId, expiresAt },
     });
 
     return {
-      accessToken,
-      refreshToken: refreshTokenValue,
+      accessToken: this.signAccessToken(userId, email),
+      refreshToken: token,
     };
   }
 }
