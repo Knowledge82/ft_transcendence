@@ -18,8 +18,9 @@ endif
 # si acaba de añadirse pero la sesión todavía no lo ha aplicado), avisamos
 # con una solución concreta en vez de dejar que falle con un
 # "permission denied" críptico más adelante
+# Si acabas de instalar Docker o de añadir tu usuario al grupo "docker" con 'sudo usermod -aG docker $$USER', tienes que cerrar sesión y volver a entrar (o reiniciar) para que el cambio de grupo se aplique. Solución rápida sin reiniciar: ejecuta 'newgrp docker' en esta misma terminal antes de repetir el comando.)
 ifeq ($(shell docker ps >/dev/null 2>&1 && echo ok),)
-$(error No se puede conectar con Docker (permission denied). Si acabas de instalar Docker o de añadir tu usuario al grupo "docker" con 'sudo usermod -aG docker $$USER', tienes que cerrar sesión y volver a entrar (o reiniciar) para que el cambio de grupo se aplique. Solución rápida sin reiniciar: ejecuta 'newgrp docker' en esta misma terminal antes de repetir el comando.)
+$(error No se puede conectar con Docker (permission denied)
 endif
 
 # colors
