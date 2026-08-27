@@ -61,7 +61,7 @@ The user will show you a Makefile fragment. Your job:
 };
 
 const MAX_INPUT_LENGTH = 4000;
-const MAX_OUTPUT_TOKENS = 1500;
+const MAX_OUTPUT_TOKENS = 4000;
 const MODEL_NAME = process.env.GROQ_MODEL ?? 'openai/gpt-oss-20b';
 
 const ARTICLE_CHECK_BASE_PROMPTS: Record<Language, string> = {
