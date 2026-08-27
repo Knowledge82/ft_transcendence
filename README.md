@@ -501,6 +501,16 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 - **Notifications** — Personal, per-user notification inbox with read/unread state.
 - **Community event feed** — Public, ownerless activity log visible to all users (new members, rank changes, and flavor/fictional entries).
 
+### Accessibility & Internationalization (nouvelle sous-section)
+- **WCAG 2.1 AA compliance** — Keyboard navigation, sufficient color contrast, and screen-reader support across the app's key views.
+- **Multi-language support (i18n)** — Language selector with 3+ supported languages, all UI strings externalized for translation.
+- **RTL support** — Layout mirroring for right-to-left languages (Arabic, Hebrew), complementing the i18n system.
+- **PWA with offline support and installability** — Service worker caching for offline access to core views, plus an installable app manifest.
+
+### AI features (nouvelle sous-section)
+- **LLM-powered Makefile assistant** — Chat interface backed by Groq's LLM API (streaming responses, error handling, rate limiting) that analyzes and corrects a user's Makefile.
+- **AI content moderation** — Automated flagging of inappropriate content in confessions/posts before human moderator review.
+
 ### Real-time communication
 - **Direct messages & channels** — 1-to-1 conversations and multi-user themed channels (`#heresies`, `#confessions`, etc.) via WebSockets (Socket.IO).
 - **File attachments in chat** — Optional file upload attached to messages.
@@ -520,10 +530,11 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 
 ## Which team member(s) worked on each feature
 
+## Which team member(s) worked on each feature
 | Feature | Contributor(s) | Description |
 |---|---|---|
-| JWT auth + refresh tokens | vdarsuye | Full login/register/token-renewal flow |
-| WebSocket real-time infrastructure | vdarsuye | Socket.IO setup powering chat & live updates |
+| Socket.IO real-time infrastructure | vdarsuye | Socket.IO setup powering chat & live updates |
+| Message moderation (soft-delete) | vdarsuye | Tombstone logic, `deletedBy` handling |
 | User profile pages | datienza | Editable profile UI, avatar display |
 | Friends list UI | datienza | Friend request/accept interface, online status |
 | Chat interface (DMs + channels) | datienza | Frontend chat views and message rendering |
@@ -532,79 +543,76 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 | File upload/attachment system | dmena-li | Client + server handling of message attachments |
 | Prisma database schema | cochatel | Full relational model design and migrations |
 | Role/permission system | cochatel | `/sanctuary` panel logic and role checks |
-| Message moderation (soft-delete) | cochatel | Tombstone logic, `deletedBy` handling |
+| JWT auth + refresh tokens | cochatel | Access/refresh token issuance, rotation, revocation on logout |
 | Project organization | cochatel | Sprint planning, task distribution, meetings |
-
+| OAuth 2.0 remote authentication | vdarsuye | Third-party login integration alongside JWT flow |
+| Complete 2FA | vdarsuye | Two-factor step added to the auth flow |
+| Organization system | cochatel | CRUD for organizations, membership management, scoped permissions |
+| WCAG 2.1 AA compliance | dmena-li, datienza | Accessible design system + accessible frontend implementation |
+| Multi-language support (i18n) + RTL | datienza | Language selector, string externalization, RTL layout support |
+| PWA (offline + installable) | datienza | Service worker, offline caching, install manifest |
+| LLM-powered Makefile assistant | cochatel | Groq API integration, streaming, rate limiting, error handling |
+| AI content moderation | cochatel | Automated content flagging tied into the moderation pipeline |
 ---
 
 # Modules
 
 ### Module 1 — Web
-
-| Module | Why | How | Points |
-|---|---|---|---|
-| Major: Frontend and backend framework (React + NestJS) | React lets us build the interface with reusable components, well suited to an app whose state changes constantly (chat, live notifications). NestJS enforces a modular structure (Module/Controller/Service/DI), which makes it easier for 4 developers with no prior Node experience to collaborate without architectural chaos. | | 2 |
-| Minor: Frontend framework (separate) | Justified within the point above: React brings a mature ecosystem (hooks, routing, state management) that speeds up building interactive views. | | — |
-| Minor: Backend framework (separate) | NestJS brings dependency injection and separation of concerns, reducing the risk of a disorganized backend with several contributors working in parallel. | | — |
-| Major: Real-time features (WebSockets) | Chat, notifications, and friends' "online" status all require instant updates without reloading the page; Socket.IO offers automatic reconnection and fallback, critical for a social app. | | 2 |
-| Major: User interaction (chat, profile, friends) | This is the social core of the project (the "Church of the True Relink"): without chat, profiles, and friends, there's no social network to support the rest of the features. | | 2 |
-| Minor: ORM (Prisma) | Prisma generates a typed client from the schema, preventing type mismatches between the database and TypeScript code, and simplifies migrations across the team. | | 1 |
-| Minor: Complete notification system | Users need to be alerted to relevant events (new message, friend request, rank change) without having to manually check every section of the app. | | 1 |
-| Minor: PWA with offline support and installability | Lets the app be installed like a native app and keeps some functionality working offline, improving the experience on mobile devices. | | 1 |
-| Minor: Own design system (10+ components) | A reusable component system guarantees visual consistency across the app and speeds up building new views without reinventing styles each time. | | 1 |
-| Minor: File upload and management system | Chat needs to support file attachments (images, documents), which requires type/size validation and secure server-side storage. | | 1 |
-| Subtotal Web | - | - | 11 |
-
+| Module | Why | Points |
+|---|---|---|
+| Major: Frontend and backend framework (React + NestJS) | React lets us build the interface with reusable components, well suited to an app whose state changes constantly (chat, live notifications). NestJS enforces a modular structure (Module/Controller/Service/DI), which makes it easier for 4 developers with no prior Node experience to collaborate without architectural chaos. | 2 |
+| Minor: Frontend framework (separate) | Justified within the point above: React brings a mature ecosystem (hooks, routing, state management) that speeds up building interactive views. | — |
+| Minor: Backend framework (separate) | NestJS brings dependency injection and separation of concerns, reducing the risk of a disorganized backend with several contributors working in parallel. | — |
+| Major: Real-time features (WebSockets) | Chat, notifications, and friends' "online" status all require instant updates without reloading the page; Socket.IO offers automatic reconnection and fallback, critical for a social app. | 2 |
+| Major: User interaction (chat, profile, friends) | This is the social core of the project (the "Church of the True Relink"): without chat, profiles, and friends, there's no social network to support the rest of the features. | 2 |
+| Minor: ORM (Prisma) | Prisma generates a typed client from the schema, preventing type mismatches between the database and TypeScript code, and simplifies migrations across the team. | 1 |
+| Minor: Complete notification system | Users need to be alerted to relevant events (new message, friend request, rank change) without having to manually check every section of the app. | 1 |
+| Minor: PWA with offline support and installability | Lets the app be installed like a native app and keeps some functionality working offline, improving the experience on mobile devices. | 1 |
+| Minor: Own design system (10+ components) | A reusable component system guarantees visual consistency across the app and speeds up building new views without reinventing styles each time. | 1 |
+| Minor: File upload and management system | Chat needs to support file attachments (images, documents), which requires type/size validation and secure server-side storage. | 1 |
+| Subtotal Web | - | 11 |
 ---
-
 ### Module 2 — Accessibility and Internationalization
-
-| Module | Why | How | Points |
-|---|---|---|---|
-| Major: Full WCAG 2.1 AA compliance | Ensures the app is usable by people with visual, motor, or cognitive disabilities (contrast, keyboard navigation, screen readers), widening the real audience of a social network. | | 2 |
-| Minor: Multi-language support (3+ languages, i18n, selector) | A social network aiming to build a community should be accessible to users from different linguistic regions, not just Spanish or English speakers. | | 1 |
-| Minor: RTL support | Complements multi-language support by including right-to-left languages (Arabic, Hebrew), avoiding excluding those users. | | 1 |
-| Minor: Additional browser compatibility | Ensures the app works correctly outside a single reference browser, avoiding dependency on APIs specific to one engine. | | 1 |
-| Subtotal Accessibility/i18n | - | - | 5 |
-
+| Module | Why | Points |
+|---|---|---|
+| Major: Full WCAG 2.1 AA compliance | Ensures the app is usable by people with visual, motor, or cognitive disabilities (contrast, keyboard navigation, screen readers), widening the real audience of a social network. | 2 |
+| Minor: Multi-language support (3+ languages, i18n, selector) | A social network aiming to build a community should be accessible to users from different linguistic regions, not just Spanish or English speakers. | 1 |
+| Minor: RTL support | Complements multi-language support by including right-to-left languages (Arabic, Hebrew), avoiding excluding those users. | 1 |
+| Minor: Additional browser compatibility | Ensures the app works correctly outside a single reference browser, avoiding dependency on APIs specific to one engine. | 1 |
+| Subtotal Accessibility/i18n | - | 5 |
 ---
-
 ### Module 3 — User Management
-
-| Module | Why | How | Points |
-|---|---|---|---|
-| Major: Standard user management (editable profile, avatar with default, friends + online status, profile page) | This is the minimum expected baseline for any social network: without an editable profile and a friend system, there's no identity or relationships between users. | | 2 |
-| Minor: Remote authentication OAuth 2.0 | Simplifies registration/login by reusing existing accounts (Google, 42, etc.), reducing friction and sparing users from managing yet another password. | | 1 |
-| Major: Advanced permission system (user CRUD, role management, views/actions based on role) | The "Church" concept is built around a hierarchy of ranks (Brother, Archbishop, etc.); without a robust permission system, that hierarchy can't be reflected or enforced at a functional level. | | 2 |
-| Major: Organization system (create/edit/delete, add/remove users, actions within the organization) | Allows structuring sub-groups within the community (parishes, congregations), extending the social concept beyond simple one-to-one friendships. | | 2 |
-| Minor: Complete 2FA | Adds an extra layer of security to accounts, especially relevant since some roles (Archbishop) hold sensitive administrative permissions. | | 1 |
-| Minor: User activity analytics panel | Provides visibility into actual platform usage (messages sent, active users, growth), useful for both moderation and product decisions. | | 1 |
-| Subtotal User Management | - | - | 9 |
-
+| Module | Why | Points |
+|---|---|---|
+| Major: Standard user management (editable profile, avatar with default, friends + online status, profile page) | This is the minimum expected baseline for any social network: without an editable profile and a friend system, there's no identity or relationships between users. | 2 |
+| Minor: Remote authentication OAuth 2.0 | Simplifies registration/login by reusing existing accounts (Google, 42, etc.), reducing friction and sparing users from managing yet another password. | 1 |
+| Major: Advanced permission system (user CRUD, role management, views/actions based on role) | The "Church" concept is built around a hierarchy of ranks (Brother, Archbishop, etc.); without a robust permission system, that hierarchy can't be reflected or enforced at a functional level. | 2 |
+| Major: Organization system (create/edit/delete, add/remove users, actions within the organization) | Allows structuring sub-groups within the community (parishes, congregations), extending the social concept beyond simple one-to-one friendships. | 2 |
+| Minor: Complete 2FA | Adds an extra layer of security to accounts, especially relevant since some roles (Archbishop) hold sensitive administrative permissions. | 1 |
+| Minor: User activity analytics panel | Provides visibility into actual platform usage (messages sent, active users, growth), useful for both moderation and product decisions. | 1 |
+| Subtotal User Management | - | 9 |
 ---
-
 ### Module 4 — Artificial Intelligence
-
-| Module | Why | How | Points |
-|---|---|---|---|
-| Major: Complete LLM system interface (text/streaming, error handling, rate limiting) | Fits the project's humor (a chatbot that "corrects your Makefile" like an oracle) and adds a differentiating feature uncommon in a school project, with streaming for a smooth response experience. | | 2 |
-| Minor: AI-based content moderation | Automates part of the human moderation workload by flagging inappropriate content in confessions/posts before an Inquisitor has to review it manually. | | 1 |
-| Subtotal AI | - | - | 3 |
+| Module | Why | Points |
+|---|---|---|
+| Major: Complete LLM system interface (text/streaming, error handling, rate limiting) | Fits the project's humor (a chatbot that "corrects your Makefile" like an oracle) and adds a differentiating feature uncommon in a school project, with streaming for a smooth response experience. | 2 |
+| Minor: AI-based content moderation | Automates part of the human moderation workload by flagging inappropriate content in confessions/posts before an Inquisitor has to review it manually. | 1 |
+| Subtotal AI | - | 3 |
 
 # Individual Contributions
 
 ## vdarsuye — Product Owner & Lead Developer
 **Contributed:**
 - Defined the overall product concept and feature scope ("Church of the True Relink").
-- Implemented the JWT authentication system, including access/refresh token issuance, rotation, and revocation on logout.
 - Set up the Socket.IO real-time layer used by chat, notifications, and presence status.
 - Worked across the full stack wherever integration issues appeared between frontend and backend.
+- Built the message moderation (soft-delete) logic, including the `SetNull` behavior for moderator references.
 
 **Challenges faced:**
 - Keeping refresh tokens secure while supporting multiple simultaneous devices per user — solved by storing one `RefreshToken` row per device/session with individual expiry and revocation, instead of a single token per user.
 - Coordinating WebSocket events with the REST API so real-time updates (new messages, friend requests) stayed in sync with database state — addressed by emitting socket events only after successful DB writes, avoiding race conditions between the two.
 
-## datienza — Developer (Front-end)
+## datienza — Developer
 **Contributed:**
 - Built the user profile page (editable fields, avatar, friend list, online indicators).
 - Implemented the chat UI for both direct messages and channels.
@@ -614,7 +622,7 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 - Managing real-time UI updates (new messages arriving via WebSocket while the user browses other views) — solved with a shared state/store pattern so incoming socket events update the UI regardless of which page is active.
 - Keeping the chat UI responsive with growing message history — addressed with pagination/lazy-loading of older messages.
 
-## dmena-li — Developer (Front-end & Back-end, Visual Identity)
+## dmena-li — Developer
 **Contributed:**
 - Designed the app's overall visual identity (theme, iconography, tone consistent with the "Church" concept).
 - Built the shared design-system components (buttons, cards, modals) reused across the app.
@@ -624,11 +632,11 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 - Balancing a distinctive visual identity with usability/accessibility constraints — resolved by iterating the design system in Figma before implementation to validate contrast and consistency early.
 - Handling file uploads safely (size limits, file type validation, storage naming) to avoid collisions or unsafe files — solved by generating unique server-side filenames while preserving the original name for display.
 
-## cochatel — Project Manager & Developer (Back-end)
+## cochatel — Project Manager & Developer
 **Contributed:**
 - Designed the full Prisma schema and relations (User, Friendship, Conversation, Message, Notification, CommunityEvent).
 - Implemented the role/permission system and the `/sanctuary` administration panel.
-- Built the message moderation (soft-delete) logic, including the `SetNull` behavior for moderator references.
+- Implemented the JWT authentication system, including access/refresh token issuance, rotation, and revocation on logout.
 - Managed team organization: bi-weekly syncs, Friday review meetings, task distribution via GitHub Issues.
 
 **Challenges faced:**
