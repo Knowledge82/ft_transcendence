@@ -366,6 +366,7 @@
   "errors": {
     "oracleRateLimited": "The Oracle is busy with other matters. Try again in a few minutes.",
     "confessorRateLimited": "The Confessor has exhausted its free AI query quota for now. Try again in a few minutes.",
+    "confessorThrottled": "You have confessed too many times in a row. Wait a minute before trying again.",
     "emptyMakefile": "You must send the Makefile content.",
     "makefileTooLong": "The Makefile is too long (maximum {{max}} characters).",
     "streamingNotSupported": "Your browser doesn't support response streaming.",

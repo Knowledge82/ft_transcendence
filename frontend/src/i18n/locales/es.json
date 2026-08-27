@@ -366,6 +366,7 @@
   "errors": {
     "oracleRateLimited": "El Oráculo está ocupado con otros asuntos. Inténtalo de nuevo en unos minutos.",
     "confessorRateLimited": "El Confesor ha agotado su cuota gratuita de consultas a la IA por ahora. Inténtalo de nuevo en unos minutos.",
+    "confessorThrottled": "Has confesado demasiadas veces seguidas. Espera un minuto antes de volver a intentarlo.",
     "emptyMakefile": "Debes enviar el contenido del Makefile.",
     "makefileTooLong": "El Makefile es demasiado largo (máximo {{max}} caracteres).",
     "streamingNotSupported": "Tu navegador no admite streaming de respuestas.",

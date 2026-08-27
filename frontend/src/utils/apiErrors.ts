@@ -1,6 +1,7 @@
 const CODE_TO_KEY: Record<string, string> = {
   ORACLE_RATE_LIMITED: 'oracleRateLimited',
   CONFESSOR_RATE_LIMITED: 'confessorRateLimited',
+  CONFESSOR_THROTTLED: 'confessorThrottled',
   EMPTY_MAKEFILE: 'emptyMakefile',
   MAKEFILE_TOO_LONG: 'makefileTooLong',
   STREAMING_NOT_SUPPORTED: 'streamingNotSupported',
