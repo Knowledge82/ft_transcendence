@@ -27,8 +27,8 @@ function randomIndex(type: string): number {
 const AI_EVENTS_PER_DAY = 48;
 const STATIC_EVENTS_PER_DAY = 288;
 const DAY_MS = 24 * 60 * 60 * 1000;
-const MAX_PHRASE_LENGTH = 200;
-const FICTIONAL_MAX_TOKENS = 500;
+const MAX_PHRASE_LENGTH = 500;
+const FICTIONAL_MAX_TOKENS = 2000;
 
 function isValidPhrase(text: string): boolean {
   return text.length > 0 && text.length <= MAX_PHRASE_LENGTH;
@@ -223,5 +223,8 @@ export class CommunityService implements OnModuleInit {
     }
 
     await this.createEvent('FICTIONAL_AI', null, { es, en, ar });
+    console.log(
+      `Evento ficticio con IA generado con éxito (es:${es.length} en:${en.length} ar:${ar.length}).`,
+);
   }
 }
