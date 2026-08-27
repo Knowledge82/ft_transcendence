@@ -2,20 +2,8 @@ This project has been created as part of the 42 curriculum by vdarsuye, datienza
 
 # Description
 
-## Project concept
-Social network for "parishioners": user profiles, hierarchical rank/role system, real-time chat, donations, and later on an LLM-based chatbot (preferred) and a card game (optional).
-[Detailed concept and possible features](./docs/concepto.md)
-
-## Who are we ? The «Church of the True Relink»
-This isn't just trolling. It's a **counter-cult**.
-On one side there's the informal cult that already exists on campus:
-- A "correct" Makefile has to react to a `touch Makefile`
-- Putting the `Makefile` and all headers into the `.o` dependencies is a sacred ritual
-- Whoever doesn't do it is a heretic and the Makefile is considered "non-functional"
-- Knowledge is passed on by word of mouth, with no one ever checking the original source
-
-On the other side, there's us.
-We take **the same language** (cult, church, true/false, heretics, sacred knowledge) and flip it around. We become the ones who supposedly guard the *true* knowledge of what a relink actually is.
+## Project name: The «Church of the True Relink»
+The “Church of the True Relink" is a full-stack social network developed as part of the 42 curriculum. The application is built around the concept of the “Church of the True Relink”, a fictional community inspired by the culture surrounding Makefiles and software development. Users can create an account and profile, interact with other members through a friendship system and activity feed, and communicate through real-time private messages and public channels. It also includes a hierarchical role and permission system, notifications, and moderation features. AI-powered functionality is integrated to analyse and correct Makefiles as well as assist with content moderation.
 
 ---
 
@@ -244,9 +232,9 @@ You'll never need to touch the database by hand again — from `/sanctuary` you 
 # Team information
 
 **vdarsuye:** Product Owner and Lead Developper -> Defines the product vision, prioritizes features, and ensures that the project meets the users' needs. At code level, worked at all levels.
-**datienza:** Developper -> Implements the application's features, worked on the front-end.
+**datienza:** Developper -> Implements the application's features, worked more on the front-end and some back-end.
 **dmena-li:** Developper -> In charge of the visual identity, worked on front-end and back-end.
-**cochatel:** Project Manager and Developper -> In charge of the organisation, organizing tasks, deadlines, meetings, and ensured that the project stays on track. At code level, worked essentially on the back-end
+**cochatel:** Project Manager and Developper -> In charge of the organisation, organizing tasks, deadlines, meetings, and ensured that the project stays on track. At code level, worked more on the back-end and some front-end.
 
 # Project management
 
