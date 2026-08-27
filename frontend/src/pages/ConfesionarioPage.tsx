@@ -6,7 +6,8 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { ROUTES } from '../routes';
 import { translateApiError } from '../utils/apiErrors';
 
-const MAX_LENGTH = 1000; // must stay in sync with MAX_INPUT_LENGTH in backend/src/ai/ai.service.ts
+const MAX_LENGTH = 4000; // must stay in sync with MAX_INPUT_LENGTH in backend/src/ai/ai.service.ts
+
 // How slowly the text "speaks" on screen, independent of how fast the
 // real data actually arrives from Groq (which is nearly instant) — this
 // is purely cosmetic, for a more solemn, deliberate pace.

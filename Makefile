@@ -4,7 +4,7 @@ ifeq ($(shell command -v docker >/dev/null 2>&1 && echo ok),)
 $(error Docker no está instalado en esta máquina. Instálalo antes de continuar: https://docs.docker.com/get-docker/)
 endif
 ifeq ($(shell docker ps >/dev/null 2>&1 && echo ok),)
-$(error No se puede conectar con Docker (permission denied)
+$(error No se puede conectar con Docker (permission denied))
 endif
 
 # Todas las reglas prod-* usan exactamente el mismo $(COMPOSE) autodetectado
@@ -45,11 +45,16 @@ db-migrate:
 	$(COMPOSE) exec backend npx prisma migrate deploy
 
 db-migrate-dev:
+	ifndef name
+		$(error Variable 'name' no definida! Usage: make db-migrate-dev name=my_migration)
+	endif
+
 	@echo "$(GREEN)Creando nueva migración: $(name)$(RESET)"
 	$(COMPOSE) exec backend npx prisma migrate dev --name $(name)
 
 db-studio:
 	$(COMPOSE) exec backend npx prisma studio
+# ---
 
 clean:
 	@echo "$(GREEN)Limpiando contenedores y volúmenes del proyecto.....$(RESET)"
