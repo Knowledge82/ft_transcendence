@@ -1,464 +1,512 @@
-# ft_transcendence — Notas de progreso 
+This project has been created as part of the 42 curriculum by vdarsuye, datienza, dmena-li and cochatel.
 
-## 🚀 Como comenzar a trabajar (Quick Start)
- 
-Sigue estos sencillos pasos para clonar el repositorio, configurar tu entorno y levantar el proyecto en local:
- 
-### A. Clonar el repositorio
- 
-Clona el proyecto en tu máquina local y accede a la carpeta raíz:
+# Description
+
+## Project concept
+Social network for "parishioners": user profiles, hierarchical rank/role system, real-time chat, donations, and later on an LLM-based chatbot (preferred) and a card game (optional).
+[Detailed concept and possible features](./docs/concepto.md)
+
+## Who are we ? The «Church of the True Relink»
+This isn't just trolling. It's a **counter-cult**.
+On one side there's the informal cult that already exists on campus:
+- A "correct" Makefile has to react to a `touch Makefile`
+- Putting the `Makefile` and all headers into the `.o` dependencies is a sacred ritual
+- Whoever doesn't do it is a heretic and the Makefile is considered "non-functional"
+- Knowledge is passed on by word of mouth, with no one ever checking the original source
+
+On the other side, there's us.
+We take **the same language** (cult, church, true/false, heretics, sacred knowledge) and flip it around. We become the ones who supposedly guard the *true* knowledge of what a relink actually is.
+
+---
+
+## 1. Basic core
+- Register / login (JWT + refresh tokens)
+- User profile with a "rank" within the Church (Brother, Archbishop of Make, etc.)
+- Role and permission system
+
+## 2. Social core
+- Friends
+- Activity feed
+
+## 4. Communication
+- General Church chat
+- Private messages
+- Themed channels (`#heresies`, `#correct-makefiles`, `#confessions`, `#homilies`)
+
+## 5. Administration and moderation
+- Rank management
+- Moderation of confessions and posts
+
+## 6. Use of AI 
+- To analyse and correct your Makefile
+- To moderate the post content
+
+---
+# Instructions
+
+### A. Clone the repository
+
+Clone the project to your local machine and access the root directory:
 ```bash
-git clone <URL_DE_TU_REPOSITORIO>
-cd <NOMBRE_DE_LA_CARPETA>
+git clone <YOUR_REPOSITORY_URL>
+cd <FOLDER_NAME>
 ```
- 
-### B. Configurar las variables de entorno
- 
-Cada desarrollador debe tener su propio archivo de configuración local. Copia el archivo de plantilla .env.example y renómbralo a .env:
+
+### B. Configure environment variables
+
+Each developer must have their own local configuration file. Copy the `.env.example` template file and rename it to `.env`:
 ```bash
 cp .env.example .env
 ```
- 
-⚠️ **Importante**: Abre el archivo .env recién creado y define tus propias contraseñas, credenciales de la base de datos y la clave secreta para los tokens (JWT_SECRET). Nunca subas tu archivo .env personal al repositorio.
- 
-#### 📝 Configuración del archivo `.env`
- 
-Cuando copies el archivo `.env.example` a `.env`, verás las siguientes variables. Aquí tienes qué significa cada una y qué debes cambiar:
- 
-| Variable | Valor por defecto | ¿Qué debes hacer? |
+
+⚠️ **Important**: Open the newly created `.env` file and set your own passwords, database credentials, and secret key for tokens (JWT_SECRET). Never commit your personal `.env` file to the repository.
+
+#### 📝 Configuring the `.env` file
+
+When you copy `.env.example` to `.env`, you'll see the following variables. Here's what each one means and what you should change:
+
+| Variable | Default value | What should you do? |
 | :--- | :--- | :--- |
-| `POSTGRES_USER` | `ft_user` | Puedes dejarlo por defecto para desarrollo local. |
-| `POSTGRES_PASSWORD` | `change_me` | **¡CÁMBIALO!** Pon una contraseña segura para tu base de datos local, sin caracteres especiales como `@ : / # ?` (ej. `mi_super_clave_123`). |
-| `POSTGRES_DB` | `ft_transcendence`| Puedes dejarlo por defecto. Es el nombre de la base de datos que se creará automáticamente en PostgreSQL. |
-| `JWT_SECRET` | `change_me_access_secret` | **¡CÁMBIALO!** Genera una cadena de texto larga y aleatoria. Se usa para firmar los Access Tokens (15 min). |
-| `JWT_REFRESH_SECRET` | `change_me_refresh_secret` | **¡CÁMBIALO!** Genera otra cadena de texto aleatoria distinta a la anterior. Se usa para firmar los Refresh Tokens (7 días). |
-| `NODE_ENV` | `development` | Déjalo en `development` para habilitar los logs detallados y el modo de recarga rápida (watch mode) en NestJS. |
-| `VITE_API_URL` | `https://localhost/api` | Déjalo así. Es la URL que usará el Frontend (Vite) para comunicarse con el Backend a través del puerto seguro de Nginx. |
-| `GROQ_API_KEY` | *(vacío)* | **¡OBLIGATORIO Y PERSONAL!** Cada desarrollador debe generar su propia clave gratuita — ver instrucciones abajo. Nunca la compartas ni la subas al repositorio. |
-| `GROQ_MODEL` | `openai/gpt-oss-20b` | Puedes dejarlo por defecto. Si este modelo queda retirado por Groq en el futuro, cámbialo aquí sin tocar el código — consulta los modelos disponibles en console.groq.com. |
- 
-> 🔑 **Tip para generar secretos seguros:**
-Puedes generar claves aleatorias fuertes rápidamente desde tu terminal ejecutando:
+| `POSTGRES_USER` | `ft_user` | You can leave this as default for local development. |
+| `POSTGRES_PASSWORD` | `change_me` | **CHANGE IT!** Set a secure password for your local database, without special characters like `@ : / # ?` (e.g. `my_super_key_123`). |
+| `POSTGRES_DB` | `ft_transcendence`| You can leave this as default. It's the name of the database that will be created automatically in PostgreSQL. |
+| `JWT_SECRET` | `change_me_access_secret` | **CHANGE IT!** Generate a long, random string. Used to sign Access Tokens (15 min). |
+| `JWT_REFRESH_SECRET` | `change_me_refresh_secret` | **CHANGE IT!** Generate another random string, different from the previous one. Used to sign Refresh Tokens (7 days). |
+| `NODE_ENV` | `development` | Leave it as `development` to enable detailed logs and watch mode in NestJS. |
+| `VITE_API_URL` | `https://localhost/api` | Leave it as is. This is the URL the Frontend (Vite) will use to communicate with the Backend through Nginx's secure port. |
+| `GROQ_API_KEY` | *(empty)* | **REQUIRED AND PERSONAL!** Each developer must generate their own free key — see instructions below. Never share it or commit it to the repository. |
+| `GROQ_MODEL` | `openai/gpt-oss-20b` | You can leave this as default. If this model is retired by Groq in the future, change it here without touching the code — check available models at console.groq.com. |
+
+> 🔑 **Tip for generating secure secrets:**
+You can quickly generate strong random keys from your terminal by running:
 ```bash
 openssl rand -base64 32
 ```
-Copia el resultado y pégalo en tu `JWT_SECRET` y `JWT_REFRESH_SECRET`.
- 
-#### 🤖 Obtener tu propia clave de Groq API
- 
-**Por qué cada uno necesita su propia clave, y no una compartida:**
-- **Cuota limitada por clave**: el nivel gratuito de Groq tiene un límite de peticiones. Si todo el equipo usa la misma clave, esa cuota se agota mucho más rápido y unos bloquean el trabajo de otros.
-- **Seguridad**: una clave compartida por chat/Slack/lo que sea es una clave que tarde o temprano se filtra por accidente. Cada clave está vinculada a la cuenta de quien la crea — mejor que sea tu propia responsabilidad, no la de otro.
-**Cómo conseguirla (gratis, sin tarjeta, 2 minutos):**
-1. Entra en console.groq.com y crea una cuenta o inicia sesión
-2. Crea una API key nueva
-3. Copia la clave generada y pégala en tu `.env` local como `GROQ_API_KEY`
+Copy the result and paste it into your `JWT_SECRET` and `JWT_REFRESH_SECRET`.
 
-### C. Levantar el proyecto
- 
-El `Makefile` detecta automáticamente si tu sistema usa `docker-compose` (el binario clásico, con guion) o `docker compose` (el plugin moderno, con espacio) — no hace falta configurar nada a mano para eso. También comprueba, antes de ejecutar cualquier otra cosa, que Docker esté instalado y que tu usuario tenga permiso para hablar con el daemon; si algo falla en cualquiera de esos dos puntos, verás un mensaje explicando exactamente qué hacer, en vez de un error críptico.
- 
-**Primera vez que levantas el proyecto en un ordenador nuevo:**
+#### 🤖 Get your own Groq API key
+
+**Why everyone needs their own key, not a shared one:**
+- **Per-key quota limit**: Groq's free tier has a request limit. If the whole team uses the same key, that quota runs out much faster and people end up blocking each other's work.
+- **Security**: a key shared over chat/Slack/whatever is a key that will sooner or later leak by accident. Each key is tied to the account that created it — better that it's your own responsibility, not someone else's.
+
+**How to get one (free, no credit card, 2 minutes):**
+1. Go to console.groq.com and create an account or sign in
+2. Create a new API key
+3. Copy the generated key and paste it into your local `.env` as `GROQ_API_KEY`
+
+### C. Start the project
+
+The `Makefile` automatically detects whether your system uses `docker-compose` (the classic binary, with a hyphen) or `docker compose` (the modern plugin, with a space) — no manual configuration needed for that. It also checks, before running anything else, that Docker is installed and that your user has permission to talk to the daemon; if either of those checks fails, you'll see a message explaining exactly what to do, instead of a cryptic error.
+
+**First time starting the project on a new machine:**
 ```bash
 make first-run
 ```
-Este comando fuerza una reconstrucción completa sin caché. Es importante usarlo (en vez de `make up`) la primera vez en cada máquina nueva: evita que Docker reutilice, por error, una capa de instalación de dependencias antigua o incompleta de algún intento anterior, lo que podría dejar el backend sin paquetes que en realidad ya están en `package.json`.
- 
-**En el día a día, una vez que el proyecto ya está levantado al menos una vez en esa máquina:**
+This command forces a full rebuild without cache. It's important to use it (instead of `make up`) the first time on each new machine: it prevents Docker from accidentally reusing an old or incomplete dependency-installation layer from a previous attempt, which could leave the backend missing packages that are actually already in `package.json`.
+
+**Day to day, once the project has already been started at least once on that machine:**
 ```bash
 make up
 ```
- 
-**Si en algún momento el proyecto se comporta de forma rara** (dependencias que "deberían estar" pero no aparecen, comportamiento inconsistente tras instalar un paquete nuevo), repetir `make first-run` suele resolverlo — vuelve a construir todo desde cero sin depender de ninguna caché previa.
- 
-### Guía de comandos del `Makefile`
- 
-Referencia rápida de cada comando disponible y cuándo usar cada uno.
- 
+
+**If at any point the project starts behaving strangely** (dependencies that "should be there" but aren't, inconsistent behavior after installing a new package), running `make first-run` again usually fixes it — it rebuilds everything from scratch without relying on any previous cache.
+
+### Makefile command guide
+
+Quick reference for each available command and when to use it.
+
 #### `make` / `make all` / `make up`
- 
-El comando del día a día. Levanta todos los contenedores, reconstruyéndolos si el código ha cambiado desde la última vez. Al final, reinicia automáticamente `nginx` — esto evita un error `502 Bad Gateway` que puede aparecer si solo se reconstruyó un servicio (por ejemplo el backend) y nginx se quedó con la dirección de red antigua de ese contenedor. No hace falta preocuparse por eso: ya está resuelto dentro de este mismo comando.
- 
+
+The everyday command. Starts all containers, rebuilding them if the code has changed since last time. At the end, it automatically restarts `nginx` — this prevents a `502 Bad Gateway` error that can appear if only one service was rebuilt (e.g. the backend) and nginx kept the old network address for that container. No need to worry about it: it's already handled inside this same command.
+
 ```bash
 make
 ```
- 
+
 #### `make first-run`
- 
-Úsalo la primera vez que levantas el proyecto en un ordenador nuevo (o si algo se comporta de forma rara y sospechas de una caché de Docker corrupta). Reconstruye todo desde cero, sin usar ninguna capa de construcción guardada previamente — más lento, pero garantiza que no arrastras nada de un intento anterior fallido.
- 
+
+Use it the first time you start the project on a new computer (or if something is behaving strangely and you suspect a corrupted Docker cache). Rebuilds everything from scratch, without using any previously saved build layer — slower, but guarantees you're not carrying anything over from a failed previous attempt.
+
 ```bash
 make first-run
 ```
- 
+
 #### `make down`
- 
-Detiene todos los contenedores sin borrar nada — ni el código, ni los datos de la base de datos. La próxima vez que hagas `make up`, todo sigue donde lo dejaste.
- 
+
+Stops all containers without deleting anything — neither the code nor the database data. The next time you run `make up`, everything picks up where you left it.
+
 ```bash
 make down
 ```
- 
+
 #### `make logs`
- 
-Muestra los logs en tiempo real de todos los contenedores a la vez. Útil para ver qué está pasando sin tener que parar y volver a levantar el proyecto.
- 
+
+Shows real-time logs from all containers at once. Useful for seeing what's going on without having to stop and restart the project.
+
 ```bash
 make logs
 ```
- 
+
 #### `make db-migrate`
- 
-Úsalo después de un `git pull` si alguien del equipo ha cambiado el esquema de la base de datos (`schema.prisma`) y ha subido una migración nueva. Aplica las migraciones que ya existen como archivos en el repositorio — no crea nada nuevo, solo pone tu base de datos local al día con lo que otros ya definieron.
- 
+
+Use it after a `git pull` if someone on the team has changed the database schema (`schema.prisma`) and pushed a new migration. Applies migrations that already exist as files in the repository — it doesn't create anything new, it just brings your local database up to date with what others have already defined.
+
 ```bash
 make db-migrate
 ```
- 
-#### `make db-migrate-dev name=nombre_descriptivo`
- 
-Úsalo cuando tú mismo cambias `schema.prisma` (añades un campo, una tabla, etc.) y necesitas generar la migración correspondiente. Requiere un nombre descriptivo — se guardará como parte del nombre del archivo de migración, así que conviene que explique brevemente qué cambia.
- 
+
+#### `make db-migrate-dev name=descriptive_name`
+
+Use it when you yourself change `schema.prisma` (add a field, a table, etc.) and need to generate the corresponding migration. Requires a descriptive name — it will be saved as part of the migration file name, so it should briefly explain what's changing.
+
 ```bash
 make db-migrate-dev name=add_articles
 ```
- 
+
 #### `make db-studio`
- 
-Abre Prisma Studio, una interfaz visual en el navegador para explorar y editar directamente el contenido de la base de datos — útil para revisar datos sin escribir SQL a mano.
- 
+
+Opens Prisma Studio, a visual browser interface for exploring and editing the database content directly — useful for reviewing data without writing SQL by hand.
+
 ```bash
 make db-studio
 ```
- 
+
 #### `make clean`
- 
-Detiene los contenedores y borra los volúmenes del proyecto — esto incluye la base de datos. Los datos se pierden, pero las imágenes de Docker ya construidas se conservan (la siguiente reconstrucción es más rápida que con `fclean`).
- 
+
+Stops the containers and deletes the project's volumes — this includes the database. The data is lost, but the already-built Docker images are kept (the next rebuild is faster than with `fclean`).
+
 ```bash
 make clean
 ```
- 
+
 #### `make fclean`
- 
-Limpieza profunda: además de todo lo que hace `clean`, borra también las imágenes de Docker del proyecto. La siguiente vez que levantes el proyecto, se reconstruye todo desde cero.
- 
+
+Deep clean: in addition to everything `clean` does, it also deletes the project's Docker images. The next time you start the project, everything is rebuilt from scratch.
+
 ```bash
 make fclean
 ```
- 
+
 #### `make re`
- 
-El "reinicio total": ejecuta `fclean` y luego `all` — borra absolutamente todo (contenedores, volúmenes, imágenes) y vuelve a levantar el proyecto de cero, exactamente igual que `first-run`. Úsalo cuando quieras empezar de página en blanco sin salir del propio Makefile.
- 
+
+The "full reset": runs `fclean` and then `all` — deletes absolutely everything (containers, volumes, images) and starts the project up again from scratch, exactly like `first-run`. Use it when you want to start with a clean slate without leaving the Makefile itself.
+
 ```bash
 make re
 ```
- 
-### Comprobaciones automáticas al ejecutar cualquier comando
- 
-Antes de ejecutar cualquiera de las reglas anteriores, el `Makefile` comprueba dos cosas y avisa con un mensaje claro si algo falla:
- 
-1. **¿Está Docker instalado en esta máquina?** Si no, indica el enlace de instalación.
-2. **¿Tiene tu usuario permiso para hablar con Docker?** Si no (típico si acabas de instalar Docker o de añadirte al grupo `docker`), te indica que cierres sesión y vuelvas a entrar, o que ejecutes `newgrp docker` como solución rápida sin reiniciar.
 
-# Cómo asignar el primer ARZOBISPO
- 
-Este es un procedimiento de arranque único: cambiar el rango de alguien solo se puede hacer desde el panel `/santuario`, pero ese panel solo es accesible para quien ya tiene el rango `ARZOBISPO` — así que el primer `ARZOBISPO` de cada base de datos nueva (por ejemplo, después de un `prisma migrate reset`, o al levantar el proyecto por primera vez en tu máquina) hay que asignarlo a mano, directamente en la base de datos.
- 
-## Paso 1 — Regístrate normalmente en la aplicación
- 
-Si todavía no tienes cuenta en esta base de datos, entra en la web y regístrate como lo haría cualquier hermano — por defecto, todo el mundo empieza con el rango `HERMANO`.
- 
-## Paso 2 — Averigua tu `id`
- 
+### Automatic checks when running any command
+
+Before running any of the above rules, the `Makefile` checks two things and warns with a clear message if something fails:
+
+1. **Is Docker installed on this machine?** If not, it shows the installation link.
+2. **Does your user have permission to talk to Docker?** If not (typical if you just installed Docker or just added yourself to the `docker` group), it tells you to log out and back in, or to run `newgrp docker` as a quick fix without restarting.
+
+## How to assign the first ARCHBISHOP
+
+This is a one-time bootstrap procedure: changing someone's rank can only be done from the `/sanctuary` panel, but that panel is only accessible to someone who already has the `ARCHBISHOP` rank — so the first `ARCHBISHOP` of each new database (for example, after a `prisma migrate reset`, or when starting the project for the first time on your machine) has to be assigned by hand, directly in the database.
+
+### Step 1 — Register normally in the application
+
+If you don't already have an account in this database, go to the site and register like any brother would — by default, everyone starts with the `BROTHER` rank.
+
+### Step 2 — Find your `id`
+
 ```bash
 docker compose exec postgres psql -U <POSTGRES_USER> -d <POSTGRES_DB> -c "SELECT id, email, role FROM \"User\";"
 ```
- 
-Sustituye `<POSTGRES_USER>` y `<POSTGRES_DB>` por los valores reales de tu archivo `.env`. Verás una tabla con todos los usuarios registrados — anota el `id` de tu propia cuenta (identifícala por el email).
- 
-## Paso 3 — Súbete el rango a `ARZOBISPO`
- 
+
+Replace `<POSTGRES_USER>` and `<POSTGRES_DB>` with the real values from your `.env` file. You'll see a table with all registered users — note down the `id` of your own account (identify it by email).
+
+### Step 3 — Upgrade your rank to `ARCHBISHOP`
+
 ```bash
-docker compose exec postgres psql -U <POSTGRES_USER> -d <POSTGRES_DB> -c "UPDATE \"User\" SET role = 'ARZOBISPO' WHERE id = <tu_id>;"
-```
- 
-Sustituye `<tu_id>` por el número que anotaste en el paso anterior.
- 
-## Paso 4 — Vuelve a iniciar sesión
- 
-Cierra sesión y vuelve a entrar (o simplemente espera a que `/altar` vuelva a pedir tus datos, lo que ocurre en cada carga de la página). Debería aparecerte el botón "Santuario".
- 
-## A partir de aquí
- 
-Ya no hace falta tocar la base de datos a mano nunca más — desde `/santuario` puedes cambiar el rango de cualquier usuario (incluido a `INQUISIDOR`) directamente desde la interfaz.
- 
-> 💡 Cuándo necesitarás repetir este proceso: cada vez que se reinicie la base de datos desde cero (`prisma migrate reset`, `make clean`, `make fclean`, `make re`) — todos los rangos se pierden junto con el resto de los datos, así que el primer `ARZOBISPO` siempre hay que crearlo así.
-
----
-
-
-## 1. Idea y planificación
-
-### Concepto del proyecto
-Red social de "feligreses": perfiles de usuario, sistema de rangos/roles jerárquicos, chat en tiempo real, donaciones, y más adelante un chatbot basado en LLM (preferible) y un juego de cartas (opcional).
-
-[Concepto detallado y funcionalidades posibles](./docs/concepto.md)
-
-### Stack tecnológico elegido
-- **Frontend:** React + TypeScript + Vite + Tailwind CSS
-- **Backend:** NestJS + TypeScript
-- **Base de datos:** PostgreSQL + Prisma ORM
-- **Tiempo real:** Socket.IO
-- **Infraestructura:** Docker Compose + Nginx (reverse proxy + HTTPS)
-
-**Por qué NestJS y no Express:** el equipo es de 4 personas. Express da libertad total pero ninguna estructura impuesta — con varios desarrolladores sin experiencia previa en Node, eso deriva en caos arquitectónico. NestJS impone una organización modular (Module/Controller/Service/DI) que facilita que cualquiera del equipo entienda dónde va cada pieza.
-
-### Planificación de módulos bonus
-Se repasaron las categorías de módulos del enunciado (Web, User Management, AI, Cybersecurity, Gaming, DevOps, Data & Analytics, Blockchain) y se seleccionaron los que encajan de forma natural con el concepto del proyecto, apuntando a superar los 14 puntos mínimos exigidos como margen de seguridad ante módulos que puedan no validarse en la evaluación.
-
-
----
-
-
-## 2. Infraestructura Docker — construcción y depuración
-
-### Estructura del repositorio
-```
-ft_transcendence/
-├── Makefile
-├── docker-compose.yml
-├── .env / .env.example
-├── backend/
-├── frontend/
-└── nginx/
+docker compose exec postgres psql -U <POSTGRES_USER> -d <POSTGRES_DB> -c "UPDATE \"User\" SET role = 'ARCHBISHOP' WHERE id = <your_id>;"
 ```
 
-### `.env` vs `.env.example`
-- `.env` contiene credenciales reales, nunca se sube a git (`.gitignore`)
-- `.env.example` es la plantilla pública con placeholders, sí se comitea — permite a cualquier miembro del equipo saber qué variables necesita configurar
+Replace `<your_id>` with the number you noted in the previous step.
 
-### docker-compose.yml — servicios
-`postgres`, `backend`, `frontend`, `nginx`, todos en la red `ft_network`.
+### Step 4 — Log in again
 
-### HTTPS con certificado autofirmado
-- Nginx reescrito con **Dockerfile propio** (no imagen directa) para incluir un script de entrypoint
-- `entrypoint.sh`: genera el certificado (`openssl req -x509 ...`) solo si no existe ya en el volumen — así no se regenera en cada reinicio, pero sí automáticamente en cualquier máquina nueva del equipo
-- Detalle técnico importante: `exec nginx -g "daemon off;"` al final del script — sustituye el proceso shell por el proceso de nginx en el mismo PID, para que las señales de apagado de Docker (`SIGTERM`) lleguen correctamente
+Log out and log back in (or just wait for `/altar` to ask for your credentials again, which happens on every page load). You should now see the "Sanctuary" button.
 
-### Configuración de Nginx (`conf.d/default.conf`)
-Tres bloques `location`:
-- `/api/` → `backend:3000`
-- `/socket.io/` → `backend:3000`, con cabeceras `Upgrade`/`Connection` (imprescindibles para que la conexión HTTP se transforme en WebSocket) y timeouts largos (86400s, ya que las conexiones WS son de larga duración)
-- `/` → `frontend:5173`, también con cabeceras de Upgrade — necesario para el Hot Module Replacement de Vite, que también usa WebSocket internamente
+## From here on
 
-[Update Makefile. El problema de docker-compose vs docker compose y la solucion](./docs/docs-makefile-update.md)
+You'll never need to touch the database by hand again — from `/sanctuary` you can change any user's rank (including to `INQUISITOR`) directly from the interface.
+
+> 💡 When you'll need to repeat this process: every time the database is reset from scratch (`prisma migrate reset`, `make clean`, `make fclean`, `make re`) — all ranks are lost along with the rest of the data, so the first `ARCHBISHOP` always has to be created this way.
 
 ---
 
-## 3. Backend — configuración base
+# Resources
 
-### Dockerfile multi-stage
-- Stage `development`: hot-reload vía `npm run start:dev --watch`
-- Stage `production`: build optimizado, para uso futuro en el despliegue final
-- `apk add openssl` obligatorio — Prisma necesita OpenSSL para su motor de consultas, y la imagen `node:20-alpine` no lo incluye por defecto
+# Team information
 
-### Incidente: Prisma 7
-Al ejecutar `npx prisma generate` sin versión fijada en `package.json`, se instaló automáticamente la última versión (Prisma 7.8.0, lanzada en noviembre de 2025). Esta versión eliminó el soporte de `url = env("DATABASE_URL")` directamente en `schema.prisma`, exigiendo un archivo `prisma.config.ts` aparte y adaptadores de conexión (driver adapters) obligatorios para instanciar el cliente.
+**vdarsuye:** Product Owner and Lead Developper -> Defines the product vision, prioritizes features, and ensures that the project meets the users' needs. At code level, worked at all levels.
+**datienza:** Developper -> Implements the application's features, worked on the front-end.
+**dmena-li:** Developper -> In charge of the visual identity, worked on front-end and back-end.
+**cochatel:** Project Manager and Developper -> In charge of the organisation, organizing tasks, deadlines, meetings, and ensured that the project stays on track. At code level, worked essentially on the back-end
 
-**Solución:** se fijó la versión 6 de forma explícita:
-```bash
-npm install prisma@6 @prisma/client@6 --save-exact
+# Project management
+
+**Organisation:** The team held short meetings every two days to discuss progress, distribute tasks, and address any issues. A longer meeting was held every Friday to review the week's progress and plan the next steps. 
+Tasks were distributed among team members according to their roles and areas of expertise. vdarsuye worked across all levels of the application, while datienza focused mainly on front-end development. dmena-li was responsible for the application's visual identity and contributed to both front-end and back-end development. cochatel focused mainly on back-end development while also managing the organization of tasks, deadlines, and meetings. Each member mainly focused on their assigned area while remaining flexible to help with other tasks.
+
+**Tools used:** Github Issues, Figma, Photoshop
+**Communication channels used:** WhatsApp
+
+# Technical stack
+
+Frontend: React + TypeScript + Vite + Tailwind CSS
+Backend: NestJS + TypeScript
+Base de datos: PostgreSQL + Prisma ORM
+Tiempo real: Socket.IO
+Infraestructura: Docker Compose + Nginx (reverse proxy + HTTPS)
+
+**Why REACT:** It allows us to build an interface using reusable components. It is particularly well-suited for interactive applications where the state of the interface changes frequently.
+
+**Why NestJS and not Express:** the team has 4 people. Express would give us total freedom but no imposed structure — with several developers who have no prior Node experience, that can lead to some architectural complications. NestJS enforces modular organization (Module/Controller/Service/DI), which makes it easier for anyone on the team to understand where each piece belongs.
+
+**Why PostrgreSQL:** PostgreSQL is a robust and mature relational database, particularly well-suited when data has relationships and requires integrity constraints. It is also widely used in the job market, which has allowed us to become familiar with it.
+
+**Why Nginx:** Nginx was chosen as a reverse proxy to provide a single entry point for the application, route requests to the appropriate services, and handle HTTPS. This simplifies the communication between the client, frontend and backend while keeping the internal services isolated
+
+# Database Schema
+
+## Visual representation (Entity-Relationship diagram)
+
+```mermaid
+erDiagram
+    User ||--o{ RefreshToken : "has"
+    User ||--o{ Friendship : "requests (as requester)"
+    User ||--o{ Friendship : "receives (as addressee)"
+    User ||--o{ ConversationParticipant : "joins"
+    User ||--o{ Message : "sends"
+    User ||--o{ Message : "moderates (deletedBy)"
+    User ||--o{ Notification : "receives"
+
+    Conversation ||--o{ ConversationParticipant : "has"
+    Conversation ||--o{ Message : "contains"
+
+    User {
+        int id PK
+        string email UK
+        string passwordHash
+        string displayName
+        string avatarUrl
+        enum role
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    RefreshToken {
+        int id PK
+        string token UK
+        int userId FK
+        datetime expiresAt
+        boolean revoked
+        datetime createdAt
+    }
+
+    Friendship {
+        int id PK
+        int requesterId FK
+        int addresseeId FK
+        enum status
+        datetime createdAt
+    }
+
+    Conversation {
+        int id PK
+        enum type
+        string name
+        datetime createdAt
+    }
+
+    ConversationParticipant {
+        int id PK
+        int conversationId FK
+        int userId FK
+        datetime joinedAt
+    }
+
+    Message {
+        int id PK
+        int conversationId FK
+        int senderId FK
+        string content
+        string attachmentFilename
+        string attachmentType
+        string attachmentName
+        datetime createdAt
+        datetime deletedAt
+        int deletedById FK
+    }
+
+    Notification {
+        int id PK
+        int userId FK
+        string type
+        string message
+        boolean isRead
+        datetime createdAt
+    }
+
+    CommunityEvent {
+        int id PK
+        string type
+        string message
+        datetime createdAt
+    }
 ```
-Para un proyecto universitario con plazos ajustados, migrar a la arquitectura de Prisma 7 no compensaba frente a simplemente fijar una versión estable y probada.
 
-### Entrypoint de migraciones
-`entrypoint.sh` en el backend ejecuta `npx prisma migrate deploy` antes de arrancar la aplicación (`exec "$@"` al final, mismo patrón que en nginx). Esto asegura que cualquier persona del equipo que levante el proyecto tenga automáticamente la última versión del esquema de base de datos aplicada, sin pasos manuales.
+> `CommunityEvent` is not connected to any other table: it is a standalone, ownerless public log (no foreign keys), so it does not appear with relationship lines above.
 
 ---
 
-## 4. Módulo de autenticación (Auth)
+## Tables and their relationships
 
-## BACKEND:
+### `User`
+Core account table: authentication data and profile info. This is the hub of the schema — almost every other table points back to it.
 
-### Esquema de base de datos (Prisma)
-- `User`: email, passwordHash (nunca se guarda la contraseña en texto plano), displayName, avatarUrl, timestamps
-- `RefreshToken`: token, relación con User, fecha de expiración, flag `revoked` — permite revocar sesiones individuales sin afectar a las demás
+- **1 → N with `RefreshToken`**: one user can have many active/expired refresh tokens (multi-device login). `onDelete: Cascade` — deleting a user wipes their tokens.
+- **1 → N with `Friendship`** (twice): a user can appear as either the `requester` or the `addressee` of a friendship, hence two named relations (`FriendshipRequester`, `FriendshipAddressee`).
+- **1 → N with `ConversationParticipant`**: a user can belong to many conversations (direct chats and channels).
+- **1 → N with `Message`** (twice): as the `sender` of a message, and separately as the moderator who soft-deleted someone else's message (`deletedBy`).
+- **1 → N with `Notification`**: a user's personal inbox.
 
-### Arquitectura de tokens: access + refresh
-- **Access token** (JWT, 15 min): se usa en cada petición a la API, vida corta para minimizar el riesgo si es robado
-- **Refresh token** (string aleatorio, 7 días): se usa únicamente para obtener un nuevo access token; se almacena en base de datos (no es JWT) para poder revocarlo individualmente
-- **Rotación**: cada vez que se usa un refresh token para renovar, ese token se marca como revocado y se emite uno nuevo — dificulta el reuso de un token robado
+### `RefreshToken`
+One row per issued refresh token, used to renew JWT access tokens without forcing re-login.
 
-### PrismaService / PrismaModule
-Envoltorio inyectable (`@Injectable()`) sobre `PrismaClient`, marcado como `@Global()` para estar disponible en toda la aplicación sin reimportar el módulo en cada feature.
+- **N → 1 with `User`**: each token belongs to exactly one user
 
-### AuthService — lógica
-- `register`: verifica email único, hashea con bcrypt (`SALT_ROUNDS = 12`), emite tokens
-- `login`: mismo mensaje de error tanto si el email no existe como si la contraseña es incorrecta, para no filtrar qué emails están registrados
-- `refresh`: valida el token contra la base de datos (existencia, no revocado, no expirado), rota el token
-- `logout`: revoca el refresh token en base de datos
+### `Friendship`
+Represents a friend request/relationship between two users. A single row covers the whole lifecycle (`PENDING` → `ACCEPTED`).
 
-### Refresh token vía httpOnly cookie (decisión de seguridad importante)
-Inicialmente el refresh token se devolvía en el cuerpo JSON de la respuesta — esto lo hace accesible desde JavaScript en el navegador, anulando la protección contra robo de tokens vía XSS.
+- **N → 1 with `User`** (twice): `requester` and `addressee`.
+- Unique constraint on `(requesterId, addresseeId)` prevents duplicate requests between the same pair.
 
-**Corrección:** el refresh token se envía ahora como cookie `httpOnly` (inaccesible desde JavaScript), con:
-- `secure: true` — solo se envía por HTTPS
-- `sameSite: 'strict'` — protección contra CSRF
-- `path: '/api/auth'` — la cookie solo se adjunta a las rutas de autenticación, no a toda la aplicación
+### `Conversation`
+A chat thread — either a `DIRECT` message (exactly 2 participants) or a `CHANNEL` (many participants, e.g. a shared general chat). `name` is only meaningful for channels.
 
-Requirió instalar `cookie-parser` y activarlo en `main.ts` con `app.use(cookieParser())`.
+- **1 → N with `ConversationParticipant`**: the list of members.
+- **1 → N with `Message`**: the message history.
 
-**Nota de sintaxis TypeScript:** `import cookieParser from 'cookie-parser'` (no `import * as cookieParser`) — este último genera un error de tipos porque `cookie-parser` es un módulo CommonJS y un import de tipo namespace no se puede invocar como función. Con `esModuleInterop: true` (activado por defecto por Nest CLI), el import por defecto funciona correctamente.
+### `ConversationParticipant`
+Join table linking `User` ↔ `Conversation` (many-to-many, materialized as its own table so it can carry extra data like `joinedAt`).
 
-### Fail-fast en refresh/logout
-Se añadió una comprobación explícita de que el token exista **antes** de consultar la base de datos:
-```typescript
-if (!rawToken) {
-  throw new UnauthorizedException('No refresh token provided');
-}
-```
-Sin esto, Prisma lanzaba un `PrismaClientValidationError` (500 Internal Server Error) al recibir `where: { token: undefined }`, en lugar del `401 Unauthorized` que corresponde semánticamente al caso.
+- **N → 1 with `Conversation`** and **N → 1 with `User`**
+- Unique constraint on `(conversationId, userId)` (a user can't join the same conversation twice)
 
-### JwtStrategy — detalle de tipado
-`process.env.JWT_SECRET` tiene el tipo `string | undefined` en TypeScript, pero `passport-jwt` exige `string`. Se optó por una comprobación explícita con `throw` en el constructor (falla rápido con mensaje claro si falta la variable de entorno) en vez de silenciar el error con `!` (non-null assertion), que oculta el problema en tiempo de compilación pero deja que falle de forma críptica en tiempo de ejecución si la variable realmente no está definida.
+### `Message`
+An individual chat message, optionally carrying a file attachment.
 
-### UsersModule — primera ruta protegida
-`GET /users/me`, protegida con `@UseGuards(JwtAuthGuard)`. Flujo completo:
-1. Petición con cabecera `Authorization: Bearer <token>`
-2. `JwtAuthGuard` ejecuta `JwtStrategy`, que extrae y valida el token
-3. Si es válido, `validate()` devuelve `{ userId, email }`, inyectado en `req.user`
-4. El controlador usa `req.user.userId` para buscar el perfil
+- **N → 1 with `Conversation`**: which thread it belongs to.
+- **N → 1 with `User`** as `sender` (`Cascade` — if the sender's account is deleted, their messages go with it).
+- **N → 1 with `User`** as `deletedBy`, using `SetNull` instead of `Cascade`: if a message is soft-deleted (`deletedAt` set, content hidden behind a tombstone) and the moderator who deleted it later has their account removed, the tombstone stays in place with `deletedById` set to `null` rather than disappearing.
+- Attachment fields (`attachmentFilename`, `attachmentType`, `attachmentName`) are all optional since most messages carry no file. `attachmentFilename` is the name on disk; `attachmentName` is the original filename kept for display.
 
-[UPDATE of UsersModule](./docs/docs-users-avatar.md)
+### `Notification`
+A personal, targeted notification with read/unread state — the "inbox" half of the notification system.
 
-[FriendsModule](./docs/docs-friends-module.md)
+- **N → 1 with `User`**: belongs to exactly one recipient
 
-[ChatModule](./docs/docs-chat-module.md)
-
-[AdminModule backend part](./docs/docs-roles-module-back.md)
-
-[AiModule](./docs/docs-ai-module.md)
-
-[CommunityModule](./docs/docs-community-events.md)
+### `CommunityEvent`
+A public, community-wide chronicle entry. Unlike `Notification`, it has no owner and no read state — it's a shared feed visible to everyone. Some entries mirror real actions (new member joined, rank changed); others are flavor/fictional filler. No foreign keys — fully standalone.
 
 ---
 
-## FRONTEND:
+## Enums
 
-[Notas de trabajo AUTH Frontend part](./docs/frontend-auth-notas.md)
-
-### Renovación automática del Access Token
-
-[El problema y la solucion](./docs/access-token-refresh.md)
-
-### TailwindCSS
-
-[TailwindCSS y paleta de colores principal](./docs/docs-tailwind-paleta.md)
-
-### Chat
-
-[ChatModule Frontend part](./docs/docs-chat-frontend.md)
-
-[Online status](./docs/docs-online-status.md)
-
-[Update LandingPage](./docs/docs-landing-page.md)
-
-[Politica de privacidad y Terminos de uso](./docs/docs-privacy-terms.md )
-
-[AdminModule frontend part](./docs/docs-admin-frontend.md)
-
-[AiModule front part](./docs/docs-ai-frontend.md)
-
-
----
----
-
-[+ Perfil, update friendlist, clicables nombres, coversaciones](./docs/docs-perfil-amigos-chat.md)
-
-[+ PWA Manifest](./docs/docs-pwa-manifest.md)
-
-[+ Migration to Groq, +slowdown out text in Confesor](./docs/docs-groq-migration.md)
-
-[+ Fix bug in chat room with msg in Conversaciones](./docs/docs-bug-dm-rooms.md)
-
-[+ Design System — componentes reutilizables](./docs/docs-design-system.md)
-
-[+ Varias mejoras: roles en vivo, amistad como privilegio y nombres temáticos](./docs/docs-mejoras-coherencia.md)
-
-[+ Fix routes, backlink](./docs/docs-routes-backlink.md)
-
-[+ Notification system. Back + Front](./docs/docs-notifications.md)
-
-[+ Attachment in chat](./docs/docs-chat-attachments.md)
-
-[+ Fix chat's urls](./docs/docs-chat-url-sync.md)
-
-[+ Soft delete, Guardian->Inquisidor](./docs/docs-inquisidor-soft-delete.md)
-
-[+ Gender, default avatar, bell](./docs/docs-gender-avatar-bell.md)
-
-[+ Articulos](./docs/docs-biblioteca.md)
-[+ Articulos fix some issues](./docs/docs-biblioteca-fixes.md)
-
-[+ Internacionalización](./docs/docs-i18n-resumen.md)
-
-[+ Translate CommunityEvent widget](./docs/docs-community-event-multilang.md)
-
-[+ Translate Notifications and Error messages](./docs/docs-notifications-errors-multilang.md)
-
-[+ Translate LLM](./docs/docs-llm-i18n.md)
-
-[+ RTL support](./docs/docs-rtl-mirroring.md)
-
-[+ Unique names, user delete](./docs/docs-unique-names-user-execution.md)
-
-[+ Admin presence notification in chat, notification about private msg](./docs/docs-admin-presence-private-msg-notification.md)
-
-[+ default confirm() window -> our custom window](./docs/docs-custom-confirm-dialog.md)
-
-[+ Self protection of the last admin](./docs/docs-santuario-self-protection.md)
-
-[+ Autenticación remota con OAuth 2.0 — Inicio de sesión con 42](./docs/docs-oauth-42.md)
-
-[+ Organizations](./docs/docs-organizations-feature.md)
-
-[+ Orgs Done](./docs/docs-organizations-feature-DONE.md)
-
-[+ Statistics(personal and general) and 2FA](./docs/docs-stats-and-2fa.md)
-
-[+ Resposive](./docs/docs-responsive-design.md)
-
-### WCAG 2.1 AA
-
-- [WCAG AA: keyboard navigation](./docs/WCAG-AA-keyboard-navigation.md)
-
-- [WCAG AA: aria-labels](./docs/WCAG-AA-aria-labels.md)
-
-- [WCAG AA: aria-live](./docs/WCAG-AA-aria-live.md)
-
-- [WCAG AA: alt text](./docs/WCAG-AA-alt-text.md)
-
-- [WCAG AA: summary](./docs/WCAG-AA-summary.md)
-
-
-## 5. Verificación end-to-end
-
-Todo el ciclo se probó manualmente con `curl` (con flags `-k` para el certificado autofirmado, `-c`/`-b` para gestionar cookies) y posteriormente también con Insomnia:
-
-1. `POST /auth/register` → `201 Created`
-2. `POST /auth/login` → `200 OK`
-3. `POST /auth/register` (email duplicado) → `409 Conflict`
-4. `GET /users/me` sin token → `401 Unauthorized`
-5. `GET /users/me` con token válido → `200 OK` con datos del perfil
-6. `POST /auth/refresh` con cookie válida → `200 OK`, nueva cookie emitida
-7. `POST /auth/logout` → `204 No Content`, cookie invalidada, token marcado como revocado en base de datos
+| Enum | Values | Used by |
+|---|---|---|
+| `Role` | `HERMANO`, `INQUISIDOR`, `ARZOBISPO` | `User.role` |
+| `FriendshipStatus` | `PENDING`, `ACCEPTED` | `Friendship.status` |
+| `ConversationType` | `DIRECT`, `CHANNEL` | `Conversation.type` |
 
 ---
 
-## 6. Estado actual y los puntos acumulados.
-[Estado actualizado para 21.08.26](./docs/estado-actualizado.md)
+## Key fields and data types
 
-## 7. Deudas.
-[CommunityEvent. LLM and DB](./docs/docs-deuda-community-event.md)
+| Table | Field | Type | Notes |
+|---|---|---|---|
+| User | id | Int (autoincrement) | Primary key |
+| User | email | String | Unique |
+| User | passwordHash | String | Hashed, never plaintext |
+| User | displayName | String? | Optional |
+| User | avatarUrl | String? | Optional |
+| User | role | Role | Default `HERMANO` |
+| User | createdAt / updatedAt | DateTime | Auto-managed |
+| RefreshToken | token | String | Unique |
+| RefreshToken | expiresAt | DateTime | Token expiry |
+| RefreshToken | revoked | Boolean | Default `false` |
+| Friendship | requesterId / addresseeId | Int | FKs to `User`; unique pair |
+| Friendship | status | FriendshipStatus | Default `PENDING` |
+| Conversation | type | ConversationType | `DIRECT` or `CHANNEL` |
+| Conversation | name | String? | Only used for `CHANNEL` |
+| ConversationParticipant | conversationId / userId | Int | FKs; unique pair |
+| Message | content | String | Message text |
+| Message | attachmentFilename / attachmentType / attachmentName | String? | All optional |
+| Message | deletedAt | DateTime? | Soft-delete marker |
+| Message | deletedById | Int? | FK to `User`, `SetNull` on delete |
+| Notification | type | String | Notification category |
+| Notification | isRead | Boolean | Default `false` |
+| CommunityEvent | type | String | Event category |
+| CommunityEvent | message | String | Event text |
+
+# Features list 
+
+# Modules
+
+### Módulo 1 — Web
+| Module | Who | Why | How | Points |
+|---|---|---|---|---|
+| Major: Framework de frontend y backend (React + NestJS) | | | | 2 |
+| Minor: framework de frontend (por separado) | | | | — |
+| Minor: framework de backend (por separado) | | | | — |
+| Major: Funcionalidades en tiempo real (WebSockets) | | | | 2 |
+| Major: Interacción entre usuarios (chat, perfil, amigos) | | | | 2 |
+| Minor: ORM (Prisma) | | | | 1 |
+| Minor: Sistema completo de notificaciones | | | | 1 |
+| Minor: PWA con soporte offline e instalabilidad | | | | 1 |
+| Minor: Design system propio (10+ componentes) | | | | 1 |
+| Minor: Sistema de subida y gestión de archivos | | | | 1 |
+| Subtotal Web | - | - | - | 11 |
+
+---
+
+### Módulo 2 — Accessibility and Internationalization
+| Module | Who | Why | How | Points |
+|---|---|---|---|---|
+| Major: Cumplimiento WCAG 2.1 AA completo | | | | 2 |
+| Minor: Soporte multi-idioma (3+ idiomas, i18n, selector) | | | | 1 |
+| Minor: Soporte RTL | | | | 1 |
+| Minor: Compatibilidad con navegadores adicionales | | | | 1 |
+| Subtotal Accessibility/i18n | - | - | - | 5 |
+
+---
+
+### Módulo 3 — User Management
+| Module | Who | Why | How | Points |
+|---|---|---|---|---|
+| Major: Gestión estándar de usuario (perfil editable, avatar con default, amigos + estado online, página de perfil) | | | | 2 |
+| Minor: Autenticación remota OAuth 2.0 | | | | 1 |
+| Major: Sistema de permisos avanzado (CRUD de usuarios, gestión de roles, vistas/acciones según rol) | | | | 2 |
+| Major: Sistema de organizaciones (crear/editar/eliminar, añadir/quitar usuarios, acciones dentro de la organización) | | | | 2 |
+| Minor: 2FA completo | | | | 1 |
+| Minor: Panel de analíticas de actividad de usuario | | | | 1 |
+| Subtotal User Management | - | - | - | 9 |
+
+---
+
+### Módulo 4 — Artificial Intelligence
+| Module | Who | Why | How | Points |
+|---|---|---|---|---|
+| Major: Interfaz completa de sistema LLM (texto/streaming, manejo de errores, rate limiting) | | | | 2 |
+| Minor: Moderación de contenido por IA | | | | 1 |
+| Subtotal AI | - | - | - | 3 |
+
+---
+
+# Individual contributions
