@@ -476,31 +476,6 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 
 ---
 
-## Which team member(s) worked on each feature
-| Feature | Contributor(s) | Description |
-|---|---|---|
-| Socket.IO real-time infrastructure | vdarsuye | Socket.IO setup powering chat & live updates |
-| Message moderation (soft-delete) | vdarsuye | Tombstone logic, `deletedBy` handling |
-| User profile pages | datienza | Editable profile UI, avatar display |
-| Friends list UI | datienza | Friend request/accept interface, online status |
-| Chat interface (DMs + channels) | datienza | Frontend chat views and message rendering |
-| Notification UI | datienza | Inbox with read/unread indicators |
-| Visual identity & design system | dmena-li | Theming, layout, reusable component library |
-| File upload/attachment system | dmena-li | Client + server handling of message attachments |
-| Prisma database schema | cochatel | Full relational model design and migrations |
-| Role/permission system | cochatel | `/sanctuary` panel logic and role checks |
-| JWT auth + refresh tokens | cochatel | Access/refresh token issuance, rotation, revocation on logout |
-| Project organization | cochatel | Sprint planning, task distribution, meetings |
-| OAuth 2.0 remote authentication | vdarsuye | Third-party login integration alongside JWT flow |
-| Complete 2FA | vdarsuye | Two-factor step added to the auth flow |
-| Organization system | cochatel | CRUD for organizations, membership management, scoped permissions |
-| WCAG 2.1 AA compliance | dmena-li, datienza | Accessible design system + accessible frontend implementation |
-| Multi-language support (i18n) + RTL | datienza | Language selector, string externalization, RTL layout support |
-| PWA (installable) | datienza | Service worker, install manifest |
-| LLM-powered Makefile assistant | cochatel | Groq API integration, streaming, rate limiting, error handling |
-| AI content moderation | cochatel | Automated content flagging tied into the moderation pipeline |
----
-
 # Modules
 
 ### Module 1 — Web
@@ -553,6 +528,7 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 - Set up the Socket.IO real-time layer used by chat, notifications, and presence status.
 - Worked across the full stack wherever integration issues appeared between frontend and backend.
 - Built the message moderation (soft-delete) logic, including the `SetNull` behavior for moderator references.
+- Designed the app's overall visual identity (theme, iconography, tone consistent with the "Church" concept).
 
 **Challenges faced:**
 - Keeping refresh tokens secure while supporting multiple simultaneous devices per user — solved by storing one `RefreshToken` row per device/session with individual expiry and revocation, instead of a single token per user.
@@ -570,7 +546,7 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 
 ## dmena-li — Developer
 **Contributed:**
-- Designed the app's overall visual identity (theme, iconography, tone consistent with the "Church" concept).
+- Worked with cochatel on LLM client robustness (retries, fallbacks).
 - Built the shared design-system components (buttons, cards, modals) reused across the app.
 - Implemented the file attachment feature for chat messages, on both the upload UI and the backend storage/serving logic.
 
