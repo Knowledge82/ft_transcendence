@@ -1,16 +1,16 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: ft_postgres
+    container_name: ft_postgres_prod
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:? ❌ [FATAL] POSTGRES_USER is missing in your .env file }
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:? ❌ [FATAL] POSTGRES_PASSWORD is missing in your .env file }
       POSTGRES_DB: ${POSTGRES_DB:? ❌ [FATAL] POSTGRES_DB is missing in your .env file }
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_prod:/var/lib/postgresql/data
     networks:
-      - ft_network
+      - ft_network_prod
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -22,7 +22,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: production
-    container_name: ft_backend
+    container_name: ft_backend_prod
     restart: unless-stopped
     depends_on:
       postgres:
@@ -39,14 +39,9 @@ services:
       FORTYTWO_CALLBACK_URL: ${FORTYTWO_CALLBACK_URL:? ❌ [FATAL] FORTYTWO_CALLBACK_URL is missing in your .env file }
       FRONTEND_URL: ${FRONTEND_URL:-https://localhost:8443}
     volumes:
-      # A diferencia del compose de desarrollo, aquí NO se monta el
-      # código fuente como volumen — la imagen ya contiene el dist/
-      # compilado durante el build; montar el código en vivo encima
-      # anularía por completo el sentido de una imagen de producción
-      # congelada y reproducible
       - ./backend/uploads:/app/uploads
     networks:
-      - ft_network
+      - ft_network_prod
     expose:
       - "3000"
 
@@ -55,21 +50,17 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: build
-    container_name: ft_frontend_build
-    # Este contenedor no "sirve" nada — su único trabajo es copiar el
-    # dist/ ya compilado (durante el build de la imagen) hacia un
-    # volumen compartido con nginx, y luego terminar. No es un servidor
-    # de verdad, es un paso de "entrega" del build final.
+    container_name: ft_frontend_build_prod
     volumes:
-      - frontend_dist:/output
+      - frontend_dist_prod:/output
     networks:
-      - ft_network
+      - ft_network_prod
 
   nginx:
     build:
       context: ./nginx
       dockerfile: Dockerfile
-    container_name: ft_nginx
+    container_name: ft_nginx_prod
     restart: unless-stopped
     depends_on:
       backend:
@@ -82,14 +73,14 @@ services:
     volumes:
       - ./nginx/conf.d.prod:/etc/nginx/conf.d
       - ./nginx/certs:/etc/nginx/certs
-      - frontend_dist:/usr/share/nginx/html:ro
+      - frontend_dist_prod:/usr/share/nginx/html:ro
     networks:
-      - ft_network
+      - ft_network_prod
 
 networks:
-  ft_network:
+  ft_network_prod:
     driver: bridge
 
 volumes:
-  postgres_data:
-  frontend_dist:
+  postgres_data_prod:
+  frontend_dist_prod:
