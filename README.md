@@ -428,12 +428,12 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 
 ## Enums
 
-| Enum | Values | Used by |
-|---|---|---|
+| Enum | Values |
+|---|---|
 | `Role` | `HERMANO`, `INQUISIDOR`, `ARZOBISPO` |
 | `FriendshipStatus` | `PENDING`, `ACCEPTED` |
 | `ConversationType` | `DIRECT`, `CHANNEL` |
-| `Gender` | `MASCULINO` | `FEMENINO` |
+| `Gender` | `MASCULINO`, `FEMENINO` |
 
 ---
 
