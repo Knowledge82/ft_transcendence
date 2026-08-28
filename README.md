@@ -462,7 +462,7 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 - **AI content moderation** — Automated flagging of inappropriate content in confessions/posts before human moderator review.
 
 ### Real-time communication
-- **Direct messages & channels** — 1-to-1 conversations and multi-user themed channels (`#heresies`, `#confessions`, etc.) via WebSockets (Socket.IO).
+- **Direct messages & channels** — 1-to-1 conversations and multi-user themed channels via WebSockets (Socket.IO).
 - **File attachments in chat** — Optional file upload attached to messages.
 - **Message moderation (soft-delete)** — Moderators can hide a message's content while preserving a tombstone record; the moderator reference is preserved independently of message ownership.
 
@@ -496,7 +496,7 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 | Organization system | cochatel | CRUD for organizations, membership management, scoped permissions |
 | WCAG 2.1 AA compliance | dmena-li, datienza | Accessible design system + accessible frontend implementation |
 | Multi-language support (i18n) + RTL | datienza | Language selector, string externalization, RTL layout support |
-| PWA (offline + installable) | datienza | Service worker, offline caching, install manifest |
+| PWA (installable) | datienza | Service worker, install manifest |
 | LLM-powered Makefile assistant | cochatel | Groq API integration, streaming, rate limiting, error handling |
 | AI content moderation | cochatel | Automated content flagging tied into the moderation pipeline |
 ---
