@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import Groq from 'groq-sdk';
+import { withModelFallback } from './model-fallback';
 
 type Language = 'es' | 'en' | 'ar';
 
@@ -62,7 +63,6 @@ The user will show you a Makefile fragment. Your job:
 
 const MAX_INPUT_LENGTH = 4000;
 const MAX_OUTPUT_TOKENS = 4000;
-const MODEL_NAME = process.env.GROQ_MODEL ?? 'openai/gpt-oss-20b';
 
 const ARTICLE_CHECK_BASE_PROMPTS: Record<Language, string> = {
   es: `Eres el Oráculo de La Iglesia del Verdadero Relink, una entidad
@@ -214,14 +214,16 @@ export class AiService {
     const lang = resolveLanguage(language);
 
     try {
-      const completion = await this.groq.chat.completions.create({
-        model: MODEL_NAME,
-        messages: [
-          { role: 'system', content: buildArticleCheckPrompt(lang, isInternal) },
-          { role: 'user', content: `Título: ${title}\n\nContenido: ${content}` },
-        ],
-        max_tokens: 600,
-      });
+      const completion = await withModelFallback((model) =>
+        this.groq.chat.completions.create({
+          model,
+          messages: [
+            { role: 'system', content: buildArticleCheckPrompt(lang, isInternal) },
+            { role: 'user', content: `Título: ${title}\n\nContenido: ${content}` },
+          ],
+          max_tokens: 600,
+        }),
+      );
 
       const raw = completion.choices[0]?.message?.content?.trim() ?? '';
 
@@ -257,15 +259,17 @@ export class AiService {
     }
 
     try {
-      const stream = await this.groq.chat.completions.create({
-        model: MODEL_NAME,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPTS[lang] },
-          { role: 'user', content: makefileContent },
-        ],
-        max_tokens: MAX_OUTPUT_TOKENS,
-        stream: true,
-      });
+      const stream = await withModelFallback((model) =>
+        this.groq.chat.completions.create({
+          model,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPTS[lang] },
+            { role: 'user', content: makefileContent },
+          ],
+          max_tokens: MAX_OUTPUT_TOKENS,
+          stream: true,
+        }),
+      );
 
       for await (const chunk of stream) {
         const text = chunk.choices[0]?.delta?.content;

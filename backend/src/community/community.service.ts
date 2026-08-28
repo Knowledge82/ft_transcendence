@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ChatGateway } from '../chat/chat.gateway';
 import Groq from 'groq-sdk';
+import { withModelFallback } from '../ai/model-fallback';
 
 const TEMPLATE_POOL_SIZES: Record<string, number> = {
   USER_REGISTERED: 3,
@@ -204,13 +205,13 @@ export class CommunityService implements OnModuleInit {
 
     const results = await Promise.all(
       languages.map((lang) =>
-        this.groq.chat.completions
-          .create({
-            model: process.env.GROQ_MODEL ?? 'openai/gpt-oss-20b',
+        withModelFallback((model) =>
+          this.groq.chat.completions.create({
+            model,
             messages: [{ role: 'system', content: FICTIONAL_PROMPTS[lang] }],
             max_tokens: FICTIONAL_MAX_TOKENS,
-          })
-          .then((completion) => completion.choices[0]?.message?.content?.trim() ?? ''),
+          }),
+        ).then((completion) => completion.choices[0]?.message?.content?.trim() ?? ''),
       ),
     );
 
