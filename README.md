@@ -7,29 +7,6 @@ The “Church of the True Relink" is a full-stack social network developed as pa
 
 ---
 
-## 1. Basic core
-- Register / login (JWT + refresh tokens)
-- User profile with a "rank" within the Church (Brother, Archbishop of Make, etc.)
-- Role and permission system
-
-## 2. Social core
-- Friends
-- Activity feed
-
-## 3. Communication
-- General Church chat
-- Private messages
-- Themed channels (`#heresies`, `#correct-makefiles`, `#confessions`, `#homilies`)
-
-## 4. Administration and moderation
-- Rank management
-- Moderation of confessions and posts
-
-## 5. Use of AI 
-- To analyse and correct your Makefile
-- To moderate the post content
-
----
 # Instructions
 
 ### Prerequisites
@@ -290,11 +267,11 @@ Tasks were distributed among team members according to their roles and areas of 
 
 # Technical stack
 
-Frontend: React + TypeScript + Vite + Tailwind CSS
-Backend: NestJS + TypeScript
-Base de datos: PostgreSQL + Prisma ORM
-Tiempo real: Socket.IO
-Infraestructura: Docker Compose + Nginx (reverse proxy + HTTPS)
+- Frontend: React + TypeScript + Vite + Tailwind CSS
+- Backend: NestJS + TypeScript
+- Base de datos: PostgreSQL + Prisma ORM
+- Tiempo real: Socket.IO
+- Infraestructura: Docker Compose + Nginx (reverse proxy + HTTPS)
 
 **Why REACT:** It allows us to build an interface using reusable components. It is particularly well-suited for interactive applications where the state of the interface changes frequently.
 
@@ -453,9 +430,10 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 
 | Enum | Values | Used by |
 |---|---|---|
-| `Role` | `HERMANO`, `INQUISIDOR`, `ARZOBISPO` | `User.role` |
-| `FriendshipStatus` | `PENDING`, `ACCEPTED` | `Friendship.status` |
-| `ConversationType` | `DIRECT`, `CHANNEL` | `Conversation.type` |
+| `Role` | `HERMANO`, `INQUISIDOR`, `ARZOBISPO` |
+| `FriendshipStatus` | `PENDING`, `ACCEPTED` |
+| `ConversationType` | `DIRECT`, `CHANNEL` |
+| `Gender` | `MASCULINO` | `FEMENINO` |
 
 ---
 
@@ -486,6 +464,7 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 | Notification | isRead | Boolean | Default `false` |
 | CommunityEvent | type | String | Event category |
 | CommunityEvent | message | String | Event text |
+| Article | message | String | Event text |
 
 # Features list 
 
