@@ -437,35 +437,6 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 
 ---
 
-## Key fields and data types
-
-| Table | Field | Type | Notes |
-|---|---|---|---|
-| User | id | Int (autoincrement) | Primary key |
-| User | email | String | Unique |
-| User | passwordHash | String | Hashed, never plaintext |
-| User | displayName | String? | Optional |
-| User | avatarUrl | String? | Optional |
-| User | role | Role | Default `HERMANO` |
-| User | createdAt / updatedAt | DateTime | Auto-managed |
-| RefreshToken | token | String | Unique |
-| RefreshToken | expiresAt | DateTime | Token expiry |
-| RefreshToken | revoked | Boolean | Default `false` |
-| Friendship | requesterId / addresseeId | Int | FKs to `User`; unique pair |
-| Friendship | status | FriendshipStatus | Default `PENDING` |
-| Conversation | type | ConversationType | `DIRECT` or `CHANNEL` |
-| Conversation | name | String? | Only used for `CHANNEL` |
-| ConversationParticipant | conversationId / userId | Int | FKs; unique pair |
-| Message | content | String | Message text |
-| Message | attachmentFilename / attachmentType / attachmentName | String? | All optional |
-| Message | deletedAt | DateTime? | Soft-delete marker |
-| Message | deletedById | Int? | FK to `User`, `SetNull` on delete |
-| Notification | type | String | Notification category |
-| Notification | isRead | Boolean | Default `false` |
-| CommunityEvent | type | String | Event category |
-| CommunityEvent | message | String | Event text |
-| Article | message | String | Event text |
-
 # Features list 
 
 ## Complete list of implemented features
@@ -480,13 +451,13 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 - **Notifications** — Personal, per-user notification inbox with read/unread state.
 - **Community event feed** — Public, ownerless activity log visible to all users (new members, rank changes, and flavor/fictional entries).
 
-### Accessibility & Internationalization (nouvelle sous-section)
+### Accessibility & Internationalization
 - **WCAG 2.1 AA compliance** — Keyboard navigation, sufficient color contrast, and screen-reader support across the app's key views.
 - **Multi-language support (i18n)** — Language selector with 3+ supported languages, all UI strings externalized for translation.
 - **RTL support** — Layout mirroring for right-to-left languages (Arabic, Hebrew), complementing the i18n system.
 - **PWA with offline support and installability** — Service worker caching for offline access to core views, plus an installable app manifest.
 
-### AI features (nouvelle sous-section)
+### AI features
 - **LLM-powered Makefile assistant** — Chat interface backed by Groq's LLM API (streaming responses, error handling, rate limiting) that analyzes and corrects a user's Makefile.
 - **AI content moderation** — Automated flagging of inappropriate content in confessions/posts before human moderator review.
 
@@ -504,10 +475,6 @@ A public, community-wide chronicle entry. Unlike `Notification`, it has no owner
 - **Database schema via Prisma ORM** — Relational schema (User, Friendship, Conversation, Message, Notification, CommunityEvent) with migrations.
 
 ---
-
-## Who worked on what
-
-## Which team member(s) worked on each feature
 
 ## Which team member(s) worked on each feature
 | Feature | Contributor(s) | Description |
